@@ -5,6 +5,7 @@
 #include <Ptypes/ptime.h>
 #include <Ptypes/pasync.h>
 #include <Ptypes/pport.h>
+#include "Packet_Handler/RequestGate.h"
 class Connection  : public pt::thread
 {
 public:
@@ -36,9 +37,18 @@ public:
 	std::string PendingAccountEmail;
 	std::list<FileContainer> FileQueue;
 	void ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email);
+	bool TryBeginLogin();
+	bool TryBeginAccountRequest();
+	void CompleteLogin();
+	void CompleteAccountRequest();
+	void ResetRequests();
 	//void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer);
 	Connection () : pt::thread(false){}
-	pt::ipstream* ClientStream;
+	pt::ipstream* ClientStream = nullptr;
 	static bool ConnectionDropped;
+	RequestGate LoginRequest;
+	RequestGate AccountRequest;
+	pt::string IPAddress;
+	int Port = 0;
 
 };

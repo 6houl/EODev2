@@ -9,6 +9,7 @@ CLIENT_F_FUNC(Account)
 	{	
 	case(PACKET_REPLY): //reply to change pass request.
 		{
+			game->world->connection->CompleteAccountRequest();
 			int ID = reader.GetShort(); 
 			int val;
 			if(reader.Length() > 6)

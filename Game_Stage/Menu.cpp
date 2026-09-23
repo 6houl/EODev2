@@ -1078,6 +1078,8 @@ void Menu::Login()
        { }
        else
 		{
+			if (!world->connection->TryBeginLogin())
+				return;
 			SLogin::SendLoginRequest(this->m_game,world->connection->ClientStream, this->TB_AccNme->text, this->TB_PassWrd->text);
 			this->BT_LGPlayGame->Deactivate();
 		}
@@ -1121,6 +1123,8 @@ void Menu::CreateAccount()
 		//World::ThrowMessage("Wrong input", "Enter a valid email address.");
 		//return;
 	}
+	if (!world->connection->TryBeginAccountRequest())
+		return;
 	SAccount::RequestAccountCreate(world->connection->ClientStream,(this->TB_CAAccNme->text), this->m_game);
 	//SAccount::RequestAccountCreate(world->connection->ClientStream,WCharToCharStr(this->TB_CAAccNme->text),WCharToCharStr(this->TB_CAPassWrdOne->text),WCharToCharStr(this->TB_CAPassWrdTwo->text),WCharToCharStr(this->TB_CAName->text),WCharToCharStr(this->TB_CACountry->text),WCharToCharStr(this->TB_CAEmail->text),this->m_game);
 

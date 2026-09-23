@@ -747,6 +747,8 @@
     <ClInclude Include="Packet_Handler\Receive\Handler.h" />
     <ClInclude Include="Packet_Handler\Receive\RConstants.h" />
     <ClInclude Include="Packet_Handler\ClientPackets.h" />
+    <ClInclude Include="Packet_Handler\PacketFramer.h" />
+    <ClInclude Include="Packet_Handler\RequestGate.h" />
     <ClInclude Include="Packet_Handler\Send\SAccount.h" />
     <ClInclude Include="Packet_Handler\Send\SAttack.h" />
     <ClInclude Include="Packet_Handler\Send\SCharacter.h" />

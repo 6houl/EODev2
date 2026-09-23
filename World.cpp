@@ -113,13 +113,17 @@ void World::CreateConnection()
 }
 void World::DropConnection()
 {
-	if(this->Connected)
+	if (this->connection && (this->Connected || this->Connecting))
 	{
 		World::DebugPrint("Connection closed.\n");
 		Connection::ConnectionDropped = true;
-		this->connection->ClientStream->close();
+		if (this->connection->ClientStream)
+			this->connection->ClientStream->close();
 		this->Connected = false;
 	}
+	if (this->connection)
+		this->connection->ResetRequests();
+	this->Connecting = false;
 }
 void World::MassTextBoxReset()
 {

@@ -7,6 +7,7 @@ CLIENT_F_FUNC(Login)
 		{
 			case PACKET_REPLY: 
 				{
+					game->world->connection->CompleteLogin();
 					int ID = reader.GetShort();
          
 					switch(ID)

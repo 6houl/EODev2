@@ -1,4 +1,6 @@
 #include "../Packet_Handler/ClientPackets.h"
+#include "../Packet_Handler/PacketFramer.h"
+#include "../Packet_Handler/RequestGate.h"
 
 #include <initializer_list>
 #include <iostream>
@@ -85,6 +87,56 @@ namespace
 		ExpectPacket("pub request", ClientPackets::FileRequest(2, 321, 1),
 			Bytes({7, 254, 5, 5, 3, 69, 2, 2}));
 	}
+
+	void Expect(bool condition, const char* name)
+	{
+		if (condition)
+		{
+			std::cout << "PASS " << name << '\n';
+			return;
+		}
+
+		std::cerr << "FAIL " << name << '\n';
+		++failures;
+	}
+
+	void TestPartialReads()
+	{
+		const std::string first = ClientPackets::LoginRequest("alice", "secret").Get();
+		const std::string second = ClientPackets::AccountRequest("bob").Get();
+		PacketFramer framer;
+		std::string packet;
+
+		framer.Append(first.data(), 1);
+		Expect(!framer.Pop(packet), "partial length");
+		framer.Append(first.data() + 1, 4);
+		Expect(!framer.Pop(packet), "partial body");
+		framer.Append(first.data() + 5, first.size() - 5);
+		Expect(framer.Pop(packet) && packet == first.substr(2), "completed partial packet");
+
+		const std::string combined = first + second;
+		framer.Append(combined.data(), combined.size());
+		Expect(framer.Pop(packet) && packet == first.substr(2), "first combined packet");
+		Expect(framer.Pop(packet) && packet == second.substr(2), "second combined packet");
+		Expect(!framer.Pop(packet), "combined buffer drained");
+
+		framer.Append(first.data(), 5);
+		framer.Reset();
+		framer.Append(second.data(), second.size());
+		Expect(framer.Pop(packet) && packet == second.substr(2), "framing reset on reconnect");
+	}
+
+	void TestRequestGate()
+	{
+		RequestGate gate;
+		Expect(gate.Begin(100), "request begins");
+		Expect(!gate.Begin(101), "duplicate request blocked");
+		Expect(!gate.Expired(5099, 5000), "request waits for timeout");
+		Expect(gate.Expired(5100, 5000), "request timeout");
+		gate.Complete();
+		Expect(!gate.Pending(), "request completion");
+		Expect(gate.Begin(5200), "request allowed after reset");
+	}
 }
 
 int main()
@@ -95,6 +147,8 @@ int main()
 	TestLogin();
 	TestWelcome();
 	TestFileRequests();
+	TestPartialReads();
+	TestRequestGate();
 
 	if (failures != 0)
 	{

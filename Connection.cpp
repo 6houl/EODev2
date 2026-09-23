@@ -3,20 +3,44 @@
 #include "Packet_Handler\Send\SInit.h"
 #include "Packet_Handler\Send\SAccount.h"
 #include "Packet_Handler\Receive\Handler.h"
+#include "Packet_Handler\PacketFramer.h"
 #include "Connection.h"
 USING_PTYPES
-pt::ipstream* ClientStream;
-PacketHandler* Packethandler;
-
-pt::string IP;
-int Conport;
 bool Connection::ConnectionDropped;
 bool Connection::Initialize(pt::string _IPAddress, int _port)
 {
-	IP = _IPAddress;
-	Conport = _port;
+	IPAddress = _IPAddress;
+	Port = _port;
 	ConnectionDropped = false;
+	ResetRequests();
 	return true;
+}
+
+bool Connection::TryBeginLogin()
+{
+	return LoginRequest.Begin(GetTickCount());
+}
+
+bool Connection::TryBeginAccountRequest()
+{
+	return AccountRequest.Begin(GetTickCount());
+}
+
+void Connection::CompleteLogin()
+{
+	LoginRequest.Complete();
+}
+
+void Connection::CompleteAccountRequest()
+{
+	AccountRequest.Complete();
+}
+
+void Connection::ResetRequests()
+{
+	LoginRequest.Complete();
+	AccountRequest.Complete();
+	AccountCreatePending = false;
 }
 
 void Connection::ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email)
@@ -29,14 +53,6 @@ void Connection::ScheduleAccountCreate(std::string accountName, std::string pass
 	AccountCreateStart = GetTickCount();
 	AccountCreatePending = true;
 }
-char* PacketSize;
-char* buffer;
-bool Initialized;
-unsigned int BufferbytesRecieved;
-unsigned int LengthOfBuffer = 0;
-PacketProcessor proc;
-clock_t Tinit, timer;
-
 void ConnectionTextPadTo(std::wstring& str, const size_t num, const char paddingChar = ' ')
 {
 	if (num > str.size())
@@ -167,14 +183,13 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 }
 void Connection::execute()
 {
+	DWORD connectStart = GetTickCount();
+	PacketFramer framer;
+	PacketHandler packetHandler;
 	try
 	{
-	Packethandler = new PacketHandler();
-	Initialized = false;
-
-	World::DebugPrint("Connecting to " + IP);
-	Tinit = clock();
-	this->ClientStream = new ipstream(IP,Conport);
+	World::DebugPrint("Connecting to " + IPAddress);
+	this->ClientStream = new ipstream(IPAddress, Port);
 	this->ClientStream->open();
 	SInit::SendInit(this->ClientStream);
 	ConnectionAccepted = false;
@@ -190,19 +205,29 @@ void Connection::execute()
 	}
 	while(true)
 	{
+		DWORD now = GetTickCount();
+		if (LoginRequest.Expired(now, 5000))
+		{
+			CompleteLogin();
+			World::ThrowMessage("Login timed out", "The server did not answer the login request.");
+		}
+		if (AccountRequest.Expired(now, 5000))
+		{
+			CompleteAccountRequest();
+			World::ThrowMessage("Request timed out", "The server did not answer the account request.");
+		}
+
 		if (AccountCreatePending && GetTickCount() - AccountCreateStart >= 2000)
 		{
 			AccountCreatePending = false;
 			SAccount::CreateAccount(ClientStream, PendingAccountName, PendingAccountPassword, PendingAccountFullName, PendingAccountLocation, PendingAccountEmail, V_Game);
 		}
 
-		unsigned int streambufferlength = 0;
 			try
 			{
 				if(World::Connecting)
 				{
-					timer = clock();
-					if(timer - Tinit > 2500)
+					if(GetTickCount() - connectStart > 5000)
 					{
 						World::DebugPrint("Couldn't connect to the login server.");
 						this->ConnectionDropped = false;
@@ -212,40 +237,19 @@ void Connection::execute()
 						return;
 					}
 				}
-				int val= ClientStream->get_dataavail();
+				int val = ClientStream->get_dataavail();
 
 				if(val > 0)
 				{
-					if(PacketSize == nullptr)
+					std::string incoming(val, '\0');
+					int received = ClientStream->read(&incoming[0], val);
+					if (received <= 0)
+						throw std::runtime_error("Connection closed");
+
+					framer.Append(incoming.data(), received);
+					std::string newbuf;
+					while (framer.Pop(newbuf))
 					{
-						PacketSize = new char[2];
-						ClientStream->read(PacketSize,2);
-						LengthOfBuffer = proc.Number(PacketSize[0], PacketSize[1]);
-						buffer = new char[LengthOfBuffer];
-
-						val += 2;
-					}
-
-					if (val + BufferbytesRecieved <= LengthOfBuffer)
-					{
-						BufferbytesRecieved += val;
-					}
-					else if (val + BufferbytesRecieved > LengthOfBuffer)
-					{
-						BufferbytesRecieved = LengthOfBuffer;
-					}
-
-					if (BufferbytesRecieved >= LengthOfBuffer)
-					{
-						ClientStream->read(buffer, LengthOfBuffer);
-
-						std::string newbuf = "";
-
-						for (int i = 0; i < LengthOfBuffer; i++)
-						{
-							newbuf += buffer[i];
-						}
-
 						newbuf = World::Receive(this->V_Game, newbuf);
 						PacketReader* reader = new PacketReader(newbuf);
 
@@ -309,7 +313,8 @@ void Connection::execute()
 							
 							if (ID != 9 && ID != 11)
 							{
-								FileQueue.pop_front();
+								if (!FileQueue.empty())
+									FileQueue.pop_front();
 							}
 
 						}
@@ -331,21 +336,16 @@ void Connection::execute()
 							World::DebugPrint(reportstr.c_str());
 							Game* game = (Game*)V_Game;
 							//game->map->ThreadLock.lock();
-							Packethandler->HandlePacket(*reader, game, ClientStream);
+							packetHandler.HandlePacket(*reader, game, ClientStream);
 							//game->map->ThreadLock.unlock();
 						}
 
 						delete reader;
-						delete [] PacketSize;
-						PacketSize = nullptr;
-						delete [] buffer;
-						BufferbytesRecieved = 0;
-						LengthOfBuffer = 0;
 					}
-					else
-					{
-						//World::DebugPrint("Waiting On Data, , , ,");
-					}
+				}
+				else
+				{
+					pt::psleep(1);
 				}
 			}
 			catch(...)
@@ -357,6 +357,7 @@ void Connection::execute()
 					World::ThrowMessage("Could not find server","The game server could not be found,\nplease try again at a later time.");
 				}
 				ConnectionAccepted = false;
+				ResetRequests();
 				World::Connected = false;
 				World::Connecting = false;
 				Game* gme = (Game*)V_Game;
