@@ -77,6 +77,7 @@ private:
 		{
 			return 8;
 		}
+		return 0;
 	}
 
 	sf::Vector2i ConvertFrameIDToStance(int FrameID)

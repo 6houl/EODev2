@@ -19,14 +19,19 @@ void Map_UI::UI_SendMessage()
 {
 	if (this->ChatTextbox->text != "")
 	{
+		auto player = this->m_game->map->m_Players.find(World::WorldCharacterID);
+		if (player == this->m_game->map->m_Players.end() || !player->second)
+			return;
+
 		std::string message = (this->ChatTextbox->text);
 		if (message[0] == '~')
 		{
 			message.erase(0,1);
 			STalk::SendGlobal(this->m_game->world->connection->ClientStream, message, this->m_game);
 			this->ChatTextbox->Reset();
-			std::string playername = this->m_game->map->m_Players[World::WorldCharacterID]->name;
-			playername[0] = std::toupper(playername[0]);
+			std::string playername = player->second->name;
+			if (!playername.empty())
+				playername[0] = std::toupper(static_cast<unsigned char>(playername[0]));
 			TextTools::AppendChat(TextTools::ChatIndex::Global, 420, 10, 4, playername, message, this->m_game);
 			this->m_game->Map_UserInterface->map_talk->UI_ChatScrollbars[TextTools::ChatIndex::Global]->BottomLineIndex();
 		}
@@ -34,8 +39,9 @@ void Map_UI::UI_SendMessage()
 		{
 			STalk::SendTalk(this->m_game->world->connection->ClientStream, message, this->m_game);
 			this->ChatTextbox->Reset();
-			std::string playername = this->m_game->map->m_Players[World::WorldCharacterID]->name;
-			playername[0] = std::toupper(playername[0]);
+			std::string playername = player->second->name;
+			if (!playername.empty())
+				playername[0] = std::toupper(static_cast<unsigned char>(playername[0]));
 			TextTools::AppendChat(TextTools::ChatIndex::Public, 420, 10, 0, playername, message, this->m_game,sf::Color::Black);
 			this->m_game->Map_UserInterface->map_talk->UI_ChatScrollbars[0]->BottomLineIndex();
 		}

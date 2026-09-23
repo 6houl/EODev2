@@ -294,7 +294,8 @@ void Connection::execute()
 								{
 									World::OnlinePlayerContainer _player;
 									_player._Name = reader->GetBreakString();
-									_player._Name[0] = toupper(_player._Name[0]);
+									if (!_player._Name.empty())
+										_player._Name[0] = toupper(static_cast<unsigned char>(_player._Name[0]));
 									_player._Title = reader->GetBreakString();
 									reader->Getbyte();
 									_player._Icon = reader->GetChar();
@@ -304,7 +305,7 @@ void Connection::execute()
 									int insertindex = 0;
 									for (int j = 0; j < Sortedcontainer.size(); j++)
 									{
-										if ((int)Sortedcontainer[j]._Name[0] <= (int)_player._Name[0])
+										if (Sortedcontainer[j]._Name <= _player._Name)
 										{
 											insertindex = j + 1;
 										}
@@ -327,15 +328,6 @@ void Connection::execute()
 							reportstr += "[" + PacketProcessor::GetFamilyName(reader->Family()) + "]";
 							reportstr += "[" + PacketProcessor::GetActionName(reader->Action()) + "]";
 
-							for (int i = 0; i < reader->Length(); i++)
-							{
-								char* st = new char[8];
-								_itoa(newbuf[i], st, 10);
-								//reportstr += "[";
-								//reportstr += st;
-								//reportstr += "]";
-								delete st;
-							}
 							World::DebugPrint(reportstr.c_str());
 							Game* game = (Game*)V_Game;
 							//game->map->ThreadLock.lock();

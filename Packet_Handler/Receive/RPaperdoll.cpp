@@ -30,22 +30,26 @@ CLIENT_F_FUNC(Paperdoll)
 					game->Map_UserInterface->map_inventory->paperdoll.Modifiable = false;
 				}
 				game->Map_UserInterface->map_inventory->paperdoll._gender = _gender;
+				auto capitalize = [](std::string& value)
+				{
+					if (!value.empty())
+						value[0] = toupper(static_cast<unsigned char>(value[0]));
+				};
 				game->Map_UserInterface->map_inventory->paperdoll._name = _name;
-				game->Map_UserInterface->map_inventory->paperdoll._name[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._name[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._name);
 				game->Map_UserInterface->map_inventory->paperdoll._home = _home;
-				game->Map_UserInterface->map_inventory->paperdoll._home[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._home[0]);
-				game->Map_UserInterface->map_inventory->paperdoll._class = "";
-				game->Map_UserInterface->map_inventory->paperdoll._class[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._class[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._home);
+				game->Map_UserInterface->map_inventory->paperdoll._class = World::ECF_File->Get(_class).name;
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._class);
 				game->Map_UserInterface->map_inventory->paperdoll._partner = _partner;
-				game->Map_UserInterface->map_inventory->paperdoll._partner[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._partner[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._partner);
 				game->Map_UserInterface->map_inventory->paperdoll._title = _title;
-				game->Map_UserInterface->map_inventory->paperdoll._title[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._title[0]);
-				game->Map_UserInterface->map_inventory->paperdoll._job = "";
-				game->Map_UserInterface->map_inventory->paperdoll._job[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._job[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._title);
+				game->Map_UserInterface->map_inventory->paperdoll._job = "Unemployed";
 				game->Map_UserInterface->map_inventory->paperdoll._guild = _guilderStr;
-				game->Map_UserInterface->map_inventory->paperdoll._guild[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._guild[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._guild);
 				game->Map_UserInterface->map_inventory->paperdoll._rank = _guildrank;
-				game->Map_UserInterface->map_inventory->paperdoll._rank[0] = toupper(game->Map_UserInterface->map_inventory->paperdoll._rank[0]);
+				capitalize(game->Map_UserInterface->map_inventory->paperdoll._rank);
 				for (int i = 0; i < 15; i++)
 				{
 					game->Map_UserInterface->map_inventory->paperdoll._paperdoll[i] = reader.GetShort();

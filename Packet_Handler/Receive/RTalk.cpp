@@ -4,7 +4,7 @@
 
 CLIENT_F_FUNC(Talk)
 {	
-	game->map->ThreadLock.lock();
+	std::lock_guard<std::mutex> lock(game->map->ThreadLock);
 		switch(action)
 		{		
 			case PACKET_PLAYER: 
@@ -12,8 +12,12 @@ CLIENT_F_FUNC(Talk)
 	
 				short ID = reader.GetShort();
 				std::string Message = reader.GetEndString();
-				std::string playername = game->map->m_Players[(ID)]->name;
-				playername[0] = std::toupper(playername[0]);
+					auto player = game->map->m_Players.find(ID);
+					if (player == game->map->m_Players.end() || !player->second)
+						return false;
+					std::string playername = player->second->name;
+					if (!playername.empty())
+						playername[0] = std::toupper(static_cast<unsigned char>(playername[0]));
 				TextTools::AppendChat(TextTools::ChatIndex::Public, 420,10, 0 ,playername, Message, game, sf::Color::Black);
 				game->Map_UserInterface->map_talk->UI_ChatScrollbars[0]->BottomLineIndex();
 				sf::Color bgcol = sf::Color(255, 255, 255, 150);
@@ -33,15 +37,14 @@ CLIENT_F_FUNC(Talk)
 
 				std::string playername = reader.GetBreakString();
 				std::string Message = reader.GetBreakString();
-				playername[0] = std::toupper(playername[0]);
+					if (!playername.empty())
+						playername[0] = std::toupper(static_cast<unsigned char>(playername[0]));
 				TextTools::AppendChat(TextTools::ChatIndex::Global, 380,10, 4, playername, Message, game);
 				game->Map_UserInterface->map_talk->UI_ChatScrollbars[TextTools::ChatIndex::Global]->BottomLineIndex();
 				break;
 			}
 			default:
-				game->map->ThreadLock.unlock();
 				return false;
 		}
-		game->map->ThreadLock.unlock();
 		return true;
 }

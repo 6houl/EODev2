@@ -55,9 +55,7 @@ CLIENT_F_FUNC(Init)
             {
 			 std::string message = "";
 			 message += "The server dropped the connection,\nreason: temporary ip ban. ";
-			 char* st = new char[8];
-			 _itoa(banlength, st, 10);
-			 message += st;
+			 message += std::to_string(banlength);
 			 message +=  " minutes.";
              World::ThrowMessage("Connection is blocked", message);
             }

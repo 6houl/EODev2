@@ -1017,10 +1017,7 @@ void Menu::Render()
 						rct.right= rct.left + 108;
 						rct.top= 137 + (i*125);
 						rct.bottom= rct.top + 30;
-						std::basic_string<char> str = "";
-						char* st = new char[8];
-						_itoa((BYTE)CSModels[i].level, st, 10);
-						str += st;
+						std::string str = std::to_string(static_cast<unsigned char>(CSModels[i].level));
 						this->m_game->DrawTextW(str.c_str(), rct.left, rct.top, sf::Color::Color(240, 240, 240, 185),13,false);
 					}
 					

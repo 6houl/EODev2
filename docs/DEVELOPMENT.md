@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 681 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 679 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -105,15 +105,24 @@ The current Release baseline builds with 0 errors and 681 existing warnings. The
 - Reloads pub objects from the downloaded path and releases the replaced object.
 - Uses valid relative pub paths instead of invalid C++ escape sequences.
 
+### Login and UI crash safety
+
+- Prevents empty name, class, guild, rank, partner, home, title, and job strings from being indexed at position zero.
+- Resolves paperdoll class names through the loaded ECF data instead of assigning a numeric byte to a string.
+- Preserves actual guild and guild-rank values from Welcome/Reply.
+- Bounds both login and character-update lists to EODev's three available selector models while still consuming every server entry.
+- Rejects chat packets for unknown players instead of inserting and dereferencing a null map entry.
+- Gives unknown character stances a stable standing frame instead of returning an indeterminate value.
+- Removes temporary formatting buffers that were leaked or freed with the wrong delete form.
+
 ## Current Boundary
 
-Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. Live ArenaServ checks are still required for account/login and multi-file synchronization. Confirmed crash and corruption paths are the next code milestone.
+Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, and chat crash paths are hardened. Live ArenaServ checks are still required for account/login and multi-file synchronization. Remaining gameplay systems are the next code milestone.
 
 ## Working Order
 
 1. Run account creation, login, and multi-file synchronization end to end against ArenaServ.
-2. Remove confirmed crash and corruption paths.
-3. Implement gameplay systems through EODev's existing UI controls.
+2. Implement gameplay systems through EODev's existing UI controls.
 
 ## Handoff Checklist
 

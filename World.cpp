@@ -215,8 +215,6 @@ bool World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 
 		for (int i = 0; i < str.length(); i++)
 		{
-			char* st = new char[8];
-			_itoa(str[i], st, 10);
 			if (i == 2)
 			{
 				reportstr += "[" + PacketProcessor::GetActionName(PacketAction(str[i] + 128)) + "]";
@@ -227,9 +225,7 @@ bool World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 			}
 			else
 			{
-				reportstr += "[";
-				reportstr += st;
-				reportstr += "]";
+				reportstr += "[" + std::to_string(static_cast<unsigned char>(str[i])) + "]";
 			}
 		}
 		World::DebugPrint(reportstr.c_str());

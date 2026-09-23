@@ -67,33 +67,45 @@ CLIENT_F_FUNC(Character)
 
 						for (int i = 0; i < CharacterSize; i++)
 						{
-							game->menu->CSModels[i].name = reader.GetBreakString();
-							if ( game->menu->CSModels[i].name[0] > 'a' &&  game->menu->CSModels[i].name[0] < 'z')
-							{
-								game->menu->CSModels[i].name[0] += 'A' - 'a';
-							}
-							game->menu->CSModels[i].ID = i;
-							int Gameid = reader.GetInt();
-							game->menu->CSModels[i].Game_ID = Gameid;
-							if(i ==0)
-							{
-								game->PlayerID = game->menu->CSModels[i].Game_ID;
-							}
-						    game->menu->CSModels[i].level = reader.GetChar();
-							game->menu->CSModels[i].Gender = reader.GetChar();
-							game->menu->CSModels[i].HairStyle = reader.GetChar() - 1;
-							game->menu->CSModels[i].HairCol = reader.GetChar();
-							game->menu->CSModels[i].SkinCol = reader.GetChar();
-							game->menu->CSModels[i].admin = reader.GetChar();
-							game->menu->CSModels[i].ShoeID = reader.GetShort() - 1;
-							game->menu->CSModels[i].ArmorID = reader.GetShort() - 1;
-							game->menu->CSModels[i].HatID = reader.GetShort() - 1;
-							game->menu->CSModels[i].ShieldID = reader.GetShort() - 1;
-							game->menu->CSModels[i].WeaponID = reader.GetShort() - 1;
-							game->menu->CSModels[i].AlignCharacter(game->menu->CSModels[i].Stance, game->menu->CSModels[i].frame_ID, game->menu->CSModels[i].direction);
+							std::string name = reader.GetBreakString();
+							int gameId = reader.GetInt();
+							int level = reader.GetChar();
+							int gender = reader.GetChar();
+							int hairStyle = reader.GetChar() - 1;
+							int hairColor = reader.GetChar();
+							int skinColor = reader.GetChar();
+							int admin = reader.GetChar();
+							int shoeId = reader.GetShort() - 1;
+							int armorId = reader.GetShort() - 1;
+							int hatId = reader.GetShort() - 1;
+							int shieldId = reader.GetShort() - 1;
+							int weaponId = reader.GetShort() - 1;
 							reader.Getbyte();
+
+							if (i >= 3)
+								continue;
+
+							if (!name.empty() && name[0] >= 'a' && name[0] <= 'z')
+								name[0] += 'A' - 'a';
+							game->menu->CSModels[i].name = name;
+							game->menu->CSModels[i].ID = i;
+							game->menu->CSModels[i].Game_ID = gameId;
+							if (i == 0)
+								game->PlayerID = gameId;
+							game->menu->CSModels[i].level = level;
+							game->menu->CSModels[i].Gender = gender;
+							game->menu->CSModels[i].HairStyle = hairStyle;
+							game->menu->CSModels[i].HairCol = hairColor;
+							game->menu->CSModels[i].SkinCol = skinColor;
+							game->menu->CSModels[i].admin = admin;
+							game->menu->CSModels[i].ShoeID = shoeId;
+							game->menu->CSModels[i].ArmorID = armorId;
+							game->menu->CSModels[i].HatID = hatId;
+							game->menu->CSModels[i].ShieldID = shieldId;
+							game->menu->CSModels[i].WeaponID = weaponId;
+							game->menu->CSModels[i].AlignCharacter(game->menu->CSModels[i].Stance, game->menu->CSModels[i].frame_ID, game->menu->CSModels[i].direction);
 						}
-						game->AccountCharacterSize = CharacterSize;
+						game->AccountCharacterSize = std::min<int>(CharacterSize, 3);
 						
 					break;
 				}
