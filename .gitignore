@@ -30,10 +30,21 @@
 *.exe
 *.out
 *.app
-.vs/EoDEV++/v15/.suo
+
+# Local reference and dependencies
+EndlessClient-master/
+third_party/
+
+# Visual Studio and build output
+.vs/
+Debug/
+Release/
+EoDEV++/
+*.suo
+*.user
+*.aps
 *.db
 *.ipch
-.vs/EoDEV++/v16/.suo
 *.opendb
 *.ini
 *.log
