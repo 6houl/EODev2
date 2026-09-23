@@ -65,6 +65,21 @@ namespace ClientPackets
 		return builder;
 	}
 
+	inline PacketBuilder CharacterDeleteRequest(unsigned int characterId)
+	{
+		PacketBuilder builder(PACKET_CHARACTER, PACKET_TAKE);
+		builder.AddInt(characterId);
+		return builder;
+	}
+
+	inline PacketBuilder CharacterDelete(unsigned short sessionId, unsigned int characterId)
+	{
+		PacketBuilder builder(PACKET_CHARACTER, PACKET_REMOVE);
+		builder.AddShort(sessionId);
+		builder.AddInt(characterId);
+		return builder;
+	}
+
 	inline PacketBuilder PlayerListRequest()
 	{
 		return PacketBuilder(PACKET_PLAYERS, PACKET_REQUEST);

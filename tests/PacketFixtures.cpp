@@ -73,6 +73,14 @@ namespace
 		ExpectPacket("login", ClientPackets::LoginRequest("alice", "secret"), expected);
 	}
 
+	void TestCharacterDelete()
+	{
+		ExpectPacket("character delete request", ClientPackets::CharacterDeleteRequest(1234567),
+			Bytes({7, 254, 9, 3, 181, 73, 20, 254}));
+		ExpectPacket("character delete", ClientPackets::CharacterDelete(321, 1234567),
+			Bytes({9, 254, 4, 3, 69, 2, 181, 73, 20, 254}));
+	}
+
 	void TestConnectionAccept()
 	{
 		ExpectPacket("connection accept", ClientPackets::ConnectionAccept(7, 11, 321),
@@ -244,6 +252,7 @@ int main()
 	TestAccountRequest();
 	TestAccountCreate();
 	TestLogin();
+	TestCharacterDelete();
 	TestConnectionAccept();
 	TestPlayerListRequest();
 	TestWhisperSetting();

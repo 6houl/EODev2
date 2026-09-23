@@ -403,7 +403,7 @@ void Menu::Update()
 	
 	if(LastDeleteRequest > -1 && this->m_game->MsgID == 1)
 	{
-		SCharacter::DeletePlayer(this->m_game->world->connection->ClientStream,LastDeleteRequest,(LPVOID*)this);
+		SCharacter::DeletePlayer(this->m_game->world->connection->ClientStream, this->m_game);
 		LastDeleteRequest = -1;
 		this->m_game->MsgID = 0;
 	}
@@ -641,7 +641,6 @@ void Menu::Update()
 						else
 						{
 							SCharacter::RequestDeletePlayer(world->connection->ClientStream,0, this->m_game);
-							World::ThrowMessage("Delete character","Character '" + CSModels[0].name + "' is going to be \ndeleted. Are you sure?", true);
 						}
 						BT_CC_Delete1->Deactivate();
 					}
@@ -666,7 +665,6 @@ void Menu::Update()
 						else
 						{
 							SCharacter::RequestDeletePlayer(world->connection->ClientStream,1, this->m_game);
-							World::ThrowMessage("Delete character","Character '" + CSModels[1].name + "' is going to be \ndeleted. Are you sure?", true);
 						}
 						BT_CC_Delete2->Deactivate();
 					}
@@ -691,7 +689,6 @@ void Menu::Update()
 						else
 						{
 							SCharacter::RequestDeletePlayer(world->connection->ClientStream,2, this->m_game);
-							World::ThrowMessage("Delete character","Character '" + CSModels[2].name + "' is going to be \ndeleted. Are you sure?", true);
 						}
 						BT_CC_Delete3->Deactivate();
 					}

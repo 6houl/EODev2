@@ -9,8 +9,16 @@ CLIENT_F_FUNC(Character)
 			case PACKET_PLAYER: 
 				{
 					int ID = reader.GetShort();//Delete ID - Used for confirmations.
-					Menu::SrvrCharID = reader.GetInt();//CharacterID
+					int CharacterID = reader.GetInt();
+					int selected = game->menu->LastDeleteRequest;
+					if (selected < 0 || selected >= 3
+						|| game->menu->CSModels[selected].Game_ID != CharacterID)
+						return false;
+
+					Menu::SrvrCharID = CharacterID;
 					Menu::SrvrDeleteID = ID;
+					World::ThrowMessage("Delete character", "Character '" + game->menu->CSModels[selected].name
+						+ "' is going to be \ndeleted. Are you sure?", true);
 					break;
 				}
 			case PACKET_REPLY: 

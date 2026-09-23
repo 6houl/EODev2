@@ -1,25 +1,24 @@
 #include "..\stdafx.h"
 #include "SCharacter.h"
 #include "..\game.h"
+#include "..\ClientPackets.h"
 
-void SCharacter::DeletePlayer(pt::ipstream* ClientStream, int deleteId, LPVOID game)
+void SCharacter::DeletePlayer(pt::ipstream* ClientStream, Game* game)
 {
-	Game* gme = (Game*)game;
 	if(Menu::SrvrCharID > 0)
 	{
-		PacketBuilder builder = PacketBuilder(PACKET_CHARACTER, PACKET_REMOVE);
-		builder.AddShort(Menu::SrvrDeleteID ); 
-		builder.AddInt(Menu::SrvrCharID);
-		World::Send(gme,ClientStream,builder);
+		PacketBuilder builder = ClientPackets::CharacterDelete(Menu::SrvrDeleteID, Menu::SrvrCharID);
+		World::Send(game, ClientStream, builder);
 	}
 }
 
-void SCharacter::RequestDeletePlayer(pt::ipstream* ClientStream, int deleteId, LPVOID game)
+void SCharacter::RequestDeletePlayer(pt::ipstream* ClientStream, int deleteId, Game* game)
 {
-	Game* gme = (Game*)game;
-	PacketBuilder builder = PacketBuilder(PACKET_CHARACTER, PACKET_TAKE);
-	builder.AddInt(gme->menu->CSModels[deleteId].Game_ID);
-	World::Send(gme,ClientStream,builder);
+	if (deleteId < 0 || deleteId >= 3 || game->menu->CSModels[deleteId].name.empty())
+		return;
+
+	PacketBuilder builder = ClientPackets::CharacterDeleteRequest(game->menu->CSModels[deleteId].Game_ID);
+	World::Send(game, ClientStream, builder);
 }
 void SCharacter::RequestCreatePlayer(pt::ipstream* ClientStream, LPVOID game)
 {

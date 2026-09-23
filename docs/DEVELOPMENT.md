@@ -132,6 +132,13 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Applies a saved disabled-whispers preference after Welcome/Reply places the character in game.
 - Leaves sound, music, language, chat logging, filtering, and interaction rows untouched until those client systems exist.
 
+### Issue #1: Character deletion safety
+
+- Passes the real `Game` instance through character-delete send paths instead of casting a `Menu` pointer to `Game`.
+- Waits for Character/Player before showing the final confirmation, matching EOLib's request-session-confirm-remove order.
+- Validates the server-returned character ID against the selected character before accepting the delete session.
+- Builds Character/Take and Character/Remove through tested production packet builders.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
