@@ -73,6 +73,12 @@ namespace
 		ExpectPacket("login", ClientPackets::LoginRequest("alice", "secret"), expected);
 	}
 
+	void TestConnectionAccept()
+	{
+		ExpectPacket("connection accept", ClientPackets::ConnectionAccept(7, 11, 321),
+			Bytes({9, 254, 2, 1, 8, 254, 12, 254, 69, 2}));
+	}
+
 	void TestWelcome()
 	{
 		ExpectPacket("welcome request", ClientPackets::WelcomeRequest(1234567),
@@ -224,6 +230,7 @@ int main()
 	TestAccountRequest();
 	TestAccountCreate();
 	TestLogin();
+	TestConnectionAccept();
 	TestWelcome();
 	TestFileRequests();
 	TestPartialReads();

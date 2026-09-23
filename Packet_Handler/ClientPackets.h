@@ -65,6 +65,17 @@ namespace ClientPackets
 		return builder;
 	}
 
+	inline PacketBuilder ConnectionAccept(unsigned short clientEncryptionMultiple,
+		unsigned short serverEncryptionMultiple,
+		unsigned short playerId)
+	{
+		PacketBuilder builder(PACKET_CONNECTION, PACKET_ACCEPT);
+		builder.AddShort(clientEncryptionMultiple);
+		builder.AddShort(serverEncryptionMultiple);
+		builder.AddShort(playerId);
+		return builder;
+	}
+
 	inline PacketBuilder WelcomeRequest(unsigned int characterId)
 	{
 		PacketBuilder builder(PACKET_WELCOME, PACKET_REQUEST);

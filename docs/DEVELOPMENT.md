@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 689 existing warnings. The fixture suite builds with 0 errors and 19 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 689 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -80,17 +80,32 @@ The current Release baseline builds with 0 errors and 689 existing warnings. The
 - Preserves embedded zero bytes instead of truncating data with null-terminated string handling.
 - Includes a binary round-trip regression fixture.
 
+### Issues #4 and #5: Protocol framing and sequence boundaries
+
+- Commit: `cf0f1f8`
+- Encodes sequence 252 in one byte and sequence 253 in two bytes, matching ArenaServ.
+- Verifies encrypted packet round trips and keeps init packets raw.
+- Rejects invalid, oversized, and truncated packet input without buffer underflow.
+
+### Account and login protocol hardening
+
+- Builds Connection/Accept from the EOLib field names and verifies its exact bytes against ArenaServ's reader.
+- Uses the server multiplier for receive and the client multiplier for send without relying on ambiguous local names.
+- Does not enter the connected UI state when Connection/Accept fails to write.
+- Handles the server's banned-account login reply.
+- Parses every returned character while limiting EODev's character selector to its three available UI slots.
+- Keeps the two-second account creation wait. EndlessClient uses the same default wait after the account-name reply before sending Account/Create.
+
 ## Current Boundary
 
-The packet payload layouts and receive framing are covered by automated tests. Sequencing, encryption, and a live ArenaServ login/account integration run still need dedicated verification. Do not treat a successful compile as proof that the full login flow is complete.
+Packet payloads, receive framing, sequence boundaries, and encryption round trips are covered by automated tests. Account creation and login packet handling are now the active boundary. A live ArenaServ integration run is still required before calling those flows complete.
 
 ## Working Order
 
-1. Verify and correct sequence insertion, encryption, and packet-length validation.
-2. Run account creation and login end to end against ArenaServ.
-3. Complete map/pub synchronization and validation.
-4. Remove confirmed crash and corruption paths.
-5. Implement gameplay systems through EODev's existing UI controls.
+1. Run account creation and login end to end against ArenaServ.
+2. Complete map/pub synchronization and validation.
+3. Remove confirmed crash and corruption paths.
+4. Implement gameplay systems through EODev's existing UI controls.
 
 ## Handoff Checklist
 

@@ -199,7 +199,7 @@ Textbox* World::GetFocusedTextbox()
 	return NULL;
 }
 
-void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
+bool World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 {	
 	static std::mutex sendMutex;
 	std::lock_guard<std::mutex> lock(sendMutex);
@@ -238,12 +238,20 @@ void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 		if (Sent < 0 || static_cast<std::size_t>(Sent) != str.length())
 			throw std::runtime_error("Incomplete packet write");
 		stream->flush();
+		return true;
 	}
 	catch (...)
 	{
 		World::ThrowMessage("Could not find server", "The game server could not be found,\nplease try again at a later time.");
 		stream->close();
 		World::Connected = false;
+		World::Connecting = false;
+		if (t_game->world->connection)
+		{
+			t_game->world->connection->ConnectionAccepted = false;
+			t_game->world->connection->ResetRequests();
+		}
+		return false;
 	}
 }
 std::string World::Receive(Game* t_game, std::string builder)

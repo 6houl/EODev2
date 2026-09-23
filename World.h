@@ -65,6 +65,6 @@ public:
 	void DropConnection();
 	static bool Connected;
 	static bool Connecting;
-	static void Send(Game* t_game, pt::ipstream* Stream, PacketBuilder Builder);
+	static bool Send(Game* t_game, pt::ipstream* Stream, PacketBuilder Builder);
 	static std::string Receive(Game* t_game, std::string Builder);
 };

@@ -4,8 +4,6 @@
 CLIENT_F_FUNC(Init)
 {
 	int id = reader.Getbyte();
-    char emulti_e;
-    char emulti_d;
 	short PlayerID;
 
 	switch (id)
@@ -25,15 +23,16 @@ CLIENT_F_FUNC(Init)
 
 			game->world->PacketCount = PCVal;
 			game->world->RawPacketCount = 0;
-            emulti_d = reader.Getbyte();
-            emulti_e = reader.Getbyte();
+			unsigned char serverEncryptionMultiple = reader.Getbyte();
+			unsigned char clientEncryptionMultiple = reader.Getbyte();
 			PlayerID = reader.GetShort();
-			game->SendMulti = (unsigned char)emulti_e;
-			game->RecvMulti = (unsigned char)emulti_d;
-			game->world->PProcessor.SetEMulti(emulti_e,emulti_d);
+			game->SendMulti = clientEncryptionMultiple;
+			game->RecvMulti = serverEncryptionMultiple;
+			game->world->PProcessor.SetEMulti(clientEncryptionMultiple, serverEncryptionMultiple);
 			game->GameID = PlayerID;
-			int response = reader.GetThree();
-			SConnection::SendPlayer(clientstream,response,game);
+			reader.GetThree();
+			if (!SConnection::SendPlayer(clientstream, game))
+				return false;
 			World::Connecting = false;
 			game->world->connection->ConnectionAccepted = true;
 			World::Connected = true;
