@@ -85,6 +85,14 @@ namespace
 			Bytes({3, 254, 1, 22}));
 	}
 
+	void TestWhisperSetting()
+	{
+		ExpectPacket("enable whispers", ClientPackets::HearWhispers(true),
+			Bytes({3, 254, 4, 17}));
+		ExpectPacket("disable whispers", ClientPackets::HearWhispers(false),
+			Bytes({3, 254, 8, 17}));
+	}
+
 	void TestWelcome()
 	{
 		ExpectPacket("welcome request", ClientPackets::WelcomeRequest(1234567),
@@ -238,6 +246,7 @@ int main()
 	TestLogin();
 	TestConnectionAccept();
 	TestPlayerListRequest();
+	TestWhisperSetting();
 	TestWelcome();
 	TestFileRequests();
 	TestPartialReads();

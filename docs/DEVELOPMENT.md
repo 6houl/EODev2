@@ -122,9 +122,19 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Protects the online-player list shared by the network and render threads.
 - Refreshes the panel on elapsed wall time instead of process CPU time.
 
+### Settings panel
+
+- Uses EODev's original fixed GFX 47 panel and the classic control positions documented by EndlessClient.
+- Loads `on` and `off` values from the original `setup.ini` format instead of treating them as false.
+- Provides working controls for chat balloons, map shadows, and incoming whispers.
+- Saves the visual settings immediately and restores them on the next launch.
+- Sends the empty Global/Remove and Global/Player packets used by EOProtocol, EOLib, and ArenaServ when incoming whispers are enabled or disabled.
+- Applies a saved disabled-whispers preference after Welcome/Reply places the character in game.
+- Leaves sound, music, language, chat logging, filtering, and interaction rows untouched until those client systems exist.
+
 ## Current Boundary
 
-Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. Live ArenaServ checks are still required for account/login and multi-file synchronization. Remaining gameplay systems are the next code milestone.
+Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
 
 ## Working Order
 

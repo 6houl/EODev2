@@ -781,41 +781,41 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 			}
 		}
 	}
-	for (int i = 0; i < (RenderWidth) + (RenderHeight); ++i)
+	if (IniConfiguration::Shadows)
 	{
-		int x, y;
-		if (i < (RenderHeight))
+		for (int i = 0; i < (RenderWidth) + (RenderHeight); ++i)
 		{
-			x = 0;
-			y = i;
-		}
-		else
-		{
-			x = i - (RenderHeight);
-			y = (RenderHeight);
-		}
-
-		for (next_depth(); y >= 0 && x < (RenderWidth); --y, ++x, next_depth())
-		{
-			int xoffs = layer_info[7].xoff - xoff;
-			int yoffs = layer_info[7].yoff - yoff;
-
-			int tilex = xoffs + (x * 32) - (y * 32);
-			int tiley = yoffs + (x * 16) + (y * 16);
-			short tile = 0;
-			tile = 0;
-			if ((y * emfh.width + x) < emfh.width * emfh.height)
+			int x, y;
+			if (i < (RenderHeight))
 			{
-				tile = m_emf.gfx(x, y)[7];
+				x = 0;
+				y = i;
 			}
-			if (tilex < -64 || tiley < -32
-				|| tilex > 700 || tiley > 500)
-				continue;
-			depth = layer_info[7].depth;
-			depth -= (this->LUTMap[x][y] * ep);
-			if (tile > 0)
+			else
 			{
-				this->m_game->Draw(this->m_game->ResourceManager->GetResource(layer_info[7].file, tile, true), tilex, tiley, sf::Color::Color(255,255,255,60), 0, 0, -1,-1,sf::Vector2f(1,1), depth);
+				x = i - (RenderHeight);
+				y = (RenderHeight);
+			}
+
+			for (next_depth(); y >= 0 && x < (RenderWidth); --y, ++x, next_depth())
+			{
+				int xoffs = layer_info[7].xoff - xoff;
+				int yoffs = layer_info[7].yoff - yoff;
+
+				int tilex = xoffs + (x * 32) - (y * 32);
+				int tiley = yoffs + (x * 16) + (y * 16);
+				short tile = 0;
+				if ((y * emfh.width + x) < emfh.width * emfh.height)
+					tile = m_emf.gfx(x, y)[7];
+				if (tilex < -64 || tiley < -32
+					|| tilex > 700 || tiley > 500)
+					continue;
+				depth = layer_info[7].depth;
+				depth -= (this->LUTMap[x][y] * ep);
+				if (tile > 0)
+				{
+					this->m_game->Draw(this->m_game->ResourceManager->GetResource(layer_info[7].file, tile, true), tilex, tiley, sf::Color::Color(255, 255, 255, 60), 0, 0, -1, -1, sf::Vector2f(1, 1), depth);
+				}
 			}
 		}
 	}

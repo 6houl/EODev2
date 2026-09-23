@@ -34,6 +34,7 @@ private:
 class IniConfiguration
 {
 public:
+	IniConfiguration();
 	CIniReader* reader;
 	CIniWriter* writer;
 	static std::string Host;
@@ -45,8 +46,10 @@ public:
 	static bool Sound;
 	static bool Shadows;
 	static bool ChatBalloons;
+	static bool HearWhispers;
 	static bool Filter;
 	static bool FilterAll;
 	void Init();
+	void SaveSettings();
 };
 #endif //Config_H

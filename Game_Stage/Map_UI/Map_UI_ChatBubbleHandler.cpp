@@ -444,6 +444,9 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 }
 void Map_UI_ChatBubbleHandler::Render(float depth)
 {
+	if (!IniConfiguration::ChatBalloons)
+		return;
+
 	int counter = 0;
 	for each (BubbleContainer container in this->ChatBubbleList)
 	{

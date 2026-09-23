@@ -1,6 +1,7 @@
 #include "..\stdafx.h"
 #include "Handler.h"
 #include "..\Send\SWelcome.h"
+#include "..\ClientPackets.h"
 
 CLIENT_F_FUNC(Welcome)
 {
@@ -379,6 +380,9 @@ CLIENT_F_FUNC(Welcome)
 							game->SetStage(Game::GameStage::PInGame);
 							game->Map_UserInterface->isactive = true;
 							game->map->IsVisible = true;
+							if (!IniConfiguration::HearWhispers)
+								World::Send(game, game->world->connection->ClientStream,
+									ClientPackets::HearWhispers(false));
 							break;
 						}
 					}

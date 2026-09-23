@@ -70,6 +70,11 @@ namespace ClientPackets
 		return PacketBuilder(PACKET_PLAYERS, PACKET_REQUEST);
 	}
 
+	inline PacketBuilder HearWhispers(bool enabled)
+	{
+		return PacketBuilder(PACKET_GLOBAL, enabled ? PACKET_REMOVE : PACKET_PLAYER);
+	}
+
 	inline PacketBuilder ConnectionAccept(unsigned short clientEncryptionMultiple,
 		unsigned short serverEncryptionMultiple,
 		unsigned short playerId)

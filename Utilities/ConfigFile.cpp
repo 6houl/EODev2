@@ -27,12 +27,9 @@ bool CIniReader::ReadBoolean(char* szSection, char* szKey, bool bolDefaultValue)
 {
  char szResult[255];
  char szDefault[255];
- bool bolResult;
- sprintf(szDefault, "%s", bolDefaultValue? "True" : "False");
+ sprintf(szDefault, "%s", bolDefaultValue? "on" : "off");
  GetPrivateProfileStringA(szSection, szKey, szDefault, szResult, 255, m_szFileName); 
- bolResult =  (strcmp(szResult, "True") == 0 || 
-		strcmp(szResult, "true") == 0) ? true : false;
- return bolResult;
+ return _stricmp(szResult, "true") == 0 || _stricmp(szResult, "on") == 0 || strcmp(szResult, "1") == 0;
 }
 char* CIniReader::ReadString(char* szSection, char* szKey, const char* szDefaultValue)
 {
@@ -73,6 +70,20 @@ void CIniWriter::WriteString(char* szSection, char* szKey, char* szValue)
 std::string IniConfiguration::Host = "";
 int IniConfiguration::Port = 0;
 bool IniConfiguration::FullScreen = false;
+bool IniConfiguration::Sizeable = true;
+bool IniConfiguration::StayOnTop = false;
+bool IniConfiguration::Music = false;
+bool IniConfiguration::Sound = true;
+bool IniConfiguration::Shadows = true;
+bool IniConfiguration::ChatBalloons = true;
+bool IniConfiguration::HearWhispers = true;
+bool IniConfiguration::Filter = true;
+bool IniConfiguration::FilterAll = false;
+
+IniConfiguration::IniConfiguration()
+	: reader(NULL), writer(NULL)
+{
+}
 
 void IniConfiguration::Init()
 {
@@ -87,10 +98,29 @@ void IniConfiguration::Init()
 	}
 	szCurDir[cnt + str.length()] = '\0';
 	reader = new CIniReader(szCurDir);
-	this->Host = reader->ReadString("CONNECTION","Host","game.endless-online.com");
+	writer = new CIniWriter(szCurDir);
+	char* host = reader->ReadString("CONNECTION","Host","game.endless-online.com");
+	this->Host = host;
+	delete[] host;
 	this->Port = reader->ReadInteger("CONNECTION","Port",8078);
-	std::string Fullscreen = reader->ReadString("CONFIGURATION","Fullscreen","off");
-	this->FullScreen = false;
-		if(Fullscreen == "off")
-		{this->FullScreen = true;}
+	this->FullScreen = reader->ReadBoolean("CONFIGURATION", "Fullscreen", false);
+	this->Sizeable = reader->ReadBoolean("CONFIGURATION", "Sizeable", true);
+	this->StayOnTop = reader->ReadBoolean("CONFIGURATION", "StayOnTop", false);
+	this->Music = reader->ReadBoolean("SETTINGS", "Music", false);
+	this->Sound = reader->ReadBoolean("SETTINGS", "Sound", true);
+	this->Shadows = reader->ReadBoolean("SETTINGS", "ShowShadows", true);
+	this->ChatBalloons = reader->ReadBoolean("SETTINGS", "ShowBaloons", true);
+	this->HearWhispers = reader->ReadBoolean("CHAT", "HearWhisper", true);
+	this->Filter = reader->ReadBoolean("CHAT", "Filter", true);
+	this->FilterAll = reader->ReadBoolean("CHAT", "FilterAll", false);
+}
+
+void IniConfiguration::SaveSettings()
+{
+	if (!writer)
+		return;
+
+	writer->WriteBoolean("SETTINGS", "ShowShadows", Shadows);
+	writer->WriteBoolean("SETTINGS", "ShowBaloons", ChatBalloons);
+	writer->WriteBoolean("CHAT", "HearWhisper", HearWhispers);
 }
