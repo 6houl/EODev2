@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 
 PacketProcessor::PacketProcessor()
@@ -381,7 +382,7 @@ std::size_t PacketReader::Length() const
 
 std::size_t PacketReader::Remaining() const
 {
-	return this->Length() - this->pos;
+	return this->pos < this->Length() ? this->Length() - this->pos : 0;
 }
 
 PacketAction PacketReader::Action() const
@@ -404,9 +405,10 @@ unsigned int PacketReader::GetNumber(std::size_t length)
 {
 	std::array<unsigned char, 4> bytes{{254, 254, 254, 254}};
 
-	std::copy_n(util::cbegin(this->data) + this->pos, std::min(length, this->Remaining()), util::begin(bytes));
+	std::size_t read_length = std::min(length, this->Remaining());
+	std::copy_n(util::cbegin(this->data) + this->pos, read_length, util::begin(bytes));
 
-	this->pos += length;
+	this->pos += read_length;
 
 	return PacketProcessor::Number(bytes[0], bytes[1], bytes[2], bytes[3]);
 }
@@ -455,7 +457,11 @@ std::string PacketReader::GetFixedString(std::size_t length)
 
 std::string PacketReader::GetBreakString(unsigned char breakchar)
 {
-	std::string ret = GetFixedString(this->data.find_first_of(breakchar, this->pos) - this->pos);
+	std::size_t break_position = this->data.find_first_of(breakchar, this->pos);
+	if (break_position == std::string::npos)
+		return GetEndString();
+
+	std::string ret = GetFixedString(break_position - this->pos);
 	++this->pos;
 	return ret;
 }
@@ -680,24 +686,11 @@ void PacketBuilder::Reset(std::size_t size_guess)
 	this->data.reserve(size_guess);
 }
 
-std::string PacketBuilder::Get(char counter) const
-{
-	std::string retdata;
-	retdata.reserve(5 + this->data.length());
-	std::array<unsigned char, 2> id = PacketProcessor::EPID(this->id);
-	std::array<unsigned char, 4> length = PacketProcessor::ENumber(this->data.length() + 2 + this->add_size);
-	char counternum = PacketProcessor::Number(counter);
-
-	retdata += length[0];
-	retdata += length[1];
-	retdata += id[0];
-	retdata += id[1];
-	retdata += this->data;
-
-	return retdata;
-}
 std::string PacketBuilder::Get() const
 {
+	if (this->data.length() + 2 + this->add_size >= PacketProcessor::MAX2)
+		throw std::length_error("Packet exceeds the two-byte EO frame limit");
+
 	std::string retdata;
 	retdata.reserve(4 + this->data.length());
 	std::array<unsigned char, 2> id = PacketProcessor::EPID(this->id);

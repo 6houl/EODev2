@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Connection.h"
 #include "World.h"
+#include "Packet_Handler\ClientPackets.h"
 
 using namespace std;
 bool World::Connected = false;
@@ -207,21 +208,9 @@ void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 	{
 		t_game->world->RawPacketCount = (t_game->world->RawPacketCount + 1) % 10;
 
-		std::string str = builder.Get();
-
-		if ((t_game->world->RawPacketCount + t_game->world->PacketCount) >= 253)
-		{
-			int seqval = ((t_game->world->RawPacketCount + t_game->world->PacketCount));
-			std::array<unsigned char, 4> seqdat = t_game->world->PProcessor.ENumber(seqval);
-			builder.Insertbyte(0, seqdat[1]);
-			builder.Insertbyte(0, seqdat[0]);
-		}
-		else
-		{
-			unsigned char seqval = t_game->world->PProcessor.Number((t_game->world->RawPacketCount + t_game->world->PacketCount + 2));
-			builder.Insertbyte(0, seqval);
-		}
-		str = t_game->world->PProcessor.Encode(builder.Get());
+		const unsigned int sequence = t_game->world->RawPacketCount + t_game->world->PacketCount;
+		builder = ClientPackets::WithSequence(builder, sequence);
+		std::string str = t_game->world->PProcessor.Encode(builder.Get());
 		std::string reportstr = "Sending : ";
 
 		for (int i = 0; i < str.length(); i++)
@@ -246,6 +235,8 @@ void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 		World::DebugPrint(reportstr.c_str());
 
 		int Sent = stream->write(str.c_str(), str.length());
+		if (Sent < 0 || static_cast<std::size_t>(Sent) != str.length())
+			throw std::runtime_error("Incomplete packet write");
 		stream->flush();
 	}
 	catch (...)

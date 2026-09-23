@@ -152,6 +152,70 @@ namespace
 		Expect(actual == expected, "binary resource preserves zero bytes");
 		std::remove(path.c_str());
 	}
+
+	void TestSequenceEncoding()
+	{
+		PacketBuilder oneByte = ClientPackets::WithSequence(ClientPackets::LoginRequest("a", "b"), 252);
+		ExpectPacket("sequence 252", oneByte,
+			Bytes({8, 254, 1, 4, 253, 'a', 255, 'b', 255}));
+
+		PacketBuilder twoByte = ClientPackets::WithSequence(ClientPackets::LoginRequest("a", "b"), 253);
+		ExpectPacket("sequence 253", twoByte,
+			Bytes({9, 254, 1, 4, 1, 2, 'a', 255, 'b', 255}));
+	}
+
+	void TestEncryptionRoundTrip()
+	{
+		PacketProcessor processor;
+		processor.SetEMulti(6, 6);
+		const std::string raw = ClientPackets::WithSequence(
+			ClientPackets::LoginRequest("alice", "secret"), 123).Get();
+		const std::string encoded = processor.Encode(raw);
+		Expect(encoded != raw, "encrypted packet differs");
+		Expect(processor.Decode(encoded.substr(2)) == raw.substr(2), "encryption round trip");
+
+		const std::string init = ClientPackets::Init(123456, "1234").Get();
+		Expect(processor.Encode(init) == init, "init packet remains raw");
+	}
+
+	void TestLengthValidation()
+	{
+		PacketFramer framer;
+		std::string packet;
+		const std::string invalid = Bytes({1, 1});
+		framer.Append(invalid.data(), invalid.size());
+		bool malformedRejected = false;
+		try
+		{
+			framer.Pop(packet);
+		}
+		catch (const std::runtime_error&)
+		{
+			malformedRejected = true;
+		}
+		Expect(malformedRejected, "invalid frame length rejected");
+
+		PacketBuilder oversized(PACKET_LOGIN, PACKET_REQUEST);
+		oversized.AddString(std::string(64007, 'x'));
+		bool oversizedRejected = false;
+		try
+		{
+			oversized.Get();
+		}
+		catch (const std::length_error&)
+		{
+			oversizedRejected = true;
+		}
+		Expect(oversizedRejected, "oversized packet rejected");
+
+		PacketReader shortReader(Bytes({1, 4, 2}));
+		Expect(shortReader.GetInt() == 1 && shortReader.Remaining() == 0,
+			"truncated number stays bounded");
+
+		PacketReader stringReader(Bytes({1, 4, 'o', 'k'}));
+		Expect(stringReader.GetBreakString() == "ok" && stringReader.Remaining() == 0,
+			"missing string break stays bounded");
+	}
 }
 
 int main()
@@ -165,6 +229,9 @@ int main()
 	TestPartialReads();
 	TestRequestGate();
 	TestBinaryResourceWrite();
+	TestSequenceEncoding();
+	TestEncryptionRoundTrip();
+	TestLengthValidation();
 
 	if (failures != 0)
 	{

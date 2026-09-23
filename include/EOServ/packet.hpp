@@ -139,7 +139,6 @@ class PacketBuilder
 		void Reset(std::size_t size_guess = 0);
 
 		std::string Get() const;
-		std::string Get(char counter) const;
 
 		operator std::string() const;
 

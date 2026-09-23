@@ -6,6 +6,15 @@
 
 namespace ClientPackets
 {
+	inline PacketBuilder WithSequence(PacketBuilder builder, unsigned int sequence)
+	{
+		const std::array<unsigned char, 4> encoded = PacketProcessor::ENumber(sequence);
+		if (sequence >= PacketProcessor::MAX1)
+			builder.Insertbyte(0, encoded[1]);
+		builder.Insertbyte(0, encoded[0]);
+		return builder;
+	}
+
 	inline PacketBuilder Init(unsigned int challenge, const std::string& hdid)
 	{
 		PacketBuilder builder;
