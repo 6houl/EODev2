@@ -23,6 +23,7 @@
 #include <mutex>
 #include <fstream>
 #include <array>
+#include <atomic>
 #include <stdexcept>
 #include <list>
 #include <time.h>

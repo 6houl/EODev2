@@ -8,14 +8,32 @@
 #include "Utilities\ResourceFile.h"
 #include "Connection.h"
 USING_PTYPES
-bool Connection::ConnectionDropped;
+
+Connection::~Connection()
+{
+	if (ClientStream)
+	{
+		ClientStream->close();
+		delete ClientStream;
+		ClientStream = NULL;
+	}
+}
+
 bool Connection::Initialize(pt::string _IPAddress, int _port)
 {
 	IPAddress = _IPAddress;
 	Port = _port;
-	ConnectionDropped = false;
+	StopRequested = false;
 	ResetRequests();
 	return true;
+}
+
+void Connection::RequestStop()
+{
+	StopRequested = true;
+	if (ClientStream)
+		ClientStream->close();
+	signal();
 }
 
 bool Connection::TryBeginLogin()
@@ -204,7 +222,7 @@ void Connection::execute()
 		
 		return;
 	}
-	while(true)
+	while(!StopRequested)
 	{
 		DWORD now = GetTickCount();
 		if (LoginRequest.Expired(now, 5000))
@@ -231,7 +249,6 @@ void Connection::execute()
 					if(GetTickCount() - connectStart > 5000)
 					{
 						World::DebugPrint("Couldn't connect to the login server.");
-						this->ConnectionDropped = false;
 						World::ThrowMessage("Could not find server","The game server could not be found,\nplease try again at a later time.");
 						World::Connected = false;
 						World::Connecting = false;
@@ -344,10 +361,9 @@ void Connection::execute()
 			}
 			catch(...)
 			{
-				if(!World::Connected && !this->ConnectionDropped)
+				if(!StopRequested && !World::Connected)
 				{
 					World::DebugPrint("connection lost\n");
-					this->ConnectionDropped = false;
 					World::ThrowMessage("Could not find server","The game server could not be found,\nplease try again at a later time.");
 				}
 				ConnectionAccepted = false;

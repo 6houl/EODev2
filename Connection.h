@@ -44,15 +44,17 @@ public:
 	void CompleteLogin();
 	void CompleteAccountRequest();
 	void ResetRequests();
+	void RequestStop();
 	//void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer);
-	Connection () : pt::thread(false){}
+	Connection () : pt::thread(false), V_Game(NULL), ClientStream(NULL), StopRequested(false){}
+	~Connection();
 	pt::ipstream* ClientStream = nullptr;
-	static bool ConnectionDropped;
 	RequestGate LoginRequest;
 	RequestGate AccountRequest;
 	pt::string IPAddress;
 	int Port = 0;
 
 private:
+	std::atomic<bool> StopRequested;
 	void RequestNextFile();
 };

@@ -40,6 +40,7 @@ std::vector<World::OnlinePlayerContainer> World::GetOnlinePlayers()
 World::World(Game* _Game)
 {
 	this->m_game = _Game;
+	this->connection = NULL;
 	//File_ENF = new ENF("\\pub\\dtn001.enf");
 	ENF_File = new ENF("pub\\dtn001.enf");
 	EIF_File = new EIF("pub\\dat001.eif");
@@ -117,6 +118,16 @@ void World::CreateConnection()
 			fflush( stdout );
 			return;
 		}
+		if (this->connection)
+		{
+			if (this->connection->get_running())
+			{
+				this->connection->RequestStop();
+				this->connection->waitfor();
+			}
+			delete this->connection;
+			this->connection = NULL;
+		}
 		this->connection = new Connection();
 		this->connection->V_Game = this->m_game;
 		Connecting = true;
@@ -131,13 +142,17 @@ void World::DropConnection()
 	if (this->connection && (this->Connected || this->Connecting))
 	{
 		World::DebugPrint("Connection closed.\n");
-		Connection::ConnectionDropped = true;
-		if (this->connection->ClientStream)
-			this->connection->ClientStream->close();
+		this->connection->RequestStop();
 		this->Connected = false;
 	}
 	if (this->connection)
+	{
+		if (this->connection->get_running())
+			this->connection->waitfor();
 		this->connection->ResetRequests();
+		delete this->connection;
+		this->connection = NULL;
+	}
 	this->Connecting = false;
 }
 void World::MassTextBoxReset()

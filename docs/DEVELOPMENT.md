@@ -146,6 +146,20 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Clears pending shop and craft state when a confirmation is cancelled.
 - Keeps informational messages on the single-button path without creating a confirmation result.
 
+### Issue #3: Pending authentication and downloads
+
+- Login and account lookup use independent request gates that block duplicate sends and expire after five seconds.
+- Account creation retains the protocol-required delay without blocking the network worker.
+- Map and pub requests use one serialized queue, so ArenaServ never receives overlapping uploads.
+- All request state is reset on disconnect and reconnect.
+
+### Issue #6: Connection cancellation and cleanup
+
+- Gives each connection its own atomic stop request instead of a shared static drop flag.
+- Closes the socket, signals the worker, waits for it to finish, and deletes the connection before reconnecting.
+- Releases the owned socket stream when the connection is destroyed.
+- Suppresses the connection-lost dialog when the disconnect was requested by the client.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
