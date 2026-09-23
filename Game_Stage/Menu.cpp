@@ -401,11 +401,15 @@ void Menu::TabPressed()
 void Menu::Update()
 {
 	
-	if(LastDeleteRequest > -1 && this->m_game->MsgID == 1)
+	Game::ConfirmationResult deleteResult = this->m_game->ConsumeConfirmation(Game::ConfirmationCharacterDelete);
+	if(LastDeleteRequest > -1 && deleteResult == Game::ConfirmationAccepted)
 	{
 		SCharacter::DeletePlayer(this->m_game->world->connection->ClientStream, this->m_game);
 		LastDeleteRequest = -1;
-		this->m_game->MsgID = 0;
+	}
+	else if (deleteResult == Game::ConfirmationCancelled)
+	{
+		LastDeleteRequest = -1;
 	}
 
 	if(this->m_game->Stage == 0 || this->m_game->Stage == 1|| this->m_game->Stage == 3)

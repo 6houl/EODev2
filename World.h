@@ -61,7 +61,6 @@ public:
 	
 	static void DebugPrint(pt::string Message);
 	static void ThrowMessage(std::string Title, std::string Message);
-	static void ThrowMessage(std::string Title, std::string Message, bool Okay);
 	Textbox* GetFocusedTextbox();
 
 	void CreateConnection();

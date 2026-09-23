@@ -17,8 +17,8 @@ CLIENT_F_FUNC(Character)
 
 					Menu::SrvrCharID = CharacterID;
 					Menu::SrvrDeleteID = ID;
-					World::ThrowMessage("Delete character", "Character '" + game->menu->CSModels[selected].name
-						+ "' is going to be \ndeleted. Are you sure?", true);
+					game->ShowConfirmation("Delete character", "Character '" + game->menu->CSModels[selected].name
+						+ "' is going to be \ndeleted. Are you sure?", Game::ConfirmationCharacterDelete);
 					break;
 				}
 			case PACKET_REPLY: 

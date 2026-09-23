@@ -85,6 +85,20 @@ private:
 	void FinalizeRender();
 
 public:
+	enum ConfirmationOwner
+	{
+		ConfirmationNone = 0,
+		ConfirmationReturnToMenu,
+		ConfirmationCharacterDelete,
+		ConfirmationInformationBox
+	};
+	enum ConfirmationResult
+	{
+		ConfirmationPending = 0,
+		ConfirmationAccepted,
+		ConfirmationCancelled
+	};
+
 	sf::RenderWindow* Device;
 	IniConfiguration* Config;
 	enum GameStage
@@ -99,8 +113,8 @@ public:
 	Button* BT_CharDeleteOK;
 	Button* BT_CharDeleteCancel;
 	Map_UI* Map_UserInterface;
-	static bool CancelTrue;
-	int MsgID;
+	ConfirmationOwner ActiveConfirmation;
+	ConfirmationResult ActiveConfirmationResult;
 	Map_UI_Cursor MapCursor;
 	ENF* ENF_File;
 	ECF* ECF_File;
@@ -145,6 +159,8 @@ public:
 	sf::Vector2f GetFontSize(std::string _Message, int fontsize = 14);
 
 	void SetStage(GameStage stage);
+	void ShowConfirmation(const std::string& title, const std::string& message, ConfirmationOwner owner);
+	ConfirmationResult ConsumeConfirmation(ConfirmationOwner owner);
 	void Initialize(sf::RenderWindow*Device, World* _world);
 	void Update();
 	void Render();

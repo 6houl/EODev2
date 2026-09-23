@@ -139,6 +139,13 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Validates the server-returned character ID against the selected character before accepting the delete session.
 - Builds Character/Take and Character/Remove through tested production packet builders.
 
+### Issue #2: Confirmation ownership
+
+- Replaces the shared `MsgID` and `CancelTrue` flags with owner-scoped confirmation state.
+- Separates return-to-menu, character-delete, and shop/craft results so one feature cannot consume another feature's answer.
+- Clears pending shop and craft state when a confirmation is cancelled.
+- Keeps informational messages on the single-button path without creating a confirmation result.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.

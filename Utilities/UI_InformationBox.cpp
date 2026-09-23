@@ -110,7 +110,8 @@ void UI_InformationBox::Update()
 {
 	if (AwaitingResponse)
 	{
-		if (m_game->MsgID == 1)
+		Game::ConfirmationResult result = m_game->ConsumeConfirmation(Game::ConfirmationInformationBox);
+		if (result == Game::ConfirmationAccepted)
 		{
 			switch (this->_ScrollType)
 			{
@@ -145,11 +146,16 @@ void UI_InformationBox::Update()
 			this->ScrollBoxID = -1;
 			this->ScrollBoxAmount = 0;
 			this->AwaitingResponse = false;
-			m_game->MsgID = 0;
 			this->isdragging = false;
 			this->isdragselected = false;
 			this->DragX = 0;
 			this->DragY = 0;
+		}
+		else if (result == Game::ConfirmationCancelled)
+		{
+			this->ScrollBoxID = -1;
+			this->ScrollBoxAmount = 0;
+			this->AwaitingResponse = false;
 		}
 	}
 	if (!World::MBHidden)
@@ -334,7 +340,7 @@ void UI_InformationBox::Update()
 			{
 				this->ScrollBoxAmount = 1;
 				std::string msg = "Would you like to craft " + std::to_string(ScrollBoxAmount) + " " + World::EIF_File->Get(this->ScrollBoxID).name + "?";
-				World::ThrowMessage("Craft item(s)", msg, true);
+				m_game->ShowConfirmation("Craft item(s)", msg, Game::ConfirmationInformationBox);
 				this->AwaitingResponse = true;
 				break;
 			}
@@ -1088,7 +1094,7 @@ void UI_InformationBox::ShowScrollBox(ScrollBoxType boxtype, int ItemID, int Val
 			{
 				this->ScrollBoxAmount = 1;
 				std::string msg = "Buy " + std::to_string(ScrollBoxAmount) + " " + World::EIF_File->Get(this->ScrollBoxID).name + " for " + to_string(ScrollBoxAmount * ScrollValueAmount) + " gold?";
-				World::ThrowMessage("Buy item(s)", msg, true);
+				m_game->ShowConfirmation("Buy item(s)", msg, Game::ConfirmationInformationBox);
 				this->AwaitingResponse = true;
 				break;
 			}
@@ -1096,7 +1102,7 @@ void UI_InformationBox::ShowScrollBox(ScrollBoxType boxtype, int ItemID, int Val
 			{			
 				this->ScrollBoxAmount = 1;
 				std::string msg = "Sell " + std::to_string(ScrollBoxAmount) + " " + World::EIF_File->Get(this->ScrollBoxID).name + " for " + to_string(ScrollBoxAmount * ScrollValueAmount) + " gold?";
-				World::ThrowMessage("Sell item(s)", msg, true);
+				m_game->ShowConfirmation("Sell item(s)", msg, Game::ConfirmationInformationBox);
 				this->AwaitingResponse = true;
 				break;
 			}
@@ -1259,7 +1265,7 @@ void UI_InformationBox::UpdateScrollBox()
 					else 
 					{
 						std::string msg = "Buy " + std::to_string(this->ScrollBoxScrollBar->GetIndex()) + " " + World::EIF_File->Get(this->ScrollBoxID).name + " for " + to_string(this->ScrollBoxScrollBar->GetIndex() *ScrollValueAmount) + " gold?";
-						World::ThrowMessage("Buy item(s)", msg, true);
+						m_game->ShowConfirmation("Buy item(s)", msg, Game::ConfirmationInformationBox);
 						this->AwaitingResponse = true;
 					}
 
@@ -1269,7 +1275,7 @@ void UI_InformationBox::UpdateScrollBox()
 				{
 					this->ScrollBoxAmount = this->ScrollBoxScrollBar->GetIndex();
 					std::string msg = "Sell " + std::to_string(this->ScrollBoxScrollBar->GetIndex()) + " " + World::EIF_File->Get(this->ScrollBoxID).name + " for " + to_string(this->ScrollBoxScrollBar->GetIndex() * ScrollValueAmount) + " gold?";
-					World::ThrowMessage("Sell item(s)", msg, true);
+					m_game->ShowConfirmation("Sell item(s)", msg, Game::ConfirmationInformationBox);
 					this->AwaitingResponse = true;
 					break;
 				}

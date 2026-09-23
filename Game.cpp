@@ -8,8 +8,6 @@
 
 sf::Sprite* sprite;
 std::shared_ptr<sf::Texture> texture;
-bool Game::CancelTrue;
-bool exitinggame;
 //Tempory font grabbing addon.
 bool GetFontData(const HFONT fontHandle, std::vector<char>& data)
 {
@@ -79,8 +77,8 @@ void Game::Initialize(sf::RenderWindow*m_Device, World* _World)
 		this->Closed = false;
 		this->Stage = Game::PMenu;
 		this->SubStage = 0;
-		this->CancelTrue = false;
-		this->MsgID = 0;
+		this->ActiveConfirmation = ConfirmationNone;
+		this->ActiveConfirmationResult = ConfirmationPending;
 
 		this->MapCursor = Map_UI_Cursor(this, this->map, Device);
 
@@ -115,17 +113,34 @@ void World::DebugPrint(pt::string Message)
 #endif
 	
 }
-void World::ThrowMessage(std::string Title, std::string Message, bool Okay)
+void Game::ShowConfirmation(const std::string& title, const std::string& message, ConfirmationOwner owner)
 {
-	World::MBTitle = Title;
-	World::MBMessage = Message;
+	World::MBTitle = title;
+	World::MBMessage = message;
 	World::MBHidden = false;
-	Game::CancelTrue = Okay;
+	this->ActiveConfirmation = owner;
+	this->ActiveConfirmationResult = ConfirmationPending;
+}
+
+Game::ConfirmationResult Game::ConsumeConfirmation(ConfirmationOwner owner)
+{
+	if (this->ActiveConfirmation != owner || this->ActiveConfirmationResult == ConfirmationPending)
+		return ConfirmationPending;
+
+	ConfirmationResult result = this->ActiveConfirmationResult;
+	this->ActiveConfirmation = ConfirmationNone;
+	this->ActiveConfirmationResult = ConfirmationPending;
+	return result;
 }
 float timerrender;
 std::chrono::time_point<std::chrono::high_resolution_clock> init, final;
 void Game::Update()
 {
+	if (this->ConsumeConfirmation(ConfirmationReturnToMenu) == ConfirmationAccepted)
+	{
+		this->Stage = Game::PMenu;
+		world->DropConnection();
+	}
 
 	init = std::chrono::high_resolution_clock::now();
 	if(!world->Connected && Stage != Game::PViewCredits)
@@ -160,13 +175,11 @@ void Game::Update()
 				world->DropConnection();
 				this->Stage = Game::PMenu;
 				this->SubStage = 0;
-				exitinggame = false;
 				this->BT_ExitGame->MouseClickProccessed();
 			}
 			else
 			{
-				World::ThrowMessage("Return to menu","Are you sure you want to return to the \nmain menu?",true);
-				exitinggame = true;
+				this->ShowConfirmation("Return to menu", "Are you sure you want to return to the \nmain menu?", ConfirmationReturnToMenu);
 				this->BT_ExitGame->MouseClickProccessed();
 			}
 
@@ -192,7 +205,7 @@ void Game::Update()
 		menu->BT_LGPlayGame->SetFrameID(0);
 		menu->BT_PlayGame->SetFrameID(0);
 		menu->BT_ViewCredits->SetFrameID(0);
-		if(!CancelTrue)
+		if(this->ActiveConfirmation == ConfirmationNone)
 		{
 			if (this->BT_Message_OK->GetFrameID() == 0 && this->MouseX > this->MessageX && this->MouseX < this->MessageX + 290 && this->MouseY > this->MessageY  && this->MouseY < this->MessageY  + 157)
 			   {
@@ -236,7 +249,7 @@ void Game::Update()
 			this->BT_CharDeleteCancel->SetPosition(std::pair<int, int>(MessageX + 181,MessageY+ 113));
 			if(!this->MessageDragging)
 			{
-				if(!CancelTrue)
+				if(this->ActiveConfirmation == ConfirmationNone)
 				{
 					this->BT_Message_OK->Update(MouseX,MouseY,MousePressed);
 					if(this->BT_Message_OK->MouseClickedOnElement())
@@ -251,23 +264,15 @@ void Game::Update()
 					this->BT_CharDeleteCancel->Update(MouseX,MouseY,MousePressed);
 					if(this->BT_CharDeleteOK->MouseClickedOnElement())
 					{
-						if(exitinggame)
-						{	
-							this->Stage = Game::PMenu;
-							exitinggame = false;
-							world->DropConnection();
-						}	
-						MsgID = 1;	
+						this->ActiveConfirmationResult = ConfirmationAccepted;
 						World::MBHidden = true;
 						this->BT_CharDeleteOK->MouseClickProccessed();
-						CancelTrue = false;
 					}
 					if(this->BT_CharDeleteCancel->MouseClickedOnElement())
 					{
-						MsgID = 0;
+						this->ActiveConfirmationResult = ConfirmationCancelled;
 						World::MBHidden = true;
 						this->BT_CharDeleteCancel->MouseClickProccessed();
-						CancelTrue = false;
 					}
 
 				}
@@ -317,7 +322,7 @@ void Game::Render()
 	if (!World::MBHidden)
 	{
 		this->Draw(this->ResourceManager->GetResource(1, 18, false), this->MessageX - 1, this->MessageY - 1, sf::Color::Color(255, 255, 255, 255), 0,0,-1,-1, sf::Vector2f(1,1),0);
-		if (!this->CancelTrue)
+		if (this->ActiveConfirmation == ConfirmationNone)
 		{
 			this->BT_Message_OK->Draw();
 		}
