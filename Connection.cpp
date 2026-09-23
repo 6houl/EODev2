@@ -255,6 +255,9 @@ void Connection::execute()
 						return;
 					}
 				}
+				if (!ClientStream->waitfor(50))
+					continue;
+
 				int val = ClientStream->get_dataavail();
 
 				if(val > 0)
@@ -353,10 +356,6 @@ void Connection::execute()
 
 						delete reader;
 					}
-				}
-				else
-				{
-					pt::psleep(1);
 				}
 			}
 			catch(...)

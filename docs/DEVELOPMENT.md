@@ -160,6 +160,11 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Releases the owned socket stream when the connection is destroyed.
 - Suppresses the connection-lost dialog when the disconnect was requested by the client.
 
+### Issue #7: Idle network waiting
+
+- Waits on the socket for up to 50 milliseconds instead of polling it every millisecond.
+- Retains frequent login, account, and delayed account-creation timeout checks without consuming a CPU core while idle.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
