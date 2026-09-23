@@ -47,6 +47,7 @@ void EIF::Read(const std::string& filename)
 	char buf[EIF::DATA_SIZE] = {0};
 
 	this->data.resize(numobj+1);
+	int recordsRead = 0;
 
 	SAFE_READ(static_cast<void *>(&namesize), sizeof(char), 1, fh);
 	for (int i = 1; i <= numobj; ++i)
@@ -110,14 +111,17 @@ void EIF::Read(const std::string& filename)
 		newdata.weight = PacketProcessor::Number(buf[55]);
 
 		newdata.size = static_cast<EIF::Size>(PacketProcessor::Number(buf[57]));
+		recordsRead = i;
 
 		if (std::fread(static_cast<void *>(&namesize), sizeof(char), 1, fh) != 1)
 		{
 			break;
 		}
 	}
+	this->data.resize(recordsRead + 1);
+	this->records_read = recordsRead;
 
-	if (this->data.back().name.compare("eof") == 0)
+	if (this->data.size() > 1 && this->data.back().name.compare("eof") == 0)
 	{
 		this->data.pop_back();
 	}
@@ -178,6 +182,7 @@ void ENF::Read(const std::string& filename)
 	char buf[ENF::DATA_SIZE] = {0};
 
 	this->data.resize(numobj+1);
+	int recordsRead = 0;
 
 	SAFE_READ(static_cast<void *>(&namesize), sizeof(char), 1, fh);
 	for (int i = 1; i <= numobj; ++i)
@@ -208,14 +213,17 @@ void ENF::Read(const std::string& filename)
 		newdata.armor = PacketProcessor::Number(buf[24], buf[25]);
 
 		newdata.exp = PacketProcessor::Number(buf[36], buf[37]);
+		recordsRead = i;
 
 		if (std::fread(static_cast<void *>(&namesize), sizeof(char), 1, fh) != 1)
 		{
 			break;
 		}
 	}
+	this->data.resize(recordsRead + 1);
+	this->records_read = recordsRead;
 
-	if (this->data.back().name.compare("eof") == 0)
+	if (this->data.size() > 1 && this->data.back().name.compare("eof") == 0)
 	{
 		this->data.pop_back();
 	}
@@ -265,6 +273,7 @@ void ESF::Read(const std::string& filename)
 	char buf[ESF::DATA_SIZE] = {0};
 
 	this->data.resize(numobj+1);
+	int recordsRead = 0;
 
 	SAFE_READ(static_cast<void *>(&namesize), sizeof(char), 1, fh);
 	SAFE_READ(static_cast<void *>(&shoutsize), sizeof(char), 1, fh);
@@ -306,6 +315,7 @@ void ESF::Read(const std::string& filename)
 		newdata.maxdam = PacketProcessor::Number(buf[25], buf[26]);
 		newdata.accuracy = PacketProcessor::Number(buf[27], buf[28]);
 		newdata.hp = PacketProcessor::Number(buf[34], buf[35]);
+		recordsRead = i;
 
 		if (std::fread(static_cast<void *>(&namesize), sizeof(char), 1, fh) != 1)
 		{
@@ -317,8 +327,10 @@ void ESF::Read(const std::string& filename)
 			break;
 		}
 	}
+	this->data.resize(recordsRead + 1);
+	this->records_read = recordsRead;
 
-	if (this->data.back().name.compare("eof") == 0)
+	if (this->data.size() > 1 && this->data.back().name.compare("eof") == 0)
 	{
 		this->data.pop_back();
 	}
@@ -370,6 +382,7 @@ void ECF::Read(const std::string& filename)
 	char buf[ECF::DATA_SIZE] = {0};
 
 	this->data.resize(numobj+1);
+	int recordsRead = 0;
 
 	SAFE_READ(static_cast<void *>(&namesize), sizeof(char), 1, fh);
 	for (int i = 1; i <= numobj; ++i)
@@ -394,14 +407,17 @@ void ECF::Read(const std::string& filename)
 		newdata.agi = PacketProcessor::Number(buf[8], buf[9]);
 		newdata.con = PacketProcessor::Number(buf[10], buf[11]);
 		newdata.cha = PacketProcessor::Number(buf[12], buf[13]);
+		recordsRead = i;
 
 		if (std::fread(static_cast<void *>(&namesize), sizeof(char), 1, fh) != 1)
 		{
 			break;
 		}
 	}
+	this->data.resize(recordsRead + 1);
+	this->records_read = recordsRead;
 
-	if (this->data.back().name.compare("eof") == 0)
+	if (this->data.size() > 1 && this->data.back().name.compare("eof") == 0)
 	{
 		this->data.pop_back();
 	}

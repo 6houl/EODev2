@@ -182,6 +182,7 @@ class EIF
 		std::array<unsigned char, 4> rid;
 		std::array<unsigned char, 2> len;
 		std::vector<EIF_Data> data;
+		unsigned int records_read = 0;
 
 		EIF(const std::string& filename) { Read(filename.c_str()); }
 
@@ -256,6 +257,7 @@ class ENF
 		std::array<unsigned char, 4> rid;
 		std::array<unsigned char, 2> len;
 		std::vector<ENF_Data> data;
+		unsigned int records_read = 0;
 
 		ENF(const std::string& filename) { Read(filename.c_str()); }
 
@@ -332,6 +334,7 @@ class ESF
 		std::array<unsigned char, 4> rid;
 		std::array<unsigned char, 2> len;
 		std::vector<ESF_Data> data;
+		unsigned int records_read = 0;
 
 		ESF(const std::string& filename) { Read(filename.c_str()); }
 
@@ -377,6 +380,7 @@ class ECF
 		std::array<unsigned char, 4> rid;
 		std::array<unsigned char, 2> len;
 		std::vector<ECF_Data> data;
+		unsigned int records_read = 0;
 
 		ECF(const std::string& filename) { Read(filename.c_str()); }
 

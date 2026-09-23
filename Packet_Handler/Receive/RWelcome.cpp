@@ -46,7 +46,7 @@ CLIENT_F_FUNC(Welcome)
 							{
 								ItemFileLen[i] = reader.Getbyte();
 							}
-							if (game->EIF_File->rid != ItemRID || game->EIF_File->len != ItemFileLen)
+							if (World::EIF_File->rid != ItemRID || World::EIF_File->len != ItemFileLen)
 							{
 								World::DebugPrint("Requesting Item Data File. . .");
 								Connection::FileContainer m_FileContainer;
@@ -65,7 +65,7 @@ CLIENT_F_FUNC(Welcome)
 							{
 								NPCFileLen[i] = reader.Getbyte();
 							}
-							if (game->ENF_File->rid != NPCRID || game->ENF_File->len != NPCFileLen)
+							if (World::ENF_File->rid != NPCRID || World::ENF_File->len != NPCFileLen)
 							{
 								World::DebugPrint("Requesting NPC Data File. . .");
 								Connection::FileContainer m_FileContainer;
@@ -84,7 +84,7 @@ CLIENT_F_FUNC(Welcome)
 							{
 								SpellFileLen[i] = reader.Getbyte();
 							}
-							if (game->ESF_File->rid != SpellRID || game->ESF_File->len != SpellFileLen)
+							if (World::ESF_File->rid != SpellRID || World::ESF_File->len != SpellFileLen)
 							{
 								World::DebugPrint("Requesting Spell Data File. . .");
 								Connection::FileContainer m_FileContainer;
@@ -103,7 +103,7 @@ CLIENT_F_FUNC(Welcome)
 							{
 								ClassFileLen[i] = reader.Getbyte();
 							}
-							if (game->ECF_File->rid != ClassRID || game->ECF_File->len != ClassFileLen)
+							if (World::ECF_File->rid != ClassRID || World::ECF_File->len != ClassFileLen)
 							{
 								World::DebugPrint("Requesting Class Data File. . .");
 								Connection::FileContainer m_FileContainer;

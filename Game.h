@@ -116,10 +116,6 @@ public:
 	ConfirmationOwner ActiveConfirmation;
 	ConfirmationResult ActiveConfirmationResult;
 	Map_UI_Cursor MapCursor;
-	ENF* ENF_File;
-	ECF* ECF_File;
-	ESF* ESF_File;
-	EIF* EIF_File;
 
 	int GameID;
 	int PlayerID;

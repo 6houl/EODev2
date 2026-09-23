@@ -38,6 +38,7 @@ public:
 	std::list<FileContainer> FileQueue;
 	void QueueFile(const FileContainer& file);
 	void CompleteFileRequest();
+	void QueueNextPubFile(const FileContainer& completedFile);
 	void ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email);
 	bool TryBeginLogin();
 	bool TryBeginAccountRequest();

@@ -181,6 +181,15 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Removes the temporary download when validation or replacement fails, preserving the previous live file.
 - Covers binary replacement, embedded zero bytes, and temporary-file cleanup in the packet fixtures.
 
+### Issues #11 and #13: Pub file ownership and split files
+
+- Keeps one canonical EIF, ENF, ESF, and ECF dataset on `World`; the stale copies on `Game` were removed.
+- Makes Welcome checksum checks and all current gameplay lookups use the same canonical data.
+- Tracks records physically present in each pub response instead of padding file 1 to the declared total.
+- Requests increasing pub file IDs until the first file's declared record total is satisfied, matching EOLib.
+- Merges later file records into the canonical dataset with continuous record IDs while retaining each downloaded file on disk.
+- ArenaServ's current upload code always serves its configured file and labels it as file 1, so its stock configuration remains a one-file source; the client now supports split-aware servers without changing that server boundary.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.

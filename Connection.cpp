@@ -9,6 +9,40 @@
 #include "Connection.h"
 USING_PTYPES
 
+template <typename PubFile>
+void MergePubFile(PubFile*& current, PubFile* part, int fileId)
+{
+	if (fileId == 1)
+	{
+		delete current;
+		current = part;
+		return;
+	}
+
+	if (!current || part->data.size() <= 1)
+	{
+		delete part;
+		throw std::runtime_error("Empty split pub file");
+	}
+
+	int nextId = static_cast<int>(current->data.size());
+	for (std::size_t i = 1; i < part->data.size(); ++i)
+	{
+		auto record = part->data[i];
+		record.id = nextId++;
+		current->data.push_back(record);
+	}
+	current->records_read += part->records_read;
+	delete part;
+}
+
+template <typename PubFile>
+bool NeedsNextPubFile(const PubFile* file)
+{
+	const unsigned int expected = PacketProcessor::Number(file->len[0], file->len[1]);
+	return file->records_read < expected;
+}
+
 Connection::~Connection()
 {
 	if (ClientStream)
@@ -79,6 +113,28 @@ void Connection::CompleteFileRequest()
 	RequestNextFile();
 }
 
+void Connection::QueueNextPubFile(const FileContainer& completedFile)
+{
+	bool needsNext = false;
+	switch (completedFile.File_Type)
+	{
+	case FileType::EIF: needsNext = NeedsNextPubFile(World::EIF_File); break;
+	case FileType::ENF: needsNext = NeedsNextPubFile(World::ENF_File); break;
+	case FileType::ESF: needsNext = NeedsNextPubFile(World::ESF_File); break;
+	case FileType::ECF: needsNext = NeedsNextPubFile(World::ECF_File); break;
+	default: return;
+	}
+
+	if (needsNext)
+	{
+		if (completedFile.ID >= 252)
+			throw std::runtime_error("Too many split pub files");
+		FileContainer nextFile = completedFile;
+		++nextFile.ID;
+		FileQueue.insert(std::next(FileQueue.begin()), nextFile);
+	}
+}
+
 void Connection::RequestNextFile()
 {
 	if (FileQueue.empty())
@@ -147,8 +203,7 @@ void ProcessFile(const std::string& data, Connection::FileContainer m_filecontai
 			World::DebugPrint(strMapID.c_str());
 			std::string filePath(path.begin(), path.end());
 			EIF* replacement = new EIF(filePath.c_str());
-			delete World::EIF_File;
-			World::EIF_File = replacement;
+			MergePubFile(World::EIF_File, replacement, m_filecontainer.ID);
 			break;
 		}
 		case(Connection::FileType::ENF):
@@ -163,8 +218,7 @@ void ProcessFile(const std::string& data, Connection::FileContainer m_filecontai
 			World::DebugPrint(strMapID.c_str());
 			std::string filePath(path.begin(), path.end());
 			ENF* replacement = new ENF(filePath.c_str());
-			delete World::ENF_File;
-			World::ENF_File = replacement;
+			MergePubFile(World::ENF_File, replacement, m_filecontainer.ID);
 			break;
 		}
 		case(Connection::FileType::ESF):
@@ -178,8 +232,7 @@ void ProcessFile(const std::string& data, Connection::FileContainer m_filecontai
 			World::DebugPrint(strMapID.c_str());
 			std::string filePath(path.begin(), path.end());
 			ESF* replacement = new ESF(filePath.c_str());
-			delete World::ESF_File;
-			World::ESF_File = replacement;
+			MergePubFile(World::ESF_File, replacement, m_filecontainer.ID);
 			break;
 		}
 		case(Connection::FileType::ECF):
@@ -194,8 +247,7 @@ void ProcessFile(const std::string& data, Connection::FileContainer m_filecontai
 			World::DebugPrint(strMapID.c_str());
 			std::string filePath(path.begin(), path.end());
 			ECF* replacement = new ECF(filePath.c_str());
-			delete World::ECF_File;
-			World::ECF_File = replacement;
+			MergePubFile(World::ECF_File, replacement, m_filecontainer.ID);
 			break;
 		}
 	}
@@ -298,6 +350,7 @@ void Connection::execute()
 
 								std::string str = reader->GetEndString();
 								ProcessFile(str, filecont);
+								QueueNextPubFile(filecont);
 								if (responseType == FileType::Map)
 									V_Game->map->LoadMap(filecont.ID);
 								CompleteFileRequest();

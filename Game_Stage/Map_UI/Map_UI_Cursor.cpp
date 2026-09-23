@@ -221,13 +221,13 @@ void Map_UI_Cursor::Render(sf::Sprite* m_sprite, float depth)
 					Map_NPC* mNPC = p_Map->m_NPCs[cursordat.index];
 					px = cursordat.x;
 					py = cursordat.y;
-					Name = this->m_game->ENF_File->data[mNPC->ID].name;
+					Name = World::ENF_File->Get(mNPC->ID).name;
 					Name[0] = std::toupper(Name[0]);
 
-					Height = this->m_game->ResourceManager->GetResource(21, (this->m_game->ENF_File->data[mNPC->ID].graphic - 1) * 40 + 1, true)->_height;
+					Height = this->m_game->ResourceManager->GetResource(21, (World::ENF_File->Get(mNPC->ID).graphic - 1) * 40 + 1, true)->_height;
 					if (Height == 0)
 					{
-						Height = this->m_game->ResourceManager->GetResource(21, (this->m_game->ENF_File->data[mNPC->ID].graphic - 1) * 40 + 2, true)->_height;
+						Height = this->m_game->ResourceManager->GetResource(21, (World::ENF_File->Get(mNPC->ID).graphic - 1) * 40 + 2, true)->_height;
 					}
 				}
 
@@ -312,7 +312,7 @@ void Map_UI_Cursor::Update()
 				Map_NPC* m_NPC = this->p_Map->m_NPCs[this->cursordat.index];
 				if (m_NPC)
 				{
-					if (this->m_game->ENF_File->data[m_NPC->ID].type == ENF::Type::Shop && this->m_game->world->UIBox_Hidden)
+					if (World::ENF_File->Get(m_NPC->ID).type == ENF::Type::Shop && this->m_game->world->UIBox_Hidden)
 					{
 						SShop::SendShopOpen(this->m_game->world->connection->ClientStream, this->cursordat.index, this->m_game);
 					}

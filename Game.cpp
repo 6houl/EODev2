@@ -82,11 +82,6 @@ void Game::Initialize(sf::RenderWindow*m_Device, World* _World)
 
 		this->MapCursor = Map_UI_Cursor(this, this->map, Device);
 
-		this->ENF_File = new ENF("pub\\dtn001.enf");
-		this->EIF_File = new EIF("pub\\dat001.eif");
-		this->ESF_File = new ESF("pub\\dsl001.esf");
-		this->ECF_File = new ECF("pub\\dat001.ecf");
-
 		this->world->W_UI_Infobox = new UI_InformationBox(this);	
 		#ifndef DEBUG
 		this->world->W_UI_Infobox->NewBox();
