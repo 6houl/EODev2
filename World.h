@@ -60,6 +60,7 @@ public:
 
 	
 	static void DebugPrint(pt::string Message);
+	static unsigned int ProtocolTickCount();
 	static void ThrowMessage(std::string Title, std::string Message);
 	Textbox* GetFocusedTextbox();
 

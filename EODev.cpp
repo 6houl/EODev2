@@ -60,7 +60,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	game.Initialize(&window, world);
 	// this struct holds Windows event messages
-	MSG msg;
+	MSG msg = {};
 
 	// Enter the infinite message loop
 	while (window.isOpen())
@@ -145,15 +145,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			
 			case(sf::Event::KeyPressed):
 			{
-				if (event.key.code < 0x25 && event.key.code > 0x28)
-				{
-					world->HandleKeyInput(event.key.code, game.Stage, game.SubStage);
-				}
-				else
-				{
-					//world->HandleTextInput(event.text.unicode, game.Stage, game.SubStage);
-				}
-
 				switch (event.key.code)
 				{
 				case(sf::Keyboard::Tab):
@@ -213,6 +204,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		}
 	
 	}
+	world->DropConnection();
+	game.Unload();
 	return msg.wParam;
 }
 // this is the main message handler for the program
@@ -225,12 +218,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_DESTROY :
 			{
 				PostQuitMessage(0);       // Send WM_QUIT
-				std::exit(0);
 				break;
 			}
 		case WM_KEYDOWN:
 		{
-			if (wParam < 0x25 && wParam > 0x28)
+			if (wParam >= VK_LEFT && wParam <= VK_DOWN)
 			{
 				world->HandleKeyInput(wParam, game.Stage, game.SubStage);
 			}

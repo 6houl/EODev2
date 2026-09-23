@@ -21,15 +21,7 @@ void SAttack::SendAttack(pt::ipstream* ClientStream, int Direction,LPVOID game)
 		procDirection = 1;
 	}
 	
-	std::time_t t = std::time(0);   // get time now
-	std::tm* now = std::localtime(&t);
-
-
-	SYSTEMTIME time;
-	GetSystemTime(&time);
-	LONG time_ms = (time.wSecond * 1000) + time.wMilliseconds;
-
 	builder.AddChar(procDirection);
-	builder.AddThree((now->tm_hour * 3600) + (now->tm_min*60) + (now->tm_sec*100) + (time_ms/ 10));
+	builder.AddThree(World::ProtocolTickCount());
 	World::Send(gme,ClientStream,builder);
 }

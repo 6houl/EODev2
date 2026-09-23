@@ -198,15 +198,18 @@ void Map::RemovePlayer(int ID)
 
 void Map::ChangeAvatar(int ID, short ShoeID, short HatID, short WeaponID, short ShieldID, short ArmorID)
 {
-	this->ThreadLock.lock();
+	std::lock_guard<std::mutex> lock(this->ThreadLock);
 	std::map<int, Map_Player*>::iterator _Player = m_Players.find(ID);
+	if (_Player == m_Players.end() || _Player->second == nullptr)
+	{
+		return;
+	}
 	_Player->second->ShoeID = ShoeID;
 	_Player->second->HatID = HatID;
 	_Player->second->WeaponID = WeaponID;
 	_Player->second->ShieldID = ShieldID;
 	_Player->second->ArmorID = ArmorID;
 	_Player->second->UpdateAppearence();
-	this->ThreadLock.unlock();
 }
 void Map::AddPlayer(Map_Player* m_Player)
 {

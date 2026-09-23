@@ -165,6 +165,14 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Waits on the socket for up to 50 milliseconds instead of polling it every millisecond.
 - Retains frequent login, account, and delayed account-creation timeout checks without consuming a CPU core while idle.
 
+### Issues #17-#20, #22, and #24: Runtime safety
+
+- Ignores avatar updates for players that are no longer present instead of dereferencing a missing map entry.
+- Initializes the Win32 message state and repairs the unreachable arrow-key range check.
+- Shuts down the connection and releases game resources when the window closes instead of entering an infinite loop or terminating inside the window callback.
+- Uses the monotonic 10 millisecond tick value expected by EOProtocol and EOLib for walk and attack packets.
+- Prints debug messages as data instead of treating server-controlled text as a format string.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.

@@ -25,6 +25,14 @@ ECF* World::ECF_File;
 std::vector<World::OnlinePlayerContainer> World::OnlinePlayers;
 std::mutex World::OnlinePlayersMutex;
 
+unsigned int World::ProtocolTickCount()
+{
+	static const auto started = std::chrono::steady_clock::now();
+	const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now() - started);
+	return static_cast<unsigned int>(elapsed.count() / 10);
+}
+
 void World::SetOnlinePlayers(const std::vector<OnlinePlayerContainer>& players)
 {
 	std::lock_guard<std::mutex> lock(OnlinePlayersMutex);

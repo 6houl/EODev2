@@ -109,7 +109,7 @@ void World::ThrowMessage(std::string Title, std::string Message)
 void World::DebugPrint(pt::string Message)
 {
 #ifdef DEBUG
-	std::printf(Message + '\n');
+	std::printf("%s\n", Message.c_str());
 #endif
 	
 }
@@ -383,9 +383,6 @@ void Game::Unload()
 	//sprite = NULL;
 	if(texture){texture.reset();}
 
-	while(true)
-	{
-	}
 }
 void Game::ResetDevice()
 {
