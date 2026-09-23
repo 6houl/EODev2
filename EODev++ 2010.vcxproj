@@ -772,6 +772,7 @@
     <ClInclude Include="Utilities\Button.h" />
     <ClInclude Include="Utilities\ConfigFile.h" />
     <ClInclude Include="Utilities\Resource_Manager.h" />
+    <ClInclude Include="Utilities\ResourceFile.h" />
     <ClInclude Include="Utilities\Textbox.h" />
     <ClInclude Include="Utilities\TextTools.h" />
     <ClInclude Include="Utilities\UI_Element.h" />

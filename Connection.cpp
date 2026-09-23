@@ -4,6 +4,7 @@
 #include "Packet_Handler\Send\SAccount.h"
 #include "Packet_Handler\Receive\Handler.h"
 #include "Packet_Handler\PacketFramer.h"
+#include "Utilities\ResourceFile.h"
 #include "Connection.h"
 USING_PTYPES
 bool Connection::ConnectionDropped;
@@ -58,14 +59,12 @@ void ConnectionTextPadTo(std::wstring& str, const size_t num, const char padding
 	if (num > str.size())
 		str.insert(0, num - str.size(), paddingChar);
 }
-void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer)
+void ProcessFile(const std::string& data, Connection::FileContainer m_filecontainer)
 {
 	switch (m_filecontainer.File_Type)
 	{
 	case(Connection::FileType::Map):
 		{
-			std::ofstream output;
-
 			wchar_t* dir_buffer = new wchar_t[1024];
 			GetCurrentDirectory(1024, dir_buffer);
 			std::wstring Path = L"";
@@ -75,19 +74,15 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 			ConnectionTextPadTo(NumberPath, 5, '0');
 			Path += NumberPath += L".emf";
 
-			output.open(Path, ios::out | ios::binary);
-			output.write(m_Buffer, strlen(m_Buffer));
+			if (!ResourceFile::Write(Path, data))
+				throw std::runtime_error("Unable to save map file");
 			std::string strMapID = "Map File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
 			delete [] dir_buffer;
-			output.close();
-
 			break;
 		}
 	case(Connection::FileType::EIF):
 		{
-			std::ofstream output;
-
 			wchar_t* dir_buffer = new wchar_t[1024];
 			GetCurrentDirectory(1024, dir_buffer);
 			std::wstring Path = L"";
@@ -97,21 +92,18 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 			ConnectionTextPadTo(NumberPath, 3, '0');
 			Path += NumberPath += L".eif";
 
-			output.open(Path, ios::out | ios::binary);
-			output.write(m_Buffer, strlen(m_Buffer));
+			if (!ResourceFile::Write(Path, data))
+				throw std::runtime_error("Unable to save item file");
 
 			std::string strMapID = "Item File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
 			delete [] dir_buffer;
-			output.close();
 			std::string str(Path.begin(), Path.end());
 			World::EIF_File = new EIF("\pub\\dat001.eif");
 			break;
 		}
 		case(Connection::FileType::ENF):
 		{
-			std::ofstream output;
-
 			wchar_t* dir_buffer = new wchar_t[1024];
 			GetCurrentDirectory(1024, dir_buffer);
 			std::wstring Path = L"";
@@ -121,21 +113,18 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 			ConnectionTextPadTo(NumberPath, 3, '0');
 			Path += NumberPath += L".enf";
 
-			output.open(Path, ios::out | ios::binary);
-			output.write(m_Buffer, strlen(m_Buffer));
+			if (!ResourceFile::Write(Path, data))
+				throw std::runtime_error("Unable to save NPC file");
 			
 			std::string strMapID = "NPC File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
 			delete [] dir_buffer;
-			output.close();
 			std::string str(Path.begin(), Path.end());
 			World::ENF_File = new ENF("\pub\\dtn001.enf");
 			break;
 		}
 		case(Connection::FileType::ESF):
 		{
-			std::ofstream output;
-
 			wchar_t* dir_buffer = new wchar_t[1024];
 			GetCurrentDirectory(1024, dir_buffer);
 			std::wstring Path = L"";
@@ -145,20 +134,17 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 			ConnectionTextPadTo(NumberPath, 3, '0');
 			Path += NumberPath += L".esf";
 
-			output.open(Path, ios::out | ios::binary);
-			output.write(m_Buffer, strlen(m_Buffer));
+			if (!ResourceFile::Write(Path, data))
+				throw std::runtime_error("Unable to save spell file");
 			std::string strMapID = "Spell File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
 			delete[] dir_buffer;
-			output.close();
 			std::string str(Path.begin(), Path.end());
 			World::ESF_File = new ESF("\pub\\dsl001.esf");
 			break;
 		}
 		case(Connection::FileType::ECF):
 		{
-			std::ofstream output;
-
 			wchar_t* dir_buffer = new wchar_t[1024];
 			GetCurrentDirectory(1024, dir_buffer);
 			std::wstring Path = L"";
@@ -168,13 +154,12 @@ void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer
 			ConnectionTextPadTo(NumberPath, 3, '0');
 			Path += NumberPath += L".ecf";
 
-			output.open(Path, ios::out | ios::binary);
-			output.write(m_Buffer, strlen(m_Buffer));
+			if (!ResourceFile::Write(Path, data))
+				throw std::runtime_error("Unable to save class file");
 
 			std::string strMapID = "Class File" + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
 			delete[] dir_buffer;
-			output.close();
 			std::string str(Path.begin(), Path.end());
 			World::ECF_File = new ECF("\pub\\dat001.ecf");;
 			break;
@@ -266,7 +251,7 @@ void Connection::execute()
 								Game* gme =  V_Game;
 								filecont.ID = gme->map->MapID;
 								std::string str = reader->GetEndString();
-								ProcessFile(str.c_str(), filecont);
+								ProcessFile(str, filecont);
 								gme->map->LoadMap(filecont.ID);
 							}
 							else if (ID == 9)
@@ -308,7 +293,7 @@ void Connection::execute()
 								filecont.File_Type = (FileType)ID;
 								filecont.ID = reader->GetChar();
 								std::string str = reader->GetEndString();
-								ProcessFile(str.c_str(), filecont);
+								ProcessFile(str, filecont);
 							}
 							
 							if (ID != 9 && ID != 11)

@@ -1,7 +1,10 @@
 #include "../Packet_Handler/ClientPackets.h"
 #include "../Packet_Handler/PacketFramer.h"
 #include "../Packet_Handler/RequestGate.h"
+#include "../Utilities/ResourceFile.h"
 
+#include <cstdio>
+#include <fstream>
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -137,6 +140,18 @@ namespace
 		Expect(!gate.Pending(), "request completion");
 		Expect(gate.Begin(5200), "request allowed after reset");
 	}
+
+	void TestBinaryResourceWrite()
+	{
+		const std::string path = "tests/build/binary-resource-fixture.dat";
+		const std::string expected = Bytes({69, 77, 70, 0, 255, 1, 0, 2});
+		Expect(ResourceFile::Write(path, expected), "binary resource write");
+
+		std::ifstream input(path, std::ios::in | std::ios::binary);
+		const std::string actual((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+		Expect(actual == expected, "binary resource preserves zero bytes");
+		std::remove(path.c_str());
+	}
 }
 
 int main()
@@ -149,6 +164,7 @@ int main()
 	TestFileRequests();
 	TestPartialReads();
 	TestRequestGate();
+	TestBinaryResourceWrite();
 
 	if (failures != 0)
 	{
