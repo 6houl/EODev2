@@ -40,6 +40,7 @@ third_party/
 Debug/
 Release/
 EoDEV++/
+tests/build/
 *.suo
 *.user
 *.aps

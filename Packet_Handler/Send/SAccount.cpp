@@ -1,6 +1,7 @@
 #include "..\stdafx.h"
 #include "SAccount.h"
 #include "..\game.h"
+#include "..\ClientPackets.h"
 
 void SAccount::ChangePass(pt::ipstream* ClientStream, std::string AccountName, std::string OldPassword,  std::string NewPassword, LPVOID game)
 {
@@ -15,8 +16,7 @@ void SAccount::ChangePass(pt::ipstream* ClientStream, std::string AccountName, s
 void SAccount::RequestAccountCreate(pt::ipstream* ClientStream, std::string AccountName ,LPVOID game)
 {
 	Game* gme = (Game*)game;
-	PacketBuilder builder = PacketBuilder(PACKET_ACCOUNT, PACKET_REQUEST);
-	builder.AddString(AccountName);
+	PacketBuilder builder = ClientPackets::AccountRequest(AccountName);
 	World::Send(gme,ClientStream,builder);
 }
 void SAccount::CreateAccount(pt::ipstream* ClientStream, std::string AccountName, std::string Password, std::string fullname, std::string location, std::string email, LPVOID game)
@@ -49,15 +49,7 @@ void SAccount::CreateAccount(pt::ipstream* ClientStream, std::string AccountName
 	GetComputerNameA(nameBuf, &nameBufSize);
 	std::string ComputerName = nameBuf;
 	
-	PacketBuilder builder = PacketBuilder(PACKET_ACCOUNT, PACKET_CREATE);
-	builder.AddShort(gme->menu->SrvrCreateID);
-	builder.Addbyte(255);
-	builder.AddBreakString(AccountName);
-	builder.AddBreakString(Password);
-	builder.AddBreakString(fullname);
-	builder.AddBreakString(location);
-	builder.AddBreakString(email);
-	builder.AddBreakString(ComputerName);
-	builder.AddBreakString(str);
+	PacketBuilder builder = ClientPackets::AccountCreate(gme->menu->SrvrCreateID, AccountName, Password,
+		fullname, location, email, ComputerName, str);
 	World::Send(gme,ClientStream,builder);
 }

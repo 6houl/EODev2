@@ -1,0 +1,107 @@
+#include "../Packet_Handler/ClientPackets.h"
+
+#include <initializer_list>
+#include <iostream>
+#include <string>
+
+namespace
+{
+	int failures = 0;
+
+	std::string Bytes(std::initializer_list<unsigned int> values)
+	{
+		std::string result;
+		result.reserve(values.size());
+		for (unsigned int value : values)
+			result.push_back(static_cast<char>(value));
+		return result;
+	}
+
+	void ExpectPacket(const char* name, const PacketBuilder& packet, const std::string& expected)
+	{
+		const std::string actual = packet.Get();
+		if (actual == expected)
+		{
+			std::cout << "PASS " << name << '\n';
+			return;
+		}
+
+		std::cerr << "FAIL " << name << ": expected " << expected.size()
+			<< " bytes, received " << actual.size() << '\n';
+		++failures;
+	}
+
+	void TestInit()
+	{
+		std::string expected = Bytes({15, 254, 255, 255, 246, 235, 2, 1, 1, 29, 113, 5});
+		expected += "1234";
+		ExpectPacket("init", ClientPackets::Init(123456, "1234"), expected);
+	}
+
+	void TestAccountRequest()
+	{
+		std::string expected = Bytes({8, 254, 1, 2});
+		expected += "alice";
+		ExpectPacket("account request", ClientPackets::AccountRequest("alice"), expected);
+	}
+
+	void TestAccountCreate()
+	{
+		std::string expected = Bytes({39, 254, 6, 2, 69, 2, 255});
+		expected += "alice" + Bytes({255});
+		expected += "secret" + Bytes({255});
+		expected += "Alex" + Bytes({255});
+		expected += "CA" + Bytes({255});
+		expected += "a@b" + Bytes({255});
+		expected += "PC" + Bytes({255});
+		expected += "1234" + Bytes({255});
+
+		ExpectPacket("account create", ClientPackets::AccountCreate(321, "alice", "secret",
+			"Alex", "CA", "a@b", "PC", "1234"), expected);
+	}
+
+	void TestLogin()
+	{
+		std::string expected = Bytes({16, 254, 1, 4});
+		expected += "alice" + Bytes({255});
+		expected += "secret" + Bytes({255});
+		ExpectPacket("login", ClientPackets::LoginRequest("alice", "secret"), expected);
+	}
+
+	void TestWelcome()
+	{
+		ExpectPacket("welcome request", ClientPackets::WelcomeRequest(1234567),
+			Bytes({7, 254, 1, 5, 181, 73, 20, 254}));
+
+		ExpectPacket("welcome message", ClientPackets::WelcomeMessage(321, 1234567),
+			Bytes({10, 254, 15, 5, 69, 2, 254, 181, 73, 20, 254}));
+	}
+
+	void TestFileRequests()
+	{
+		ExpectPacket("map request", ClientPackets::FileRequest(1, 321, 42),
+			Bytes({8, 254, 5, 5, 2, 69, 2, 43, 254}));
+
+		ExpectPacket("pub request", ClientPackets::FileRequest(2, 321, 1),
+			Bytes({7, 254, 5, 5, 3, 69, 2, 2}));
+	}
+}
+
+int main()
+{
+	TestInit();
+	TestAccountRequest();
+	TestAccountCreate();
+	TestLogin();
+	TestWelcome();
+	TestFileRequests();
+
+	if (failures != 0)
+	{
+		std::cerr << failures << " packet fixture(s) failed\n";
+		return 1;
+	}
+
+	std::cout << "All packet fixtures passed\n";
+	return 0;
+}

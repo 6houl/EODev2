@@ -20,4 +20,10 @@ build-release.cmd
 
 Use `build-release.cmd -BuildOnly` for an incremental build.
 
+Run the packet fixture tests with:
+
+```bat
+run-tests.cmd
+```
+
 The dependency folders, reference client, IDE state, and build output are local-only and must not be committed.
