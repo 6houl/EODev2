@@ -2,6 +2,7 @@
 #include "game.h"
 #include "Packet_Handler\Send\SInit.h"
 #include "Packet_Handler\Send\SAccount.h"
+#include "Packet_Handler\Send\SWelcome.h"
 #include "Packet_Handler\Receive\Handler.h"
 #include "Packet_Handler\PacketFramer.h"
 #include "Utilities\ResourceFile.h"
@@ -42,6 +43,41 @@ void Connection::ResetRequests()
 	LoginRequest.Complete();
 	AccountRequest.Complete();
 	AccountCreatePending = false;
+	FileQueue.clear();
+}
+
+void Connection::QueueFile(const FileContainer& file)
+{
+	const bool startTransfer = FileQueue.empty();
+	FileQueue.push_back(file);
+	if (startTransfer)
+		RequestNextFile();
+}
+
+void Connection::CompleteFileRequest()
+{
+	if (!FileQueue.empty())
+		FileQueue.pop_front();
+	RequestNextFile();
+}
+
+void Connection::RequestNextFile()
+{
+	if (FileQueue.empty())
+		return;
+
+	char requestType = 0;
+	switch (FileQueue.front().File_Type)
+	{
+	case FileType::Map: requestType = 1; break;
+	case FileType::EIF: requestType = 2; break;
+	case FileType::ENF: requestType = 3; break;
+	case FileType::ESF: requestType = 4; break;
+	case FileType::ECF: requestType = 5; break;
+	default: throw std::runtime_error("Unknown file request type");
+	}
+
+	SWelcome::RequestFile(ClientStream, requestType, V_Game, FileQueue.front().ID);
 }
 
 void Connection::ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email)
@@ -61,107 +97,87 @@ void ConnectionTextPadTo(std::wstring& str, const size_t num, const char padding
 }
 void ProcessFile(const std::string& data, Connection::FileContainer m_filecontainer)
 {
+	wchar_t directory[MAX_PATH + 1] = {0};
+	if (!GetCurrentDirectoryW(MAX_PATH, directory))
+		throw std::runtime_error("Unable to find the client directory");
+
+	std::wstring path(directory);
+	std::wstring numberPath = std::to_wstring(m_filecontainer.ID);
+
 	switch (m_filecontainer.File_Type)
 	{
 	case(Connection::FileType::Map):
 		{
-			wchar_t* dir_buffer = new wchar_t[1024];
-			GetCurrentDirectory(1024, dir_buffer);
-			std::wstring Path = L"";
-			Path += dir_buffer;
-			Path += L"\\Maps\\";
-			wstring NumberPath = std::to_wstring(m_filecontainer.ID);
-			ConnectionTextPadTo(NumberPath, 5, '0');
-			Path += NumberPath += L".emf";
+			ConnectionTextPadTo(numberPath, 5, '0');
+			path += L"\\Maps\\" + numberPath + L".emf";
 
-			if (!ResourceFile::Write(Path, data))
+			if (!ResourceFile::Write(path, data))
 				throw std::runtime_error("Unable to save map file");
 			std::string strMapID = "Map File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
-			delete [] dir_buffer;
 			break;
 		}
 	case(Connection::FileType::EIF):
 		{
-			wchar_t* dir_buffer = new wchar_t[1024];
-			GetCurrentDirectory(1024, dir_buffer);
-			std::wstring Path = L"";
-			Path += dir_buffer;
-			Path += L"\\pub\\dat";
-			wstring NumberPath = std::to_wstring(m_filecontainer.ID);
-			ConnectionTextPadTo(NumberPath, 3, '0');
-			Path += NumberPath += L".eif";
+			ConnectionTextPadTo(numberPath, 3, '0');
+			path += L"\\pub\\dat" + numberPath + L".eif";
 
-			if (!ResourceFile::Write(Path, data))
+			if (!ResourceFile::Write(path, data))
 				throw std::runtime_error("Unable to save item file");
 
 			std::string strMapID = "Item File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
-			delete [] dir_buffer;
-			std::string str(Path.begin(), Path.end());
-			World::EIF_File = new EIF("\pub\\dat001.eif");
+			std::string filePath(path.begin(), path.end());
+			EIF* replacement = new EIF(filePath.c_str());
+			delete World::EIF_File;
+			World::EIF_File = replacement;
 			break;
 		}
 		case(Connection::FileType::ENF):
 		{
-			wchar_t* dir_buffer = new wchar_t[1024];
-			GetCurrentDirectory(1024, dir_buffer);
-			std::wstring Path = L"";
-			Path += dir_buffer;
-			Path += L"\\pub\\dtn";
-			wstring NumberPath = std::to_wstring(m_filecontainer.ID);
-			ConnectionTextPadTo(NumberPath, 3, '0');
-			Path += NumberPath += L".enf";
+			ConnectionTextPadTo(numberPath, 3, '0');
+			path += L"\\pub\\dtn" + numberPath + L".enf";
 
-			if (!ResourceFile::Write(Path, data))
+			if (!ResourceFile::Write(path, data))
 				throw std::runtime_error("Unable to save NPC file");
 			
 			std::string strMapID = "NPC File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
-			delete [] dir_buffer;
-			std::string str(Path.begin(), Path.end());
-			World::ENF_File = new ENF("\pub\\dtn001.enf");
+			std::string filePath(path.begin(), path.end());
+			ENF* replacement = new ENF(filePath.c_str());
+			delete World::ENF_File;
+			World::ENF_File = replacement;
 			break;
 		}
 		case(Connection::FileType::ESF):
 		{
-			wchar_t* dir_buffer = new wchar_t[1024];
-			GetCurrentDirectory(1024, dir_buffer);
-			std::wstring Path = L"";
-			Path += dir_buffer;
-			Path += L"\\pub\\dsl";
-			wstring NumberPath = std::to_wstring(m_filecontainer.ID);
-			ConnectionTextPadTo(NumberPath, 3, '0');
-			Path += NumberPath += L".esf";
+			ConnectionTextPadTo(numberPath, 3, '0');
+			path += L"\\pub\\dsl" + numberPath + L".esf";
 
-			if (!ResourceFile::Write(Path, data))
+			if (!ResourceFile::Write(path, data))
 				throw std::runtime_error("Unable to save spell file");
 			std::string strMapID = "Spell File " + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
-			delete[] dir_buffer;
-			std::string str(Path.begin(), Path.end());
-			World::ESF_File = new ESF("\pub\\dsl001.esf");
+			std::string filePath(path.begin(), path.end());
+			ESF* replacement = new ESF(filePath.c_str());
+			delete World::ESF_File;
+			World::ESF_File = replacement;
 			break;
 		}
 		case(Connection::FileType::ECF):
 		{
-			wchar_t* dir_buffer = new wchar_t[1024];
-			GetCurrentDirectory(1024, dir_buffer);
-			std::wstring Path = L"";
-			Path += dir_buffer;
-			Path += L"\\pub\\dat";
-			wstring NumberPath = std::to_wstring(m_filecontainer.ID);
-			ConnectionTextPadTo(NumberPath, 3, '0');
-			Path += NumberPath += L".ecf";
+			ConnectionTextPadTo(numberPath, 3, '0');
+			path += L"\\pub\\dat" + numberPath + L".ecf";
 
-			if (!ResourceFile::Write(Path, data))
+			if (!ResourceFile::Write(path, data))
 				throw std::runtime_error("Unable to save class file");
 
 			std::string strMapID = "Class File" + std::to_string(m_filecontainer.ID) + " Recieved!";
 			World::DebugPrint(strMapID.c_str());
-			delete[] dir_buffer;
-			std::string str(Path.begin(), Path.end());
-			World::ECF_File = new ECF("\pub\\dat001.ecf");;
+			std::string filePath(path.begin(), path.end());
+			ECF* replacement = new ECF(filePath.c_str());
+			delete World::ECF_File;
+			World::ECF_File = replacement;
 			break;
 		}
 	}
@@ -243,16 +259,28 @@ void Connection::execute()
 						if (familyID == 255 && ActionID == 255 && ConnectionAccepted)
 						{
 							int ID = reader->Getbyte();
-							if (ID <= FileType::Map)
+							if (ID == 4 || ID == 5 || ID == FileType::EIF || ID == FileType::ENF || ID == FileType::ESF || ID == FileType::ECF)
 							{
-								Connection::FileContainer filecont;
-								filecont.File_Type = FileType::Map;
-	
-								Game* gme =  V_Game;
-								filecont.ID = gme->map->MapID;
+								if (FileQueue.empty())
+									throw std::runtime_error("Unexpected file response");
+
+								const FileContainer filecont = FileQueue.front();
+								const FileType responseType = (ID == 4 || ID == 5) ? FileType::Map : static_cast<FileType>(ID);
+								if (responseType != filecont.File_Type)
+									throw std::runtime_error("Unexpected file response type");
+
+								if (responseType != FileType::Map)
+								{
+									const int responseFileId = reader->GetChar();
+									if (responseFileId != filecont.ID)
+										throw std::runtime_error("Unexpected pub file ID");
+								}
+
 								std::string str = reader->GetEndString();
 								ProcessFile(str, filecont);
-								gme->map->LoadMap(filecont.ID);
+								if (responseType == FileType::Map)
+									V_Game->map->LoadMap(filecont.ID);
+								CompleteFileRequest();
 							}
 							else if (ID == 9)
 							{
@@ -287,19 +315,9 @@ void Connection::execute()
 								World::OnlinePlayers = Sortedcontainer;
 								World::DebugPrint("Player list recieved!");
 							}
-							else
+							else if (ID != 11)
 							{
-								Connection::FileContainer filecont;
-								filecont.File_Type = (FileType)ID;
-								filecont.ID = reader->GetChar();
-								std::string str = reader->GetEndString();
-								ProcessFile(str, filecont);
-							}
-							
-							if (ID != 9 && ID != 11)
-							{
-								if (!FileQueue.empty())
-									FileQueue.pop_front();
+								throw std::runtime_error("Unknown init response");
 							}
 
 						}

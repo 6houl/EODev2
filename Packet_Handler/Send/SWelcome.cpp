@@ -17,10 +17,9 @@ void SWelcome::LoginWelcome(pt::ipstream* ClientStream, int Char_ID, LPVOID game
 	World::Send(gme, ClientStream, builder);
 }
 
-void SWelcome::RequestFile(pt::ipstream* ClientStream, char FileType, LPVOID game)
+void SWelcome::RequestFile(pt::ipstream* ClientStream, char FileType, LPVOID game, unsigned short fileId)
 {
 	Game* gme = (Game*)game;
-	unsigned short fileId = FileType > 1 ? 1 : gme->map->MapID;
 	PacketBuilder builder = ClientPackets::FileRequest(FileType, World::WorldCharacterID, fileId);
 	World::Send(gme, ClientStream, builder);
 }

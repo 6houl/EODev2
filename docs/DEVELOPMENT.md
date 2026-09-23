@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 689 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 681 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -96,16 +96,24 @@ The current Release baseline builds with 0 errors and 689 existing warnings. The
 - Parses every returned character while limiting EODev's character selector to its three available UI slots.
 - Keeps the two-second account creation wait. EndlessClient uses the same default wait after the account-name reply before sending Account/Create.
 
+### Map and pub transfer safety
+
+- Queues stale EMF, EIF, ENF, ESF, and ECF downloads and requests only one file at a time.
+- This ordering is required because ArenaServ rejects a second request while its current upload is active.
+- Validates each init file reply against the queued file type and pub file ID before writing it.
+- Uses the queued map ID instead of whichever map happens to be current when a download completes.
+- Reloads pub objects from the downloaded path and releases the replaced object.
+- Uses valid relative pub paths instead of invalid C++ escape sequences.
+
 ## Current Boundary
 
-Packet payloads, receive framing, sequence boundaries, and encryption round trips are covered by automated tests. Account creation and login packet handling are now the active boundary. A live ArenaServ integration run is still required before calling those flows complete.
+Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. Live ArenaServ checks are still required for account/login and multi-file synchronization. Confirmed crash and corruption paths are the next code milestone.
 
 ## Working Order
 
-1. Run account creation and login end to end against ArenaServ.
-2. Complete map/pub synchronization and validation.
-3. Remove confirmed crash and corruption paths.
-4. Implement gameplay systems through EODev's existing UI controls.
+1. Run account creation, login, and multi-file synchronization end to end against ArenaServ.
+2. Remove confirmed crash and corruption paths.
+3. Implement gameplay systems through EODev's existing UI controls.
 
 ## Handoff Checklist
 

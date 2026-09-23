@@ -31,8 +31,7 @@ CLIENT_F_FUNC(Welcome)
 								Connection::FileContainer m_FileContainer;
 								m_FileContainer.File_Type = Connection::FileType::Map;
 								m_FileContainer.ID = MapID;
-								game->world->connection->FileQueue.push_back(m_FileContainer);
-								SWelcome::RequestFile(game->world->connection->ClientStream, 1, (LPVOID*)game);
+								game->world->connection->QueueFile(m_FileContainer);
 							}
 							//EMF_File::
 
@@ -52,8 +51,7 @@ CLIENT_F_FUNC(Welcome)
 								Connection::FileContainer m_FileContainer;
 								m_FileContainer.File_Type = Connection::FileType::EIF;
 								m_FileContainer.ID = 1;
-								game->world->connection->FileQueue.push_back(m_FileContainer);
-								SWelcome::RequestFile(game->world->connection->ClientStream, 2, (LPVOID*)game);
+								game->world->connection->QueueFile(m_FileContainer);
 							}
 
 							std::array<eo2_byte, 4U> NPCRID;
@@ -72,8 +70,7 @@ CLIENT_F_FUNC(Welcome)
 								Connection::FileContainer m_FileContainer;
 								m_FileContainer.File_Type = Connection::FileType::ENF;
 								m_FileContainer.ID = 1;
-								game->world->connection->FileQueue.push_back(m_FileContainer);
-								SWelcome::RequestFile(game->world->connection->ClientStream, 3, (LPVOID*)game);
+								game->world->connection->QueueFile(m_FileContainer);
 							}
 
 							std::array<eo2_byte, 4U> SpellRID;
@@ -92,8 +89,7 @@ CLIENT_F_FUNC(Welcome)
 								Connection::FileContainer m_FileContainer;
 								m_FileContainer.File_Type = Connection::FileType::ESF;
 								m_FileContainer.ID = 1;
-								game->world->connection->FileQueue.push_back(m_FileContainer);
-								SWelcome::RequestFile(game->world->connection->ClientStream, 4, (LPVOID*)game);
+								game->world->connection->QueueFile(m_FileContainer);
 							}
 
 							std::array<eo2_byte, 4U> ClassRID;
@@ -112,8 +108,7 @@ CLIENT_F_FUNC(Welcome)
 								Connection::FileContainer m_FileContainer;
 								m_FileContainer.File_Type = Connection::FileType::ECF;
 								m_FileContainer.ID = 1;
-								game->world->connection->FileQueue.push_back(m_FileContainer);
-								SWelcome::RequestFile(game->world->connection->ClientStream, 5, (LPVOID*)game);
+								game->world->connection->QueueFile(m_FileContainer);
 							}
 							
 							game->map->ClearMap();

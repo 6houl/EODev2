@@ -3,6 +3,6 @@ class SWelcome
 {
 	public:
 		static void LoginCharacter(pt::ipstream* ClientStream, int PlayerID, LPVOID game);
-		static void RequestFile(pt::ipstream* ClientStream, char FileType, LPVOID game);
+		static void RequestFile(pt::ipstream* ClientStream, char FileType, LPVOID game, unsigned short fileId);
 		static void LoginWelcome(pt::ipstream* ClientStream, int charID, LPVOID game);
 };

@@ -27,10 +27,10 @@ World::World(Game* _Game)
 {
 	this->m_game = _Game;
 	//File_ENF = new ENF("\\pub\\dtn001.enf");
-	ENF_File = new ENF("\pub\\dtn001.enf");
-	EIF_File = new EIF("\pub\\dat001.eif");
-	ESF_File = new ESF("\pub\\dsl001.esf");
-	ECF_File = new ECF("\pub\\dat001.ecf");
+	ENF_File = new ENF("pub\\dtn001.enf");
+	EIF_File = new EIF("pub\\dat001.eif");
+	ESF_File = new ESF("pub\\dsl001.esf");
+	ECF_File = new ECF("pub\\dat001.ecf");
 	
 };
 pt::thread* ListenThread;

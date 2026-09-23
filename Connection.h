@@ -36,6 +36,8 @@ public:
 	std::string PendingAccountLocation;
 	std::string PendingAccountEmail;
 	std::list<FileContainer> FileQueue;
+	void QueueFile(const FileContainer& file);
+	void CompleteFileRequest();
 	void ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email);
 	bool TryBeginLogin();
 	bool TryBeginAccountRequest();
@@ -51,4 +53,6 @@ public:
 	pt::string IPAddress;
 	int Port = 0;
 
+private:
+	void RequestNextFile();
 };
