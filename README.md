@@ -2,6 +2,8 @@
 
 EODev is the custom Endless Online client used with ArenaServ and Etheos.
 
+Development rules, source priority, verified progress, and the current handoff point are maintained in [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
+
 ## Build
 
 The authoritative solution is `EoDEV++.sln`. It uses `EODev++ 2010.vcxproj` and targets Win32.
