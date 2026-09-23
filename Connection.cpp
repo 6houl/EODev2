@@ -288,7 +288,6 @@ void Connection::execute()
 								
 								int numberofplayers = reader->GetShort();
 								reader->Getbyte();
-								World::OnlinePlayers.clear();
 								std::vector<World::OnlinePlayerContainer> Sortedcontainer;
 								for (int i = 0; i < numberofplayers; i++)
 								{
@@ -313,7 +312,7 @@ void Connection::execute()
 									}
 									Sortedcontainer.insert(Sortedcontainer.begin() + insertindex, _player);
 								}
-								World::OnlinePlayers = Sortedcontainer;
+								World::SetOnlinePlayers(Sortedcontainer);
 								World::DebugPrint("Player list recieved!");
 							}
 							else if (ID != 11)

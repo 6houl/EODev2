@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 679 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 678 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -115,9 +115,16 @@ The current Release baseline builds with 0 errors and 679 existing warnings. The
 - Gives unknown character stances a stable standing frame instead of returning an indeterminate value.
 - Removes temporary formatting buffers that were leaked or freed with the wrong delete form.
 
+### Online player panel
+
+- Sends the empty Players/Request packet defined by EOProtocol and used by EOLib.
+- Parses ArenaServ's full online-player reply and displays the character name, title, guild tag, and resolved ECF class name in EODev's existing fixed panel.
+- Protects the online-player list shared by the network and render threads.
+- Refreshes the panel on elapsed wall time instead of process CPU time.
+
 ## Current Boundary
 
-Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, and chat crash paths are hardened. Live ArenaServ checks are still required for account/login and multi-file synchronization. Remaining gameplay systems are the next code milestone.
+Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. Live ArenaServ checks are still required for account/login and multi-file synchronization. Remaining gameplay systems are the next code milestone.
 
 ## Working Order
 

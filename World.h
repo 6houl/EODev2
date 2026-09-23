@@ -13,6 +13,7 @@
 #include "Utilities\ConfigFile.h"
 #include "include\EOServ\eodata.hpp"
 #include "Utilities\UI_InformationBox.h"
+#include <mutex>
 
 class World
 {
@@ -47,6 +48,8 @@ public:
 		std::string _GuildTag;
 	};
 	static std::vector<OnlinePlayerContainer> OnlinePlayers;
+	static void SetOnlinePlayers(const std::vector<OnlinePlayerContainer>& players);
+	static std::vector<OnlinePlayerContainer> GetOnlinePlayers();
 	void HandleTextInput(WPARAM Parameter, int  phase, int  subphase);
 	void HandleKeyInput(WPARAM Parameter, int  phase,int subphase);
     Textbox* RegisterTextBox(Textbox TxtBox);
@@ -67,4 +70,7 @@ public:
 	static bool Connecting;
 	static bool Send(Game* t_game, pt::ipstream* Stream, PacketBuilder Builder);
 	static std::string Receive(Game* t_game, std::string Builder);
+
+private:
+	static std::mutex OnlinePlayersMutex;
 };

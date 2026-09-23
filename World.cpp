@@ -23,6 +23,20 @@ EIF* World::EIF_File;
 ESF* World::ESF_File;
 ECF* World::ECF_File;
 std::vector<World::OnlinePlayerContainer> World::OnlinePlayers;
+std::mutex World::OnlinePlayersMutex;
+
+void World::SetOnlinePlayers(const std::vector<OnlinePlayerContainer>& players)
+{
+	std::lock_guard<std::mutex> lock(OnlinePlayersMutex);
+	OnlinePlayers = players;
+}
+
+std::vector<World::OnlinePlayerContainer> World::GetOnlinePlayers()
+{
+	std::lock_guard<std::mutex> lock(OnlinePlayersMutex);
+	return OnlinePlayers;
+}
+
 World::World(Game* _Game)
 {
 	this->m_game = _Game;

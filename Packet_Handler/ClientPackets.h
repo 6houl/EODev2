@@ -65,6 +65,11 @@ namespace ClientPackets
 		return builder;
 	}
 
+	inline PacketBuilder PlayerListRequest()
+	{
+		return PacketBuilder(PACKET_PLAYERS, PACKET_REQUEST);
+	}
+
 	inline PacketBuilder ConnectionAccept(unsigned short clientEncryptionMultiple,
 		unsigned short serverEncryptionMultiple,
 		unsigned short playerId)

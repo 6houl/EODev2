@@ -7,7 +7,7 @@ private:
 	Map_UI* m_MapUI;
 	Game* m_game;
 public:
-	time_t WhosisOnlineStartTimer, WhoisOnlineEndTimer;
+	DWORD LastListRefresh;
 	Button* UI_Element_WhoIsOnlineButton;
 	UI_Scrollbar* UI_WhoisOnlineScrollbar;
 	//Map_UI_Inventory();

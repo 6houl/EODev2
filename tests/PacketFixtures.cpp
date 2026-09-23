@@ -79,6 +79,12 @@ namespace
 			Bytes({9, 254, 2, 1, 8, 254, 12, 254, 69, 2}));
 	}
 
+	void TestPlayerListRequest()
+	{
+		ExpectPacket("player list request", ClientPackets::PlayerListRequest(),
+			Bytes({3, 254, 1, 22}));
+	}
+
 	void TestWelcome()
 	{
 		ExpectPacket("welcome request", ClientPackets::WelcomeRequest(1234567),
@@ -231,6 +237,7 @@ int main()
 	TestAccountCreate();
 	TestLogin();
 	TestConnectionAccept();
+	TestPlayerListRequest();
 	TestWelcome();
 	TestFileRequests();
 	TestPartialReads();
