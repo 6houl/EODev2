@@ -13,7 +13,8 @@ CLIENT_F_FUNC(Account)
 			int val;
 			if(reader.Length() > 6)
 			{
-				val = reader.Getbyte();
+				val = reader.GetChar();
+				game->world->PacketCount = val;
 			}
 			std::string ret =  reader.GetEndString();
 			if(ret == "OK")
@@ -32,7 +33,7 @@ CLIENT_F_FUNC(Account)
 				else
 				{
 					game->menu->SrvrCreateID = ID;
-					SAccount::CreateAccount(game->world->connection->ClientStream,(game->menu->TB_CAAccNme->text),(game->menu->TB_CAPassWrdOne->text),(game->menu->TB_CAPassWrdTwo->text),(game->menu->TB_CAName->text),(game->menu->TB_CACountry->text),(game->menu->TB_CAEmail->text),game);
+					game->world->connection->ScheduleAccountCreate((game->menu->TB_CAAccNme->text),(game->menu->TB_CAPassWrdOne->text),(game->menu->TB_CAName->text),(game->menu->TB_CACountry->text),(game->menu->TB_CAEmail->text));
 				}
 			}
 			else if(ret == "NO")

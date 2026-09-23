@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "game.h"
 #include "Packet_Handler\Send\SInit.h"
+#include "Packet_Handler\Send\SAccount.h"
 #include "Packet_Handler\Receive\Handler.h"
 #include "Connection.h"
 USING_PTYPES
@@ -16,6 +17,17 @@ bool Connection::Initialize(pt::string _IPAddress, int _port)
 	Conport = _port;
 	ConnectionDropped = false;
 	return true;
+}
+
+void Connection::ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email)
+{
+	PendingAccountName = accountName;
+	PendingAccountPassword = password;
+	PendingAccountFullName = fullName;
+	PendingAccountLocation = location;
+	PendingAccountEmail = email;
+	AccountCreateStart = GetTickCount();
+	AccountCreatePending = true;
 }
 char* PacketSize;
 char* buffer;
@@ -177,7 +189,13 @@ void Connection::execute()
 		return;
 	}
 	while(true)
-	{		
+	{
+		if (AccountCreatePending && GetTickCount() - AccountCreateStart >= 2000)
+		{
+			AccountCreatePending = false;
+			SAccount::CreateAccount(ClientStream, PendingAccountName, PendingAccountPassword, PendingAccountFullName, PendingAccountLocation, PendingAccountEmail, V_Game);
+		}
+
 		unsigned int streambufferlength = 0;
 			try
 			{

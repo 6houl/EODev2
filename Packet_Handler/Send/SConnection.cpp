@@ -5,8 +5,8 @@ void SConnection::SendPlayer(pt::ipstream* ClientStream, int response, LPVOID ga
 {
 	Game* gme = (Game*)game;
 	PacketBuilder builder = PacketBuilder(PACKET_CONNECTION, PACKET_ACCEPT);
-    builder.AddShort(gme->RecvMulti); // dickwinder multiple
-	builder.AddShort(gme->SendMulti); // dickwinder multiple
+	builder.AddShort(gme->SendMulti); // encryption multiplier
+	builder.AddShort(gme->RecvMulti); // decryption multiplier
     builder.AddShort(gme->GameID); // player id
 	World::Send(gme,ClientStream,builder);
 }

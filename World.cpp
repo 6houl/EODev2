@@ -196,6 +196,9 @@ Textbox* World::GetFocusedTextbox()
 
 void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 {	
+	static std::mutex sendMutex;
+	std::lock_guard<std::mutex> lock(sendMutex);
+
 	try
 	{
 		t_game->world->RawPacketCount = (t_game->world->RawPacketCount + 1) % 10;
@@ -205,8 +208,7 @@ void World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 		if ((t_game->world->RawPacketCount + t_game->world->PacketCount) >= 253)
 		{
 			int seqval = ((t_game->world->RawPacketCount + t_game->world->PacketCount));
-			unsigned char* seqdat = new unsigned char[2];
-			seqdat = t_game->world->PProcessor.ENumber(seqval).data();
+			std::array<unsigned char, 4> seqdat = t_game->world->PProcessor.ENumber(seqval);
 			builder.Insertbyte(0, seqdat[1]);
 			builder.Insertbyte(0, seqdat[0]);
 		}

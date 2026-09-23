@@ -17,16 +17,6 @@ CLIENT_F_FUNC(Init)
 		case (2):
         {
 			World::DebugPrint("Connection established!\n");
-			World::Connecting = false;
-			game->world->connection->ConnectionAccepted = true;
-			if(game->menu->SelectID == 1)
-			{
-				game->Stage = Game::GameStage::PLogin;
-			}
-			else if(game->menu->SelectID == 2)
-			{
-				game->Stage = Game::GameStage::PCreateAccount;
-			}
             int EIFVAL1 = reader.Getbyte();
             int EIFVAL2 = reader.Getbyte();
 
@@ -43,10 +33,19 @@ CLIENT_F_FUNC(Init)
 			game->world->PProcessor.SetEMulti(emulti_e,emulti_d);
 			game->GameID = PlayerID;
 			int response = reader.GetThree();
-			game->menu->SelectID = 0;
-			World::Connected = true;
-			//Connection::ConnectionDropped = true;
 			SConnection::SendPlayer(clientstream,response,game);
+			World::Connecting = false;
+			game->world->connection->ConnectionAccepted = true;
+			World::Connected = true;
+			if(game->menu->SelectID == 1)
+			{
+				game->Stage = Game::GameStage::PLogin;
+			}
+			else if(game->menu->SelectID == 2)
+			{
+				game->Stage = Game::GameStage::PCreateAccount;
+			}
+			game->menu->SelectID = 0;
 			break;
 		}
 		case (3):

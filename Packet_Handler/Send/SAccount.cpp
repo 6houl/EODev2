@@ -19,7 +19,7 @@ void SAccount::RequestAccountCreate(pt::ipstream* ClientStream, std::string Acco
 	builder.AddString(AccountName);
 	World::Send(gme,ClientStream,builder);
 }
-void SAccount::CreateAccount(pt::ipstream* ClientStream, std::string AccountName, std::string Password, std::string fullname, std::string location, std::string email, std::string computer, LPVOID game)
+void SAccount::CreateAccount(pt::ipstream* ClientStream, std::string AccountName, std::string Password, std::string fullname, std::string location, std::string email, LPVOID game)
 {
 	
 	std::string notice = "Create account " + AccountName + ". \nNOTE: The account creation process takes approximately three seconds otherwise the game server disconnects you.\n";
@@ -49,7 +49,6 @@ void SAccount::CreateAccount(pt::ipstream* ClientStream, std::string AccountName
 	GetComputerNameA(nameBuf, &nameBufSize);
 	std::string ComputerName = nameBuf;
 	
-	Sleep(4000);
 	PacketBuilder builder = PacketBuilder(PACKET_ACCOUNT, PACKET_CREATE);
 	builder.AddShort(gme->menu->SrvrCreateID);
 	builder.Addbyte(255);

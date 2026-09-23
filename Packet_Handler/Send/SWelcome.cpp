@@ -14,7 +14,7 @@ void SWelcome::LoginWelcome(pt::ipstream* ClientStream, int Char_ID, LPVOID game
 {
 	Game* gme = (Game*)game;
 	PacketBuilder builder = PacketBuilder(PACKET_WELCOME, PACKET_MSG);
-	builder.AddThree(0);//Unknown
+	builder.AddThree(World::WorldCharacterID);
 	builder.AddInt(Char_ID);
 	World::Send(gme, ClientStream, builder);
 }
@@ -24,14 +24,13 @@ void SWelcome::RequestFile(pt::ipstream* ClientStream, char FileType, LPVOID gam
 	Game* gme = (Game*)game;
 	PacketBuilder builder = PacketBuilder(PACKET_WELCOME, PACKET_AGREE);
 	builder.AddChar(FileType);
+	builder.AddShort(World::WorldCharacterID);
 	if (FileType > 1)
 	{
-		builder.AddShort(2);
 		builder.Addbyte(2);
 	}
 	else
 	{
-		builder.AddShort(4);
 		builder.AddShort(gme->map->MapID);
 	}
 	World::Send(gme, ClientStream, builder);

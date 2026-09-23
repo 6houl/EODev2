@@ -199,7 +199,7 @@ CLIENT_F_FUNC(Welcome)
 							reader.Getbyte();
 							
 							game->map->AddPlayer(MainPlayer);
-							SWelcome::LoginWelcome(game->world->connection->ClientStream, MainPlayer->CharacterID, (LPVOID*)game);
+							SWelcome::LoginWelcome(game->world->connection->ClientStream, CharacterID, (LPVOID*)game);
 							break;
 						}
 						case (2):

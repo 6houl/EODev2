@@ -27,7 +27,15 @@ public:
 		int ID;
 	};
 	bool ConnectionAccepted = false;
+	bool AccountCreatePending = false;
+	DWORD AccountCreateStart = 0;
+	std::string PendingAccountName;
+	std::string PendingAccountPassword;
+	std::string PendingAccountFullName;
+	std::string PendingAccountLocation;
+	std::string PendingAccountEmail;
 	std::list<FileContainer> FileQueue;
+	void ScheduleAccountCreate(std::string accountName, std::string password, std::string fullName, std::string location, std::string email);
 	//void ProcessFile(const char* m_Buffer, Connection::FileContainer m_filecontainer);
 	Connection () : pt::thread(false){}
 	pt::ipstream* ClientStream;

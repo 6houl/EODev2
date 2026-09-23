@@ -49,7 +49,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -95,7 +95,7 @@
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(SolutionDir)include;$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\lib;$(ProjectDir)third_party\sfml\SFML-2.5.1\lib;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
@@ -111,7 +111,7 @@
     <GenerateManifest>true</GenerateManifest>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(SolutionDir)include;$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\lib;$(ProjectDir)third_party\sfml\SFML-2.5.1\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <LinkIncremental>false</LinkIncremental>
@@ -245,7 +245,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;ptypes.lib;winmm.lib;comctl32.lib;SFML\flac.lib;SFML\freetype.lib;SFML\ogg.lib;SFML\openal32.lib;SFML\sfml-audio-s.lib;SFML\sfml-graphics-s.lib;SFML\sfml-main.lib;SFML\sfml-system-s.lib;SFML\sfml-window-s.lib;SFML\vorbis.lib;SFML\vorbisenc.lib;SFML\vorbisfile.lib;opengl32.lib;glu32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;ptypes.lib;winmm.lib;comctl32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio-s.lib;sfml-graphics-s.lib;sfml-main.lib;sfml-system-s.lib;sfml-window-s.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;opengl32.lib;glu32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -602,6 +602,7 @@
     </ClCompile>
     <ClCompile Include="Packet_Handler\Send\SChest.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\StdAfx.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Packet_Handler\Send\SConnection.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\stdafx.h</PrecompiledHeaderFile>
@@ -793,4 +794,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
+  <Target Name="CopySfmlRuntime" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Copy SourceFiles="$(ProjectDir)third_party\sfml\SFML-2.5.1\bin\openal32.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
