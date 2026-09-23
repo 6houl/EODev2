@@ -324,6 +324,12 @@ void Map::WalkNPC(int ID, int direction, int DestX, int DestY)
 void Map::WalkGameCharacter(int ID, int direction, int _X, int _Y)
 {
 	this->ThreadLock.lock();
+	auto player = this->m_Players.find(ID);
+	if (player == this->m_Players.end() || player->second == nullptr)
+	{
+		this->ThreadLock.unlock();
+		return;
+	}
 	Full_EMF::TileMeta tmeta;
 	if(_X >= this->m_emf.header.width|| _Y >= this->m_emf.header.height|| _X < 0 || _Y < 0)
 	{
@@ -353,6 +359,9 @@ clock_t m_standkeytimer, m_standkeyendtimer;
 void Map::OnKeyPress(WPARAM args)
 {
 	int m_playerID = World::WorldCharacterID;
+	auto player = this->m_Players.find(m_playerID);
+	if (player == this->m_Players.end() || player->second == nullptr)
+		return;
 	int scale = 1;
 	int delay = 100;
 	int delay2 = 350;

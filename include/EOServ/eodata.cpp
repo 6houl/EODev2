@@ -56,7 +56,8 @@ void EIF::Read(const std::string& filename)
 
 		namesize = PacketProcessor::Number(namesize);
 		name.resize(namesize);
-		SAFE_READ(&name[0], sizeof(char), namesize, fh);
+		if (namesize > 0)
+			SAFE_READ(&name[0], sizeof(char), namesize, fh);
 		SAFE_READ(buf, sizeof(char), EIF::DATA_SIZE, fh);
 
 		newdata.id = i;
@@ -191,7 +192,8 @@ void ENF::Read(const std::string& filename)
 
 		namesize = PacketProcessor::Number(namesize);
 		name.resize(namesize);
-		SAFE_READ(&name[0], sizeof(char), namesize, fh);
+		if (namesize > 0)
+			SAFE_READ(&name[0], sizeof(char), namesize, fh);
 		SAFE_READ(buf, sizeof(char), ENF::DATA_SIZE, fh);
 
 		newdata.id = i;
@@ -391,7 +393,8 @@ void ECF::Read(const std::string& filename)
 
 		namesize = PacketProcessor::Number(namesize);
 		name.resize(namesize);
-		SAFE_READ(&name[0], sizeof(char), namesize, fh);
+		if (namesize > 0)
+			SAFE_READ(&name[0], sizeof(char), namesize, fh);
 
 		SAFE_READ(buf, sizeof(char), ECF::DATA_SIZE, fh);
 

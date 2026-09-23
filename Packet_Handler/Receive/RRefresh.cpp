@@ -11,7 +11,13 @@ CLIENT_F_FUNC(Refresh)
 				int numberofplayers = reader.GetChar();
 				reader.Getbyte();
 				game->map->ThreadLock.lock();
-				Map_Player* MainPlayer = game->map->m_Players[World::WorldCharacterID];
+				auto mainPlayerEntry = game->map->m_Players.find(World::WorldCharacterID);
+				if (mainPlayerEntry == game->map->m_Players.end() || mainPlayerEntry->second == nullptr)
+				{
+					game->map->ThreadLock.unlock();
+					return false;
+				}
+				Map_Player* MainPlayer = mainPlayerEntry->second;
 				int exp = MainPlayer->exp;
 				game->map->ThreadLock.unlock();
 				std::vector<int> preserveIDList;

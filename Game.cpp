@@ -131,10 +131,13 @@ float timerrender;
 std::chrono::time_point<std::chrono::high_resolution_clock> init, final;
 void Game::Update()
 {
+	std::unique_lock<std::recursive_mutex> stateLock(this->StateLock);
 	if (this->ConsumeConfirmation(ConfirmationReturnToMenu) == ConfirmationAccepted)
 	{
 		this->Stage = Game::PMenu;
+		stateLock.unlock();
 		world->DropConnection();
+		stateLock.lock();
 	}
 
 	init = std::chrono::high_resolution_clock::now();
@@ -167,7 +170,9 @@ void Game::Update()
 		{ 
 			if(Stage == this->PViewCredits)
 			{
+				stateLock.unlock();
 				world->DropConnection();
+				stateLock.lock();
 				this->Stage = Game::PMenu;
 				this->SubStage = 0;
 				this->BT_ExitGame->MouseClickProccessed();
@@ -281,6 +286,7 @@ std::string fpsstring;
 int Game_FPSCounter = 0;
 void Game::Render()
 {
+	std::lock_guard<std::recursive_mutex> stateLock(this->StateLock);
 	this->map->FinalizeMapState();
 	this->RenderList.clear();
 	Game_FPSCounter++;

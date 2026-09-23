@@ -31,6 +31,10 @@ void Map_UI_CharacterStats::Update()
 void Map_UI_CharacterStats::Render(float depth)
 {
 	this->UI_Element_CharacterStatsButton->Draw();
+	auto player = this->m_game->map->m_Players.find(World::WorldCharacterID);
+	if (player == this->m_game->map->m_Players.end() || player->second == nullptr)
+		return;
+	Map_Player* mainPlayer = player->second;
 	switch (this->m_MapUI->UI_Stage)
 	{
 	case(Map_UI::UI_ElementStage::UI_Element_CharacterStats):
@@ -44,7 +48,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		std::string m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->str);
+		std::string m_message = to_string(mainPlayer->str);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 		//this->m_game->MessageFont->DrawTextA(this->m_MapUI->Sprite, m_message.c_str(), -1, &rct, DT_NOCLIP, fontcol);
 
@@ -53,7 +57,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->intl);
+		m_message = to_string(mainPlayer->intl);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 
 		y += 18;
@@ -61,7 +65,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->wis);
+		m_message = to_string(mainPlayer->wis);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 
 		y += 18;
@@ -69,7 +73,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->agi);
+		m_message = to_string(mainPlayer->agi);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 
 		y += 18;
@@ -77,7 +81,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->con);
+		m_message = to_string(mainPlayer->con);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 
 		y += 18;
@@ -85,7 +89,7 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
-		m_message = to_string(this->m_game->map->m_Players[World::WorldCharacterID]->cha);
+		m_message = to_string(mainPlayer->cha);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
 	
 		x = 260;

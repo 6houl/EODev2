@@ -14,7 +14,9 @@ CLIENT_F_FUNC(NPC)
 					int Damage = reader.GetThree();
 					double HpLeft = reader.GetShort(); //As a percent?
 					game->map->ThreadLock.lock();
-					game->map->m_NPCs[Index]->DealDamage(HpLeft,Damage);
+					auto npc = game->map->m_NPCs.find(Index);
+					if (npc != game->map->m_NPCs.end() && npc->second)
+						npc->second->DealDamage(HpLeft,Damage);
 					game->map->ThreadLock.unlock();
 					break;
 				}
@@ -31,7 +33,9 @@ CLIENT_F_FUNC(NPC)
 					int procDirection = NpcDir;
 					game->map->ThreadLock.lock();
 					//game->map->m_Players[PlayerID]->hp -= Damage;
-					game->map->m_Players[PlayerID]->DealDamage(Damage);
+					auto player = game->map->m_Players.find(PlayerID);
+					if (player != game->map->m_Players.end() && player->second)
+						player->second->DealDamage(Damage);
 					if (NpcDir == 1)
 					{
 						procDirection = 3;
@@ -93,7 +97,9 @@ CLIENT_F_FUNC(NPC)
 					{
 						game->map->AddItem(NPCDropUID, NPCDropItemID, x, y, ItemAmount);
 					}
-					game->map->m_NPCs.at(NPCIndex)->DealDamage(0, damage);
+					auto npc = game->map->m_NPCs.find(NPCIndex);
+					if (npc != game->map->m_NPCs.end() && npc->second)
+						npc->second->DealDamage(0, damage);
 					game->map->KillNPC(NPCIndex);
 				}
 				if (KillerID == 0)

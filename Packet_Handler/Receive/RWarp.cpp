@@ -16,8 +16,11 @@ CLIENT_F_FUNC(Warp)
 					{
 						x = reader.GetChar();
 						y = reader.GetChar();
-						game->map->m_Players[World::WorldCharacterID]->x = x;
-						game->map->m_Players[World::WorldCharacterID]->y = y;
+						auto player = game->map->m_Players.find(World::WorldCharacterID);
+						if (player == game->map->m_Players.end() || player->second == nullptr)
+							return false;
+						player->second->x = x;
+						player->second->y = y;
 					}
 					else if (ID == 2)//warp to a new map
 					{
@@ -58,8 +61,14 @@ CLIENT_F_FUNC(Warp)
 				int CharacterSize = reader.GetChar();
 				reader.Getbyte();
 				game->map->ThreadLock.lock();
-				Map_Player* MainPlayer = game->map->m_Players[World::WorldCharacterID];
-				int exp = MainPlayer->exp;	
+				auto mainPlayerEntry = game->map->m_Players.find(World::WorldCharacterID);
+				if (mainPlayerEntry == game->map->m_Players.end() || mainPlayerEntry->second == nullptr)
+				{
+					game->map->ThreadLock.unlock();
+					return false;
+				}
+				Map_Player* MainPlayer = mainPlayerEntry->second;
+				int exp = MainPlayer->exp;
 				game->map->ThreadLock.unlock();
 				//game->map->LoadMap(MapID);
 				

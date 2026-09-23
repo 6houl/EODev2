@@ -85,6 +85,7 @@ private:
 	void FinalizeRender();
 
 public:
+	std::recursive_mutex StateLock;
 	enum ConfirmationOwner
 	{
 		ConfirmationNone = 0,

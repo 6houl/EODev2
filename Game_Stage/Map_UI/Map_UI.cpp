@@ -246,6 +246,10 @@ void Map_UI::Render()
 }
 void Map_UI::DrawHUDStats()
 {
+	auto player = this->m_game->map->m_Players.find(World::WorldCharacterID);
+	if (player == this->m_game->map->m_Players.end() || player->second == nullptr)
+		return;
+	Map_Player* mainPlayer = player->second;
 	RECT IconSrcRect;
 	IconSrcRect.left = 0;
 	IconSrcRect.top = 0;
@@ -257,8 +261,8 @@ void Map_UI::DrawHUDStats()
 
 	//this->Sprite->Draw(HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
 	//this->m_game->map->ThreadLock.lock();
-	float hp = (float)this->m_game->map->m_Players[World::WorldCharacterID]->hp;
-	float maxhp = (float)this->m_game->map->m_Players[World::WorldCharacterID]->maxhp;
+	float hp = (float)mainPlayer->hp;
+	float maxhp = mainPlayer->maxhp > 0 ? (float)mainPlayer->maxhp : 1.0f;
 	IconSrcRect.left = 0;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
@@ -266,8 +270,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.right = 25 + (hp / maxhp)*85;
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
-	float tp = (float)this->m_game->map->m_Players[World::WorldCharacterID]->tp;
-	float maxtp = (float)this->m_game->map->m_Players[World::WorldCharacterID]->maxtp;
+	float tp = (float)mainPlayer->tp;
+	float maxtp = mainPlayer->maxtp > 0 ? (float)mainPlayer->maxtp : 1.0f;
 	IconSrcRect.left = 110;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
@@ -286,8 +290,8 @@ void Map_UI::DrawHUDStats()
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 
-	float exp = (float)this->m_game->map->m_Players[World::WorldCharacterID]->exp - (std::round(std::pow(double(this->m_game->map->m_Players[World::WorldCharacterID]->level + 0), 3.0) * 133.1));
-	float exptnl = std::round(std::pow((this->m_game->map->m_Players[World::WorldCharacterID]->level + 1), 3.0) * 133.1)- std::round(std::pow((this->m_game->map->m_Players[World::WorldCharacterID]->level), 3.0) * 133.1);
+	float exp = (float)mainPlayer->exp - (std::round(std::pow(double(mainPlayer->level + 0), 3.0) * 133.1));
+	float exptnl = (std::max)(1.0f, static_cast<float>(std::round(std::pow((mainPlayer->level + 1), 3.0) * 133.1)- std::round(std::pow((mainPlayer->level), 3.0) * 133.1)));
 	IconSrcRect.left = 110 * 3;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;

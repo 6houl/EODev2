@@ -11,7 +11,8 @@ CLIENT_F_FUNC(Attack)
 					int ID = reader.GetShort();
 					int Dir = reader.GetChar();
 					int findid = (ID);
-					if (findid >= 0)
+					auto player = game->map->m_Players.find(findid);
+					if (findid >= 0 && player != game->map->m_Players.end() && player->second)
 					{
 						int procDirection = Dir;
 						if (Dir == 1)
@@ -27,8 +28,8 @@ CLIENT_F_FUNC(Attack)
 							procDirection = 2;
 						}
 						//game->map->ThreadLock.lock();
-						game->map->m_Players[findid]->direction = procDirection;
-						game->map->m_Players[findid]->SetStance(CharacterModel::PlayerStance::BluntAttacking);
+						player->second->direction = procDirection;
+						player->second->SetStance(CharacterModel::PlayerStance::BluntAttacking);
 						//game->map->ThreadLock.unlock();
 					}
 					

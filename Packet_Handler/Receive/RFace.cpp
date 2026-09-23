@@ -11,7 +11,8 @@ CLIENT_F_FUNC(Face)
 					short PlayerID = reader.GetShort();
 					int Direction = reader.GetChar();
 					int findid = (PlayerID);
-					if (findid >= 0)
+					auto player = game->map->m_Players.find(findid);
+					if (findid >= 0 && player != game->map->m_Players.end() && player->second)
 					{
 						int procDirection = Direction;
 						if (Direction == 1)
@@ -27,7 +28,7 @@ CLIENT_F_FUNC(Face)
 							procDirection = 2;
 						}
 						game->map->ThreadLock.lock();
-						game->map->m_Players[findid]->direction = procDirection;
+						player->second->direction = procDirection;
 						game->map->ThreadLock.unlock();
 					}
 					

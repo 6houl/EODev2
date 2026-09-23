@@ -323,6 +323,7 @@ void Connection::execute()
 					std::string newbuf;
 					while (framer.Pop(newbuf))
 					{
+						std::lock_guard<std::recursive_mutex> stateLock(V_Game->StateLock);
 						newbuf = World::Receive(this->V_Game, newbuf);
 						PacketReader* reader = new PacketReader(newbuf);
 

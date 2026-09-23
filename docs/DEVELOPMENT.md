@@ -190,6 +190,16 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Merges later file records into the canonical dataset with continuous record IDs while retaining each downloaded file on disk.
 - ArenaServ's current upload code always serves its configured file and labels it as file 1, so its stock configuration remains a one-file source; the client now supports split-aware servers without changing that server boundary.
 
+### Issues #14-#16 and #23: Bounds and shared state
+
+- Serializes packet-driven state changes against game update and rendering through the game state lock.
+- Releases that lock before waiting for connection shutdown so the network worker cannot deadlock behind the main thread.
+- Ignores face, attack, damage, refresh, warp, inventory, chest, and avatar updates when their referenced player or NPC no longer exists.
+- Uses bounds-safe pub lookups for NPC stats and graphics and ignores unknown NPC definitions.
+- Prevents invalid paperdoll removals from clearing equipment slot zero.
+- Handles zero-length pub names without indexing an empty string.
+- Guards HUD and stat rendering when the main player is absent and avoids division by zero for empty HP, TP, or experience ranges.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.

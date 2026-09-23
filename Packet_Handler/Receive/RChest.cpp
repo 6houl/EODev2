@@ -24,13 +24,16 @@ CLIENT_F_FUNC(Chest)
 	}
 	case PACKET_REPLY:
 	{
+		auto player = game->map->m_Players.find(World::WorldCharacterID);
+		if (player == game->map->m_Players.end() || player->second == nullptr)
+			return false;
 		int id = reader.GetShort();
 		int amount = reader.GetInt();
 		int weight = reader.GetChar();
 		int maxweight = reader.GetChar();
 		game->Map_UserInterface->map_inventory->SetItem(id, amount);
-		game->map->m_Players[World::WorldCharacterID]->weight = weight;
-		game->map->m_Players[World::WorldCharacterID]->maxweight = maxweight;
+		player->second->weight = weight;
+		player->second->maxweight = maxweight;
 
 		EIF_Data m_item = World::EIF_File->Get(id);
 		game->Map_UserInterface->DrawHelpMessage("Notification", "You dropped " + std::to_string(amount) + "x " + m_item.name);
@@ -50,14 +53,17 @@ CLIENT_F_FUNC(Chest)
 
 	case PACKET_GET:
 	{
+		auto player = game->map->m_Players.find(World::WorldCharacterID);
+		if (player == game->map->m_Players.end() || player->second == nullptr)
+			return false;
 		Map_UI_Inventory::InventoryItem newitem;
 		newitem.id = reader.GetShort();
 		newitem.amount = reader.GetThree();
 		int weight = reader.GetChar();
 		int maxweight = reader.GetChar();
 		game->Map_UserInterface->map_inventory->AddItem(newitem);
-		game->map->m_Players[World::WorldCharacterID]->weight = weight;
-		game->map->m_Players[World::WorldCharacterID]->maxweight = maxweight;
+		player->second->weight = weight;
+		player->second->maxweight = maxweight;
 
 		EIF_Data m_item = World::EIF_File->Get(newitem.id);
 		game->Map_UserInterface->DrawHelpMessage("Notification", "You picked up " + std::to_string(newitem.amount) + "x " + m_item.name);

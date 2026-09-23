@@ -92,7 +92,7 @@ CLIENT_F_FUNC(Paperdoll)
 
 				if (PlayerID == World::WorldCharacterID)
 				{
-					int pos = 0;
+					int pos = -1;
 					for (int i = 0; i < 15; i++)
 					{
 						if (game->Map_UserInterface->map_inventory->paperdoll._paperdoll[i] == ItemID)
@@ -108,7 +108,8 @@ CLIENT_F_FUNC(Paperdoll)
 							}
 						}
 					}
-					game->Map_UserInterface->map_inventory->paperdoll._paperdoll[pos] = 0;
+					if (pos >= 0)
+						game->Map_UserInterface->map_inventory->paperdoll._paperdoll[pos] = 0;
 					Map_UI_Inventory::InventoryItem item;
 					item.amount = 1;
 					item.id = ItemID;

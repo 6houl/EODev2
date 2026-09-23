@@ -202,7 +202,10 @@ void Map_NPC::Update(int FPS)
 
 void Map_NPC::DealDamage(short HpLeft, int _damage)
 {
-	this->MaxHP = World::ENF_File->data[this->ID].hp;
+	const ENF_Data& npcData = World::ENF_File->Get(this->ID);
+	if (!npcData)
+		return;
+	this->MaxHP = (std::max)(1, npcData.hp);
 	this->HP = (float)(HpLeft / 100.0f)*(float)this->MaxHP;
 	std::string p_Damage = to_string(_damage);
 	this->Damage.clear();
@@ -222,6 +225,9 @@ void Map_NPC::NPCKill()
 }
 void Map_NPC::Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_color)
 {
+	const ENF_Data& npcData = World::ENF_File->Get(this->ID);
+	if (!npcData)
+		return;
 	int IndexOffSet = 0;
 	int DirectionOffset = 0;
 	if (this->Stance == Map_NPC::Standing) { IndexOffSet = 0; DirectionOffset = 2; }
@@ -233,7 +239,7 @@ void Map_NPC::Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m
 		Scaleflip = 1;
 	}
 
-	int TextureIndex = 1 + IndexOffSet + FrameID + (World::ENF_File->data[this->ID].graphic - 1) * 40;
+	int TextureIndex = 1 + IndexOffSet + FrameID + (npcData.graphic - 1) * 40;
 	if (this->direction == 1 || this->direction == 3)
 	{
  		TextureIndex += DirectionOffset;
