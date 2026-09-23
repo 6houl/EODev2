@@ -213,9 +213,9 @@ void Connection::execute()
 	SInit::SendInit(this->ClientStream);
 	ConnectionAccepted = false;
 
-	} catch(...)
+	} catch(const std::exception& error)
 	{ 
-		World::DebugPrint("Couldn't connect to the login server.");
+		World::DebugPrint(error.what());
 		World::ThrowMessage("Could not find server","The game server could not be found,\nplease try again at a later time."); 
 		World::Connected = false; 
 		World::Connecting = false;
@@ -358,12 +358,20 @@ void Connection::execute()
 					}
 				}
 			}
-			catch(...)
+			catch(const std::exception& error)
 			{
-				if(!StopRequested && !World::Connected)
+				if (!StopRequested)
 				{
-					World::DebugPrint("connection lost\n");
-					World::ThrowMessage("Could not find server","The game server could not be found,\nplease try again at a later time.");
+					World::DebugPrint(error.what());
+					if (ConnectionAccepted)
+					{
+						const bool resourceFailure = !FileQueue.empty();
+						World::ThrowMessage(resourceFailure ? "Resource update failed" : "Connection error", error.what());
+					}
+					else
+					{
+						World::ThrowMessage("Could not find server", "The game server could not be found,\nplease try again at a later time.");
+					}
 				}
 				ConnectionAccepted = false;
 				ResetRequests();

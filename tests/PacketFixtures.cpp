@@ -172,12 +172,18 @@ namespace
 	void TestBinaryResourceWrite()
 	{
 		const std::string path = "tests/build/binary-resource-fixture.dat";
+		const std::string temporaryPath = path + ".download";
 		const std::string expected = Bytes({69, 77, 70, 0, 255, 1, 0, 2});
+		{
+			std::ofstream existing(path, std::ios::out | std::ios::binary | std::ios::trunc);
+			existing << "old data";
+		}
 		Expect(ResourceFile::Write(path, expected), "binary resource write");
 
 		std::ifstream input(path, std::ios::in | std::ios::binary);
 		const std::string actual((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 		Expect(actual == expected, "binary resource preserves zero bytes");
+		Expect(!std::filesystem::exists(temporaryPath), "resource temporary file removed");
 		std::remove(path.c_str());
 	}
 

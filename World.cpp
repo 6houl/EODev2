@@ -273,9 +273,10 @@ bool World::Send(Game* t_game, pt::ipstream* stream, PacketBuilder builder)
 		stream->flush();
 		return true;
 	}
-	catch (...)
+	catch (const std::exception& error)
 	{
-		World::ThrowMessage("Could not find server", "The game server could not be found,\nplease try again at a later time.");
+		World::DebugPrint(error.what());
+		World::ThrowMessage("Connection error", error.what());
 		stream->close();
 		World::Connected = false;
 		World::Connecting = false;

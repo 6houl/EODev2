@@ -173,6 +173,14 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Uses the monotonic 10 millisecond tick value expected by EOProtocol and EOLib for walk and attack packets.
 - Prints debug messages as data instead of treating server-controlled text as a format string.
 
+### Issues #8 and #12: Error reporting and resource replacement
+
+- Reports parser, protocol, and file failures as connection or resource errors after init instead of claiming the server was not found.
+- Keeps the server-not-found message limited to failures before the init handshake completes.
+- Writes downloads to a sibling temporary file, flushes and checks the byte count, then atomically replaces the live resource.
+- Removes the temporary download when validation or replacement fails, preserving the previous live file.
+- Covers binary replacement, embedded zero bytes, and temporary-file cleanup in the packet fixtures.
+
 ## Current Boundary
 
 Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
