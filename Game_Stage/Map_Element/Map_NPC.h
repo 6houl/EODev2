@@ -3,22 +3,26 @@
 class Map_NPC
 {
 	int FindWalkDirection(int dest_x, int dest_y);
-	Game* m_Game;
+	Game* m_Game = nullptr;
 public:
 	Map_NPC();
-	int Index;
-	int ID;
-	int x, y, direction;
+	int Index = 0;
+	int ID = 0;
+	int x = 0, y = 0, direction = 0;
 	int FrameID = 0;
 	int FrameCounter = 0;
-	int HP;
-	int MaxHP;
+	int HP = 0;
+	int MaxHP = 1;
 	int destination_x = -1;
 	int destination_y = -1;
 	int moveFPS = 0;
 	int yoffset = 0;
 	int xoffset = 0;
 	int WalkCounter = 0;
+	double WalkElapsedSeconds = 0.0;
+	double AnimationElapsedSeconds = 0.0;
+	double DamageElapsedSeconds = 0.0;
+	double DeathElapsedSeconds = 0.0;
 
 	bool isattacked = false;
 	int time = 0;
@@ -35,12 +39,12 @@ public:
 		Dead
 	};
 	//sf::Color::White Color;
-	NPC_Stance Stance;
+	NPC_Stance Stance = NPC_Stance::Standing;
 	void Initialize(LPVOID* m_game);
 	void SetStance(NPC_Stance m_Stance);
-	void MoveNPC(int FPS, int DestX,int DestY);
+	void MoveNPC(double deltaSeconds, int DestX,int DestY);
 	void DealDamage(short HpLeft, int damage);
-	void Update(int FPS);
+	void Update(double deltaSeconds);
 	void Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_color = sf::Color::White );
 	~Map_NPC();
 };

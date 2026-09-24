@@ -45,7 +45,7 @@ public:
 		UI_Element_GameHelp,
 	};
 
-	time_t HelpMessageTimer;
+	std::uint64_t HelpMessageTimer = 0;
 	std::string HelpMessageTitle = "";
 	std::string HelpMessage= "";
 	UI_ElementStage UI_Stage = UI_ElementStage::UI_Element_News;

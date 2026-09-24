@@ -228,7 +228,7 @@ void Map_UI_ChatBubbleHandler::Update()
 	int counter = 0;
 	for each (BubbleContainer container in this->ChatBubbleList)
 	{
-		time_t currenttime = clock();
+		const std::uint64_t currenttime = GetTickCount64();
 		if (currenttime - container._StartTime > 3000 + (container._Message.size() * 50))
 		{
 			this->ChatBubbleList.erase(this->ChatBubbleList.begin() + counter);
@@ -256,8 +256,10 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 				x = (rx * 32) - (ry * 32) + 280 + 28 - (sizeX / 2) + this->m_game->map->m_Players[_Message._PlayerID]->xoffset - this->m_game->map->m_Players[World::WorldCharacterID]->xoffset;
 				y = (ry * 16) + (rx * 16) + 170 - 72 - sizeY + this->m_game->map->m_Players[_Message._PlayerID]->yoffset - this->m_game->map->m_Players[World::WorldCharacterID]->yoffset;
 			}
-			sf::Vector3f* Pos = new sf::Vector3f(x, y, 0.5 + (0.0001 * Index));
-			sf::Vector3f * Center = new sf::Vector3f(1, 1, 0);
+			sf::Vector3f PosValue(x, y, 0.5f + (0.0001f * Index));
+			sf::Vector3f CenterValue(1, 1, 0);
+			sf::Vector3f* Pos = &PosValue;
+			sf::Vector3f* Center = &CenterValue;
 			RECT SrcRect;
 			sf::Color col = _Message.BG_color;
 
@@ -328,8 +330,6 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 
 			this->m_game->DrawText(_Message._Message, SrcRect.left, SrcRect.top, _Message.TextCol_color, 9, false, 0);
 
-			delete Pos;
-			delete Center;
 		}
 	}
 	else
@@ -364,8 +364,10 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 					y -= this->m_game->map->m_Players[World::WorldCharacterID]->yoffset;
 				}
 			
-			sf::Vector3f* Pos = new sf::Vector3f(x, y, 0.5 + (0.0001 * Index));
-			sf::Vector3f * Center = new sf::Vector3f(1, 1, 0);
+			sf::Vector3f PosValue(x, y, 0.5f + (0.0001f * Index));
+			sf::Vector3f CenterValue(1, 1, 0);
+			sf::Vector3f* Pos = &PosValue;
+			sf::Vector3f* Center = &CenterValue;
 			RECT SrcRect;
 			sf::Color col = _Message.BG_color;
 
@@ -437,8 +439,6 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 			//this->m_game->Map_UserInterface->Sprite->SetTransform(&newmatrix);
 			//this->m_game->MessageFont->DrawTextA(this->m_game->Map_UserInterface->Sprite, _Message._Message.c_str(), -1, &SrcRect, DT_LEFT, _Message.TextCol_color);
 			//this->m_game->Map_UserInterface->Sprite->SetTransform(&originalMatrix);
-			delete Pos;
-			delete Center;
 		}
 	}
 }
@@ -479,7 +479,7 @@ void Map_UI_ChatBubbleHandler::AddMapMessage(std::string Message, int PlayerID, 
 	newcontainer.Width = messagesize.x;
 	newcontainer._Message = _Message;
 	newcontainer._PlayerID = PlayerID;
-	newcontainer._StartTime = clock();
+	newcontainer._StartTime = GetTickCount64();
 	newcontainer.BG_color = BG_color;
 	newcontainer.TextCol_color = TextCol_color;
 	this->ChatBubbleList.push_back(newcontainer);

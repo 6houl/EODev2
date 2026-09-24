@@ -131,12 +131,12 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 	{
 		this->MaxIndex = this->SubText.size();
 	}
-	ScrollBarFPSCounter++;
-	if (ScrollBarFPSCounter > FPS / 4 )
+	const std::uint64_t currentTime = GetTickCount64();
+	if (currentTime - this->LastTextLayoutTime >= 250)
 	{
 		{
 			this->SubText = TextTools::SnipTextToWidth(this->FullText, this->ElementWidth, Fontsize, this->m_game);
-			this->ScrollBarFPSCounter = 0;
+			this->LastTextLayoutTime = currentTime;
 
 		}
 	}
@@ -239,16 +239,15 @@ void UI_Scrollbar::Draw(float depth)
 	SrcRect.top = 0;
 	SrcRect.bottom = 15;
 	SrcRect.right = 16;
-	sf::Vector3f* Pos = new sf::Vector3f(x - 1, y + 16 + this->Barpos, 0);
-	sf::Vector3f* Center = new sf::Vector3f(0, 0, 0);
+	sf::Vector3f Pos(x - 1, y + 16 + this->Barpos, 0);
 	if (!this->IsVertical)
 	{
-		Pos->x = x + 16 + this->Barpos;
-		Pos->y = y;
+		Pos.x = x + 16 + this->Barpos;
+		Pos.y = y;
 	}
 
 
-	this->m_game->Draw(this->p_ScrollbarTexture, Pos->x, Pos->y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
+	this->m_game->Draw(this->p_ScrollbarTexture, Pos.x, Pos.y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
 	if (this->TextOrElement)
 	{
 		if (this->p_container != NULL)
@@ -279,11 +278,8 @@ void UI_Scrollbar::Draw(float depth)
 				IconSrcRect.top = this->p_container->at(i).Chat_Icon*13;
 				IconSrcRect.bottom = IconSrcRect.top+13;
 				IconSrcRect.right = 12;
-				sf::Vector3f* IconPos = new sf::Vector3f(this->x + this->TextX - 18, this->y + this->TextY + count*16, 0);
-				sf::Vector3f* IconCentre = new sf::Vector3f(0, 0, 0);
-				this->m_game->Draw(this->p_IconTexture, IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
-				delete IconPos;
-				delete IconCentre;
+				sf::Vector3f IconPos(this->x + this->TextX - 18, this->y + this->TextY + count*16, 0);
+				this->m_game->Draw(this->p_IconTexture, IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
 				RECT rct;
 				rct.left = this->x + this->TextX;
 				rct.right = this->x + this->TextX + this->ElementWidth;
@@ -314,8 +310,6 @@ void UI_Scrollbar::Draw(float depth)
 					}
 					if (count >=  5)
 					{
-						delete Pos;
-						delete Center;
 						return;
 					}
 					count++;
@@ -345,7 +339,5 @@ void UI_Scrollbar::Draw(float depth)
 		}
 
 	}
-			delete Pos;
-		delete Center;
 };
 

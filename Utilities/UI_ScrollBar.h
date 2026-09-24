@@ -28,7 +28,7 @@ class UI_Scrollbar
 	float BarHeight = 0;
 	bool Selected = false;
 	float Lineindex = 0;
-	int ScrollBarFPSCounter = 0;
+	std::uint64_t LastTextLayoutTime = 0;
 	bool Buttonsenabled = true;
 	int MaxIndex = 0;
 	int Numberoflines = 6;

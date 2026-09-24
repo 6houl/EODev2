@@ -385,11 +385,11 @@ void Map_UI_Inventory::MoveItem(int _item)
 		Count++;
 	}
 }
-time_t clicktimerstart, clicktimerend;
+std::uint64_t clicktimerstart = 0, clicktimerend = 0;
 void Map_UI_Inventory::Update()
 {
 	//this->DropJunkTextbox->
-	clicktimerend = clock();
+	clicktimerend = GetTickCount64();
 	this->UI_Element_InventoryButton->Update(this->m_MapUI->MouseX, this->m_MapUI->MouseY, this->m_MapUI->MousePressed);
 	if (this->UI_Element_InventoryButton->MouseClickedOnElement())
 	{
@@ -582,7 +582,7 @@ void Map_UI_Inventory::Update()
 							}
 						}
 					}
-					clicktimerstart = clock();
+					clicktimerstart = GetTickCount64();
 					this->InventoryGrid[index].MousePressed = true;
 					childMPindex = Cell.ID;
 				}
@@ -645,8 +645,7 @@ void Map_UI_Inventory::Render(float depth)
 			SrcRect.right = SrcRect.left + 23;
 			int x = (114) + (22 * Cell.X) + (Cell.X * 4);
 			int y = (340) + (4 * Cell.Y) + (Cell.Y * 22);
-			sf::Vector3f* Pos = new sf::Vector3f(x, y, 0);
-			sf::Vector3f* Center = new sf::Vector3f(0, 0, 0);
+			sf::Vector3f Pos(x, y, 0);
 			sf::Color col = sf::Color::Color(255, 255, 255, 255);
 
 			if (Cell.MouseOver)
@@ -655,7 +654,7 @@ void Map_UI_Inventory::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 22;
 				col = sf::Color::Color(150, 255, 255, 255);
 			}
-			this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos->x, Pos->y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
+			this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos.x, Pos.y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
 
 			//this->m_MapUI->Sprite->Draw(this->m_game->ResourceManager->CreateTexture(2, 27, true)._Texture.get(), &SrcRect, Center, Pos, col);
 			if (Cell.ID != -1 && Cell.ID != childMPindex)
@@ -667,12 +666,10 @@ void Map_UI_Inventory::Render(float depth)
 						col = sf::Color::Color(255, 255, 255, 255);
 						SrcRect.top = 163 + 22;
 						SrcRect.bottom = SrcRect.top + 22;
-						this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos->x, Pos->y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
+						this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos.x, Pos.y, sf::Color(255, 255, 255, 255), SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
 					}
 				}
 			}
-			delete Pos;
-			delete Center;
 		}
 		for each (InventoryGridCell Cell in this->InventoryGrid)
 		{
@@ -683,8 +680,6 @@ void Map_UI_Inventory::Render(float depth)
 			SrcRect.right = SrcRect.left + 22;
 			int x = (114) + (22 * Cell.X) + (Cell.X * 4);
 			int y = (340) + (4 * Cell.Y) + (Cell.Y * 22);
-			sf::Vector3f* Pos = new sf::Vector3f(x, y, 0);
-			sf::Vector3f* Center = new sf::Vector3f(0, 0, 0);
 			sf::Color col = sf::Color::Color(255, 255, 255, 255);
 
 
@@ -693,25 +688,22 @@ void Map_UI_Inventory::Render(float depth)
 			{
 				EIF_Data m_item = World::EIF_File->Get(Cell.ID);
 				
-				sf::Vector3f* itemPos = new sf::Vector3f(x, y, 0);
-				sf::Vector3f* itemCenter = new sf::Vector3f(0, 0, 0);
+				sf::Vector3f itemPos(x, y, 0);
 				if (Cell.MousePressed)
 				{
 					int m_itemHeight = this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true)->_height;
 					int m_itemWidth = this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true)->_width;
 
-					itemPos->x = this->m_game->MouseX - m_itemWidth / 2;
-					itemPos->y = this->m_game->MouseY - m_itemHeight / 2;
-					this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), itemPos->x, itemPos->y, sf::Color(255, 255, 255, 150), 0, 0, -1, -1, sf::Vector2f(1, 1), 0);
+					itemPos.x = this->m_game->MouseX - m_itemWidth / 2;
+					itemPos.y = this->m_game->MouseY - m_itemHeight / 2;
+					this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), itemPos.x, itemPos.y, sf::Color(255, 255, 255, 150), 0, 0, -1, -1, sf::Vector2f(1, 1), 0);
 				}
 				else
 				{
-					this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), itemPos->x, itemPos->y, sf::Color(255, 255, 255, 255), 0, 0, -1, -1, sf::Vector2f(1, 1), 0);
+					this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), itemPos.x, itemPos.y, sf::Color(255, 255, 255, 255), 0, 0, -1, -1, sf::Vector2f(1, 1), 0);
 				}
 				ItemIDS.insert(Cell.ID);
 			}
-			delete Pos;
-			delete Center;
 		}
 		for each (InventoryGridCell Cell in this->InventoryGrid)
 		{
@@ -848,11 +840,10 @@ void Map_UI_Inventory::Render(float depth)
 					y -= ((y + DrawBox.bottom) - (480)) ;
 				}
 
-				sf::Vector3f* BoxPos = new sf::Vector3f(x, y, 0);
-				sf::Vector3f* BoxCenter = new sf::Vector3f(0, 0, 0);
+				sf::Vector3f BoxPos(x, y, 0);
 				sf::Color Boxcol = sf::Color::Color(255, 255, 255, 150);
 
-				this->m_game->Draw(this->p_BlackBoxTexture, BoxPos->x, BoxPos->y, Boxcol, 0, 0, DrawBox.right, DrawBox.bottom, sf::Vector2f(1, 1), depth - 0.02f);
+				this->m_game->Draw(this->p_BlackBoxTexture, BoxPos.x, BoxPos.y, Boxcol, 0, 0, DrawBox.right, DrawBox.bottom, sf::Vector2f(1, 1), depth - 0.02f);
 				
 				RECT BoxRect = { 0,0 ,0,0 };
 				BoxRect.left = x + 2 + DrawBox.left;
@@ -867,8 +858,6 @@ void Map_UI_Inventory::Render(float depth)
 				BoxRect.right = x + 1 + DrawBox.right;
 				this->m_game->DrawTextW(DecriptionString, BoxRect.left, BoxRect.top, sf::Color(255,255,200), 9, false, depth - 0.03f, 0);
 			
-				delete BoxPos;
-				delete BoxCenter;
 				break;
 			}
 		}
@@ -922,17 +911,16 @@ void Map_UI_Inventory::RenderPaperdoll(float depth)
 		BoxRect.top = _Player->second->Gender * 290;
 		BoxRect.bottom = BoxRect.top + 290;
 		BoxRect.right = 380;
-		sf::Vector3f* Pos = new sf::Vector3f(PPdollX, PPdollY, 0.07);
-		sf::Vector3f* Centre = new sf::Vector3f(0, 0, 0);
+		sf::Vector3f Pos(PPdollX, PPdollY, 0.07f);
 		
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 49, false), Pos->x, Pos->y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1,1), depth);
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 49, false), Pos.x, Pos.y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1,1), depth);
 		this->UI_Element_PpdollOkay->Draw();
 
 		for (int i = 0; i < 15; i++)
 		{
-			Pos = new sf::Vector3f(PPdollX + PaperdollInformation[i].xoff, PPdollY + PaperdollInformation[i].yoff, depth);
+			Pos = sf::Vector3f(PPdollX + PaperdollInformation[i].xoff, PPdollY + PaperdollInformation[i].yoff, depth);
 			EIF_Data m_item = World::EIF_File->Get(this->paperdoll._paperdoll[i]);
-			this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), Pos->x, Pos->y, sf::Color::White, 0, 0, -1, -1, sf::Vector2f(1, 1), depth);
+			this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, m_item.graphic * 2, true), Pos.x, Pos.y, sf::Color::White, 0, 0, -1, -1, sf::Vector2f(1, 1), depth);
 		}
 
 		sf::Color col = sf::Color::Color(255, 255, 255, 200);
@@ -989,8 +977,6 @@ void Map_UI_Inventory::RenderPaperdoll(float depth)
 		BoxRect.right = BoxRect.left + 250;
 		this->m_game->DrawTextW(this->paperdoll._rank.c_str(), BoxRect.left, BoxRect.top, col, 9, false, depth - 0.03f, 0);
 
-		delete Pos;
-		delete Centre;
 	}
 }
 int startx = 0;
@@ -1034,10 +1020,9 @@ void Map_UI_Inventory::RenderDropJunk()
 	BoxRect.top = 0;
 	BoxRect.bottom = BoxRect.top + 170;
 	BoxRect.right = BoxRect.left+265;
-	sf::Vector3f* Pos = new sf::Vector3f(DropMenuX, DropMenuY, 0.07);
-	sf::Vector3f* Centre = new sf::Vector3f(0, 0, 0);
+	sf::Vector3f Pos(DropMenuX, DropMenuY, 0.07f);
 	//this->m_MapUI->Sprite->Draw(this->p_DropJunkTexture.get(), &BoxRect, Centre, Pos, sf::Color::Color(255, 255, 255, 255));
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos->x, Pos->y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1, 1), 0.001f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos.x, Pos.y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1, 1), 0.001f);
 	
 	sf::Color col = sf::Color::Color(214, 230, 230, 200);
 	
@@ -1052,10 +1037,10 @@ void Map_UI_Inventory::RenderDropJunk()
 		BoxRect.top = 174;
 		BoxRect.bottom = BoxRect.top + 20;
 		BoxRect.right = BoxRect.left + 244;
-		Pos->y = DropMenuY + 11;
-		Pos->x = DropMenuX + 11;
+		Pos.y = DropMenuY + 11;
+		Pos.x = DropMenuX + 11;
 		renderstr += "junk?";
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos->x, Pos->y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1, 1), 0.001f);
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 27, false), Pos.x, Pos.y, sf::Color::White, BoxRect.left, BoxRect.top, BoxRect.right, BoxRect.bottom, sf::Vector2f(1, 1), 0.001f);
 
 		//this->m_MapUI->Sprite->Draw(this->p_DropJunkTexture.get(), &BoxRect, Centre, Pos, sf::Color::Color(255, 255, 255, 255));
 	}
@@ -1075,8 +1060,6 @@ void Map_UI_Inventory::RenderDropJunk()
 	this->UI_Element_DropOkay->Draw(0.001);
 	this->DropJunkTextbox->Render(0.001);
 	this->DropJunkScrollBar->Draw(0.0005f);
-	delete Pos;
-	delete Centre;
 }
 void Map_UI_Inventory::UpdateDropJunk()
 {

@@ -2,6 +2,16 @@
 #include "Map_Player.h"
 #include "..\..\World.h"
 #include "..\..\game.h"
+#include <algorithm>
+#include <cmath>
+
+namespace
+{
+	constexpr double PlayerWalkSeconds = 0.48;
+	constexpr double PlayerActionFrameSeconds = 0.12;
+	constexpr double PlayerActionSeconds = 0.60;
+	constexpr double DamageDisplaySeconds = 0.40;
+}
 
 Map_Player::Map_Player()
 {
@@ -22,7 +32,15 @@ void Map_Player::SetStance(PlayerStance m_Stance)
 	this->Stance = m_Stance;
 	fpscounter = 0;
 	this->frame_ID = 0;
-	//startwalkanimationtimer = clock();
+	this->AnimationElapsedSeconds = 0.0;
+	if (m_Stance != PlayerStance::Walking)
+	{
+		this->destination_x = -1;
+		this->destination_y = -1;
+		this->WalkElapsedSeconds = 0.0;
+		this->xoffset = 0;
+		this->yoffset = 0;
+	}
 }
 int  Map_Player::FindWalkDirection(int dest_x, int dest_y)
 {
@@ -50,77 +68,42 @@ int  Map_Player::FindWalkDirection(int dest_x, int dest_y)
 	return 0;
 }
 
-void Map_Player::MovePlayer(int FPS, int dest_x, int dest_y)
+void Map_Player::MovePlayer(double deltaSeconds, int dest_x, int dest_y)
 {
-	endwalkanimationtimer = clock();
-	//std::string str = "Move From " + this->name + ". Player ID " + std::to_string(this->CharacterID);
-	//World::DebugPrint(str.c_str());
+	const bool startingWalk = this->destination_x != dest_x || this->destination_y != dest_y || this->Stance != PlayerStance::Walking;
 	int move_direction = this->FindWalkDirection(dest_x, dest_y);
 	this->direction = move_direction;
-	moveFPS++;
-	if (endwalkanimationtimer - startwalkanimationtimer > (1000/8.5))
+	if (startingWalk)
 	{
-		switch (move_direction)
-		{
-			case(0):
-			{
-				this->yoffset += 4;
-				this->xoffset -= 8;
-				break;
-			}
-			case(1):
-			{
-				this->xoffset += 8;
-				this->yoffset -= 4;
-				break;
-			}
-			case(2):
-			{
-				this->xoffset += 8;
-				this->yoffset += 4;
-				break;
-			}
-			case(3):
-			{
-				this->yoffset -= 4;
-				this->xoffset -= 8;
-				break;
-			}
-		}
-		this->frame_ID++;
-		startwalkanimationtimer = clock();
-		WalkCounter++;
+		this->WalkElapsedSeconds = 0.0;
+		this->xoffset = 0;
+		this->yoffset = 0;
+		this->SetStance(PlayerStance::Walking);
 	}
-	if (WalkCounter >= 4)
+
+	this->WalkElapsedSeconds += (std::max)(0.0, deltaSeconds);
+	const double progress = (std::min)(1.0, this->WalkElapsedSeconds / PlayerWalkSeconds);
+	const int horizontal = static_cast<int>(std::lround(32.0 * progress));
+	const int vertical = static_cast<int>(std::lround(16.0 * progress));
+	this->frame_ID = (std::min)(3, static_cast<int>(progress * 4.0));
+
+	switch (move_direction)
 	{
-		switch (move_direction)
-		{
-			case(0):
-			{
-				this->y++;
-				break;
-			}
-			case(1):
-			{
-				this->y--;
-				break;
-			}
-			case(2):
-			{
-				this->x++;
-				break;
-			}
-			case(3):
-			{
-				this->x--;
-				break;
-			}
-		}
+		case 0: this->xoffset = -horizontal; this->yoffset = vertical; break;
+		case 1: this->xoffset = horizontal; this->yoffset = -vertical; break;
+		case 2: this->xoffset = horizontal; this->yoffset = vertical; break;
+		case 3: this->xoffset = -horizontal; this->yoffset = -vertical; break;
+	}
+
+	if (progress >= 1.0)
+	{
+		this->x = dest_x;
+		this->y = dest_y;
 		this->destination_x = -1;
 		this->destination_y = -1;
 		this->xoffset = 0;
 		this->yoffset = 0;
-		WalkCounter = 0;
+		this->WalkElapsedSeconds = 0.0;
 		this->frame_ID = 0;
 		this->SetStance(CharacterModel::PlayerStance::Standing);
 	}
@@ -132,6 +115,7 @@ void Map_Player::DealDamage(int Damage)
 	std::string p_Damage = to_string(Damage);
 	this->Damage.clear();
 	this->time = 0;
+	this->DamageElapsedSeconds = 0.0;
 	for (int i = 0; i < p_Damage.size(); i++)
 	{
 		unsigned char damage = p_Damage[i];
@@ -144,29 +128,31 @@ void Map_Player::DealDamage(int Damage)
 void Map_Player::PlayerKill()
 {
 	this->SetStance(Map_Player::PlayerStance::Standing);
+	this->DeathElapsedSeconds = 0.0;
 	this->Deathcounter += 1;
 }
-void Map_Player::Update(int FPS)
+void Map_Player::Update(double deltaSeconds)
 {
 	if (this->destination_x >= 0 || this->destination_y >= 0)
 	{
-		MovePlayer(FPS, destination_x, destination_y);
+		MovePlayer(deltaSeconds, destination_x, destination_y);
 	}
 	if (this->Damage.size() > 0)
 	{
-		this->time++;
+		this->DamageElapsedSeconds += deltaSeconds;
 	}
 	if (this->Deathcounter > 0)
 	{
-		Deathcounter++;
+		this->DeathElapsedSeconds += deltaSeconds;
 	}
-	if (this->time > FPS/2)
+	if (this->DamageElapsedSeconds >= DamageDisplaySeconds)
 	{
 		this->Damage.clear();
 		this->time = 0;
+		this->DamageElapsedSeconds = 0.0;
 		this->isattacked = false;
 	}
-	fpscounter++;
+	this->AnimationElapsedSeconds += deltaSeconds;
 	switch (this->Stance)
 	{
 		case(PlayerStance::Standing):
@@ -177,39 +163,25 @@ void Map_Player::Update(int FPS)
 		}
 		case(PlayerStance::BluntAttacking):
 		{
-			if (this->frame_ID == 0 && fpscounter > (FPS / 5))
+			this->frame_ID = this->AnimationElapsedSeconds >= PlayerActionFrameSeconds ? 1 : 0;
+			if (this->AnimationElapsedSeconds >= PlayerActionSeconds)
 			{
-				this->frame_ID++;
-				fpscounter = 0;
-			}
-			if (fpscounter > (FPS / 3))
-			{
-				this->frame_ID++;
-				if (this->frame_ID > 1)
-				{
-					this->frame_ID = 0;
-					this->SetStance(CharacterModel::Standing);
-				}
-				fpscounter = 0;
+				this->SetStance(CharacterModel::Standing);
 			}
 			break;
 		}
 		case(PlayerStance::BowAttacking):
 		{
-			if (fpscounter > (FPS / 3))
+			this->frame_ID = 0;
+			if (this->AnimationElapsedSeconds >= PlayerActionSeconds)
 			{
-				this->frame_ID++;
-				if (this->frame_ID > 0)
-				{
-					this->frame_ID = 0;
-					this->SetStance(CharacterModel::Standing);
-				}
+				this->SetStance(CharacterModel::Standing);
 			}
 			break;
 		}
 		case(PlayerStance::Spelling):
 		{
-			if (fpscounter > (FPS))
+			if (this->AnimationElapsedSeconds >= PlayerActionSeconds)
 			{
 				this->frame_ID = 0;
 				fpscounter = 0;
@@ -251,12 +223,12 @@ void Map_Player::Map_PlayerRender(sf::Sprite* _Sprite, int x, int y, float depth
 		{
 			scalex = -1;
 		}
-		sf::Vector3f* IconPos = new sf::Vector3f(x + 6 - 35 / 2 + this->xoffset * scalex, y + this->yoffset + 50 - 70, 0);
-		sf::Vector3f* IconCentre = new sf::Vector3f(0, 0, 0);
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color::White, IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
+		sf::Vector3f IconPos(x + 6 - 35 / 2 + this->xoffset * scalex, y + this->yoffset + 50 - 70, 0);
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color::White, IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
 		//_Sprite->Draw(m_this->m_game->Map_UserInterface->HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
 
-		float HPPercent = (float)this->hp / (float)this->maxhp;
+		float HPPercent = this->maxhp > 0 ? (float)this->hp / (float)this->maxhp : 0.0f;
+		HPPercent = (std::max)(0.0f, (std::min)(1.0f, HPPercent));
 		int hpcolormultiplier = 0;
 		if (HPPercent < 0.7f)
 		{
@@ -271,12 +243,13 @@ void Map_Player::Map_PlayerRender(sf::Sprite* _Sprite, int x, int y, float depth
 		IconSrcRect.bottom = IconSrcRect.top + 7;
 		IconSrcRect.right = HPPercent * 40;
 
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color::White, IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color::White, IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
 		//m_this->m_game->map->Sprite->Draw(m_this->m_game->Map_UserInterface->HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
-		IconPos->y -= 14;
-		IconPos->x += 20;
-		IconPos->x += (this->Damage.size() * 9) / 2;
-		IconPos->y -= (7 * ((float)this->time / ((float)m_game->FPS / 2.5)));
+		const float damageProgress = (std::min)(1.0f, static_cast<float>(this->DamageElapsedSeconds / DamageDisplaySeconds));
+		IconPos.y -= 14;
+		IconPos.x += 20;
+		IconPos.x += (this->Damage.size() * 9) / 2;
+		IconPos.y -= 7.0f * damageProgress;
 		for (int i = 0; i < this->Damage.size(); i++)
 		{
 			unsigned char damage = this->Damage[i] - 48;
@@ -291,18 +264,16 @@ void Map_Player::Map_PlayerRender(sf::Sprite* _Sprite, int x, int y, float depth
 				IconSrcRect.top = 28;
 				IconSrcRect.bottom = IconSrcRect.top + 12;
 				IconSrcRect.right = IconSrcRect.left + 30;
-				IconPos->x -= 18;
+				IconPos.x -= 18;
 			}
 			else
 			{
-				IconPos->x -= 9;
+				IconPos.x -= 9;
 			}
 
-			float alpha = 255 - (160 * ((float)this->time / ((float)m_game->FPS / 2)));
+			const sf::Uint8 alpha = static_cast<sf::Uint8>(255.0f - 160.0f * damageProgress);
 			//m_this->m_game->map->Sprite->Draw(m_this->m_game->Map_UserInterface->HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(int)alpha, 255, 255, 255));
-			this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255,255,255,alpha), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
+			this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255,255,255,alpha), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), depth);
 		}
-		delete IconPos;
-		delete IconCentre;
 	}
 }

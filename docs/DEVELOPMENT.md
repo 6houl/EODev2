@@ -1,7 +1,7 @@
 # EODev Development Guide
 
 **Status:** Authoritative
-**Last updated:** 2026-09-23
+**Last updated:** 2026-09-24
 
 ## Purpose
 
@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 678 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 662 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -200,14 +200,30 @@ The current Release baseline builds with 0 errors and 678 existing warnings. The
 - Handles zero-length pub names without indexing an empty string.
 - Guards HUD and stat rendering when the main player is absent and avoids division by zero for empty HP, TP, or experience ranges.
 
+### Issues #100, #117-#123, and #156-#158: Rendering and movement stability
+
+- Uses monotonic elapsed time for frame pacing, player and NPC movement, map animation, combat frames, damage display, death effects, and UI refresh timers.
+- Interpolates player movement over 480 milliseconds and NPC movement over 400 milliseconds using EndlessClient's 32-by-16 isometric tile offsets and animation timing as the reference.
+- Keeps EODev's fixed camera and panel layout. Smooth actor offsets now move the world beneath the centered local player without adding EndlessClient zoom or floating UI behavior.
+- Applies the tile-spec walkability rules supported by EOLib and blocks occupied actor positions and in-progress destinations before sending a local walk.
+- Treats Refresh/Reply coordinates as authoritative and cancels unfinished interpolation when ArenaServ rejects or corrects a walk.
+- Parses ArenaServ's Walk/Reply sentinels and dropped-item entries instead of leaving unread reply data.
+- Initializes actor state, equipment, stance, direction, animation, and destination fields before the first render.
+- Removes the duplicate local-player render and replaces per-draw multimap allocation with a reserved, stable-sorted render queue.
+- Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
+- Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
+
+Live checks should cover continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. The local player should remain centered while the map moves smoothly, and all actors should finish on server-provided coordinates.
+
 ## Current Boundary
 
-Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, and online-player paths are hardened. The settings panel now controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, and whisper preference changes. Remaining gameplay systems are the next code milestone.
+Packet payloads, receive framing, sequence boundaries, encryption round trips, and the file-transfer build path are verified. High-risk login, character-list, paperdoll, chat, online-player, rendering, timing, and movement paths are hardened. The settings panel controls the three systems EODev can currently honor. Live ArenaServ checks are still required for account/login, multi-file synchronization, whisper preference changes, and movement correction under latency.
 
 ## Working Order
 
-1. Run account creation, login, and multi-file synchronization end to end against ArenaServ.
-2. Implement gameplay systems through EODev's existing UI controls.
+1. Run account creation, login, movement, combat animation, and multi-file synchronization end to end against ArenaServ.
+2. Verify frame pacing and camera tracking on a populated map and record any remaining packet-driven snaps.
+3. Continue gameplay systems through EODev's existing UI controls.
 
 ## Handoff Checklist
 

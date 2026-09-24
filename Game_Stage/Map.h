@@ -29,6 +29,7 @@ public:
 	bool IsVisible = false;
 	int MapID = 0;
 	int MapAnimIndex = 0;
+	double MapAnimationElapsedSeconds = 0.0;
 	const char* m_map_filename = nullptr;
 	int xsub = 0, ysub = 0, xoff = 0, yoff= 0;
 	int	xpos = 0, ypos = 0;
@@ -81,6 +82,8 @@ public:
 	void WalkPlayer(int ID, int direction , int FromX, int FromY);
 	void WalkGameCharacter(int ID, int direction, int _X, int _Y);
 	void WalkNPC(int ID, int direction, int FromX, int FromY);
+	bool IsTileWalkable(EMF_Tile_Spec spec) const;
+	bool IsTileOccupied(int x, int y, int movingPlayerID) const;
 	void Initialize(World* _World, sf::RenderWindow*m_Device, Game* m_game);
 	void LoadMap(int ID);
 	void Do_Open(const char* filename);

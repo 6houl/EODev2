@@ -5,6 +5,7 @@
 #include "Utilities/ConfigFile.h"
 #include "stdafx.h"
 #include "Resource_Manager.h"
+#include <algorithm>
 
 sf::Sprite* sprite;
 std::shared_ptr<sf::Texture> texture;
@@ -41,6 +42,8 @@ void Game::Initialize(sf::RenderWindow*m_Device, World* _World)
 		this->Device = m_Device;
 		//D3DXCreateSprite(Device, &sprite);
 		this->FPS = 60;
+		this->LastFrameTime = std::chrono::steady_clock::now();
+		this->RenderList.reserve(8192);
 
 		this->DefaultFont = new sf::Font();
 		HINSTANCE hResInstance = (HINSTANCE)GetModuleHandle(NULL);
@@ -127,10 +130,21 @@ Game::ConfirmationResult Game::ConsumeConfirmation(ConfirmationOwner owner)
 	this->ActiveConfirmationResult = ConfirmationPending;
 	return result;
 }
-float timerrender;
-std::chrono::time_point<std::chrono::high_resolution_clock> init, final;
 void Game::Update()
 {
+	const auto frameTime = std::chrono::steady_clock::now();
+	double elapsed = std::chrono::duration<double>(frameTime - this->LastFrameTime).count();
+	this->LastFrameTime = frameTime;
+	if (elapsed <= 0.0)
+	{
+		elapsed = 1.0 / 120.0;
+	}
+	this->DeltaSeconds = (std::min)(elapsed, 0.1);
+	this->ElapsedMilliseconds += static_cast<std::uint64_t>(this->DeltaSeconds * 1000.0);
+	const double currentFPS = 1.0 / elapsed;
+	const double blend = (std::min)(1.0, this->DeltaSeconds * 4.0);
+	this->FPS += (currentFPS - this->FPS) * blend;
+
 	std::unique_lock<std::recursive_mutex> stateLock(this->StateLock);
 	if (this->ConsumeConfirmation(ConfirmationReturnToMenu) == ConfirmationAccepted)
 	{
@@ -140,7 +154,6 @@ void Game::Update()
 		stateLock.lock();
 	}
 
-	init = std::chrono::high_resolution_clock::now();
 	if(!world->Connected && Stage != Game::PViewCredits)
 	{
 		Stage = Game::GameStage::PMenu;
@@ -281,7 +294,6 @@ void Game::Update()
 	}
 	this->MouseWheelVal = 0;
 }
-long timerrecorder;
 std::string fpsstring;
 int Game_FPSCounter = 0;
 void Game::Render()
@@ -346,13 +358,12 @@ void Game::Render()
 	}
 
 
-	timerrender = clock();
-	if (timerrender - timerrecorder > 100)
+	this->FpsDisplayElapsed += this->DeltaSeconds;
+	if (this->FpsDisplayElapsed >= 0.1)
 	{
 		fpsstring = to_string((int)FPS);
 		fpsstring += " fps";
-
-		timerrecorder = timerrender;
+		this->FpsDisplayElapsed = 0.0;
 	}
 
 	this->DrawTextW(fpsstring.c_str(), 33, 14, sf::Color(240, 240, 199, 255), 16, false,0,1);
@@ -362,14 +373,6 @@ void Game::Render()
 
 
 	//Device->Present( NULL, NULL, NULL, NULL );
-	final = std::chrono::high_resolution_clock::now();
-	//if (final - init > 0)
-	{//this->FPS =
-		std::chrono::duration<double> diff = final - init;
-		this->FPS = 1 / diff.count();
-	}
-
-
 	//World::DebugPrint(std::to_string(FPS).c_str());
 }
 void Game::Unload()
@@ -392,24 +395,32 @@ void Game::ResetDevice()
 void Game::Draw(Resource_Manager::TextureData* dat, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
 {
 	RenderInfo newinfo = RenderInfo(dat, x, y, Color, imgx, imgy, imgw, imgh, scale);
-	this->RenderList.insert(std::pair<float,RenderInfo>(_Depth, newinfo));
+	newinfo.depth = _Depth;
+	newinfo.order = this->RenderList.size();
+	this->RenderList.push_back(std::move(newinfo));
 }
 
 void Game::Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
 {
 	Resource_Manager::TextureData* _dat = this->ResourceManager->GetResource(ModuleID, GFXID, BlackIsTransparent);
 	RenderInfo newinfo = RenderInfo(_dat, x, y, Color, imgx, imgy, imgw, imgh, scale);
-	this->RenderList.insert(std::pair<float, RenderInfo>(_Depth, newinfo));
+	newinfo.depth = _Depth;
+	newinfo.order = this->RenderList.size();
+	this->RenderList.push_back(std::move(newinfo));
 }
 void Game::Draw(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>*  Rendertex, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f Scale, float Depth )
 {
 	RenderInfo newinfo = RenderInfo(_RenderSprite, Rendertex, x, y, Color, imgx, imgy, imgw, imgh, Scale);
-	this->RenderList.insert(std::pair<float, RenderInfo>(Depth, newinfo));
+	newinfo.depth = Depth;
+	newinfo.order = this->RenderList.size();
+	this->RenderList.push_back(std::move(newinfo));
 }
 void Game::DrawText(std::string str, int x, int y, sf::Color Color, int height, bool centered, float _Depth, int outlinethickness, int bottomx, int bottomy)
 {
 	RenderInfo newinfo = RenderInfo(str, x, y, Color, bottomx, bottomy, NULL, height, sf::Vector2f(1,1),centered, outlinethickness);
-	this->RenderList.insert(std::pair<float, RenderInfo>(_Depth, newinfo));
+	newinfo.depth = _Depth;
+	newinfo.order = this->RenderList.size();
+	this->RenderList.push_back(std::move(newinfo));
 
 }
 sf::Vector2f Game::GetFontSize(std::string _Message, int fontsize)
@@ -424,51 +435,57 @@ sf::Vector2f Game::GetFontSize(std::string _Message, int fontsize)
 }
 void Game::FinalizeRender()
 {
+	std::sort(this->RenderList.begin(), this->RenderList.end(), [](const RenderInfo& left, const RenderInfo& right)
+	{
+		if (left.depth != right.depth)
+			return left.depth > right.depth;
+		return left.order < right.order;
+	});
 	for (auto const& entry : this->RenderList)
 	{
-		switch (entry.second.ResourceType)
+		switch (entry.ResourceType)
 		{
 			case(RenderInfo::DrawType::Texture):
 			{
-				if (entry.second._TextureData != NULL)
+				if (entry._TextureData != NULL)
 				{
-					int imgw = entry.second.imgw - entry.second.imgx;
-					int imgh = entry.second.imgh - entry.second.imgy;
-					entry.second._TextureData->_Sprite->setScale(entry.second.Scale);
-					entry.second._TextureData->_Sprite->setPosition(entry.second.x + (entry.second.Scale.x == -1 ? ((imgw + imgh < 0) ? entry.second._TextureData->_width : imgw) : 0), entry.second.y + (entry.second.Scale.y == -1 ? ((imgw + imgh < 0) ? entry.second._TextureData->_height : imgh) : 0));
+					int imgw = entry.imgw - entry.imgx;
+					int imgh = entry.imgh - entry.imgy;
+					entry._TextureData->_Sprite->setScale(entry.Scale);
+					entry._TextureData->_Sprite->setPosition(entry.x + (entry.Scale.x == -1 ? ((imgw + imgh < 0) ? entry._TextureData->_width : imgw) : 0), entry.y + (entry.Scale.y == -1 ? ((imgw + imgh < 0) ? entry._TextureData->_height : imgh) : 0));
 					if (imgw + imgh < 0)
 					{
-						entry.second._TextureData->_Sprite->setTextureRect(sf::IntRect(0, 0, entry.second._TextureData->_width, entry.second._TextureData->_height));
+						entry._TextureData->_Sprite->setTextureRect(sf::IntRect(0, 0, entry._TextureData->_width, entry._TextureData->_height));
 					}
 					else
 					{
-						entry.second._TextureData->_Sprite->setTextureRect(sf::IntRect(entry.second.imgx, entry.second.imgy, imgw, imgh));
+						entry._TextureData->_Sprite->setTextureRect(sf::IntRect(entry.imgx, entry.imgy, imgw, imgh));
 					}
-					entry.second._TextureData->_Sprite->setColor(entry.second.Color);
+					entry._TextureData->_Sprite->setColor(entry.Color);
 
-					Device->draw(*entry.second._TextureData->_Sprite);
+					Device->draw(*entry._TextureData->_Sprite);
 				}
 				break;
 			}
 			case(RenderInfo::DrawType::Text):
 			{
 				this->RenderTextLock.lock();
-				rendertext->setColor(entry.second.Color);
-				rendertext->setString(entry.second._Message);
-				rendertext->setOutlineThickness(entry.second.borderthickness);
+				rendertext->setColor(entry.Color);
+				rendertext->setString(entry._Message);
+				rendertext->setOutlineThickness(entry.borderthickness);
 				rendertext->setOutlineColor(sf::Color::Black);
 				rendertext->setScale(0.5, 0.5);
-				rendertext->setCharacterSize(entry.second.imgh * 2);
-				if (entry.second.textcentered)
+				rendertext->setCharacterSize(entry.imgh * 2);
+				if (entry.textcentered)
 				{
 					sf::FloatRect textRect = rendertext->getGlobalBounds();
-					rendertext->setPosition(entry.second.x - (textRect.width / 2), entry.second.y);
+					rendertext->setPosition(entry.x - (textRect.width / 2), entry.y);
 				}
 				else
 				{
-					rendertext->setPosition(entry.second.x, entry.second.y);
+					rendertext->setPosition(entry.x, entry.y);
 				}
-				if (entry.second.imgx > 0 || entry.second.imgy > 0)
+				if (entry.imgx > 0 || entry.imgy > 0)
 				{
 					//rendertext->
 				}
@@ -478,28 +495,28 @@ void Game::FinalizeRender()
 			}
 			case(RenderInfo::DrawType::MergedTexture):
 			{	
-				sf::RenderTexture* txturhandle = entry.second.RenderTextureTarget->get();
-				sf::Sprite* sptehndle = entry.second.RenderTargetSprite->get();
+				sf::RenderTexture* txturhandle = entry.RenderTextureTarget->get();
+				sf::Sprite* sptehndle = entry.RenderTargetSprite->get();
 				
 				if (txturhandle != nullptr)
 				{
-					int imgw = entry.second.imgw - entry.second.imgx;
-					int imgh = entry.second.imgh - entry.second.imgy;
+					int imgw = entry.imgw - entry.imgx;
+					int imgh = entry.imgh - entry.imgy;
 					int txturew = txturhandle->getSize().x;
 					int txtureh = txturhandle->getSize().y;
-					entry.second.RenderTargetSprite->get()->setScale(entry.second.Scale);
-					entry.second.RenderTargetSprite->get()->setPosition(entry.second.x + (entry.second.Scale.x == -1 ? ((imgw + imgh < 0) ? txturew : imgw) : 0), entry.second.y);
+					entry.RenderTargetSprite->get()->setScale(entry.Scale);
+					entry.RenderTargetSprite->get()->setPosition(entry.x + (entry.Scale.x == -1 ? ((imgw + imgh < 0) ? txturew : imgw) : 0), entry.y);
 					if (imgw + imgh < 0)
 					{
-						entry.second.RenderTargetSprite->get()->setTextureRect(sf::IntRect(0, 0, txturew, txtureh));
+						entry.RenderTargetSprite->get()->setTextureRect(sf::IntRect(0, 0, txturew, txtureh));
 					}
 					else
 					{
-						entry.second.RenderTargetSprite->get()->setTextureRect(sf::IntRect(entry.second.imgx, entry.second.imgy, imgw, imgh));
+						entry.RenderTargetSprite->get()->setTextureRect(sf::IntRect(entry.imgx, entry.imgy, imgw, imgh));
 					}
-					entry.second.RenderTargetSprite->get()->setColor(entry.second.Color);
+					entry.RenderTargetSprite->get()->setColor(entry.Color);
 
-					Device->draw(*entry.second.RenderTargetSprite->get());	
+					Device->draw(*entry.RenderTargetSprite->get());
 				}
 				break;
 			}

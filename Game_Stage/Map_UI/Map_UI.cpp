@@ -207,7 +207,7 @@ void Map_UI::Render()
 	
 	if (this->HelpMessageTitle != "")
 	{
-		time_t curtime = clock();
+		const std::uint64_t curtime = GetTickCount64();
 		if (curtime - this->HelpMessageTimer < 2000)
 		{
 			//sf::Color col = D3DCOLOR_XRGB(0, 0, 0);
@@ -222,7 +222,7 @@ void Map_UI::Render()
 		else
 		{
 			this->HelpMessageTitle = "";
-			this->HelpMessage != "";
+			this->HelpMessage = "";
 		}
 	}
 	auto t = std::time(nullptr);
@@ -255,9 +255,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 0;
 	IconSrcRect.bottom = 14;
 	IconSrcRect.right = 439;
-	sf::Vector3f* IconPos = new sf::Vector3f(105,8, 0.1f);
-	sf::Vector3f* IconCentre = new sf::Vector3f(0, 0, 0);
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	sf::Vector3f IconPos(105,8, 0.1f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 	//this->Sprite->Draw(HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
 	//this->m_game->map->ThreadLock.lock();
@@ -267,17 +266,19 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 
-	IconSrcRect.right = 25 + (hp / maxhp)*85;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	const float hpPercent = (std::max)(0.0f, (std::min)(1.0f, hp / maxhp));
+	IconSrcRect.right = 25 + hpPercent*85;
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 	float tp = (float)mainPlayer->tp;
 	float maxtp = mainPlayer->maxtp > 0 ? (float)mainPlayer->maxtp : 1.0f;
 	IconSrcRect.left = 110;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
-	IconSrcRect.right = IconSrcRect.left  + 25 + (tp / maxtp) * 85;
-	IconPos->x = IconSrcRect.left + 105;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	const float tpPercent = (std::max)(0.0f, (std::min)(1.0f, tp / maxtp));
+	IconSrcRect.right = IconSrcRect.left  + 25 + tpPercent * 85;
+	IconPos.x = IconSrcRect.left + 105;
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 	
 
 	float sp = 100;
@@ -286,8 +287,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 	IconSrcRect.right = IconSrcRect.left + 25 + (sp / maxsp) * 85;
-	IconPos->x = IconSrcRect.left + 105;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	IconPos.x = IconSrcRect.left + 105;
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 
 	float exp = (float)mainPlayer->exp - (std::round(std::pow(double(mainPlayer->level + 0), 3.0) * 133.1));
@@ -295,17 +296,16 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.left = 110 * 3;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
-	IconSrcRect.right = IconSrcRect.left + 25 + (exp / exptnl) * 85;
-	IconPos->x = IconSrcRect.left + 105;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos->x, IconPos->y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
-	delete IconPos;
-	delete IconCentre;
+	const float expPercent = (std::max)(0.0f, (std::min)(1.0f, exp / exptnl));
+	IconSrcRect.right = IconSrcRect.left + 25 + expPercent * 85;
+	IconPos.x = IconSrcRect.left + 105;
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 	//this->m_game->map->ThreadLock.unlock();
 }
 
 void Map_UI::DrawHelpMessage(std::string title, std::string Message)
 {
-	this->HelpMessageTimer = clock();
+	this->HelpMessageTimer = GetTickCount64();
 	this->HelpMessageTitle = "["+title+"]";
 	this->HelpMessage = Message;
 }

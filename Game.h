@@ -1,4 +1,7 @@
 #pragma once
+#include <chrono>
+#include <cstdint>
+#include <vector>
 #include "Utilities/UI_Element.h"
 #include "Game_Stage/Map_UI/Map_UI_Cursor.h"
 #include "Game_Stage/Map_UI/Map_UI.h"
@@ -11,7 +14,7 @@ private:
 	struct RenderInfo
 	{
 	public:
-		Resource_Manager::TextureData* _TextureData;
+		Resource_Manager::TextureData* _TextureData = nullptr;
 		int x; 
 		int y;
 		sf::Color Color;
@@ -20,11 +23,12 @@ private:
 		int imgw = -1; 
 		int  imgh = -1;
 		sf::Vector2f Scale;
-		float depth;
+		float depth = 0.0f;
+		std::size_t order = 0;
 		bool textcentered = false;
-		std::shared_ptr<sf::RenderTexture>* RenderTextureTarget;
-		std::shared_ptr<sf::Sprite>* RenderTargetSprite;
-		int borderthickness;
+		std::shared_ptr<sf::RenderTexture>* RenderTextureTarget = nullptr;
+		std::shared_ptr<sf::Sprite>* RenderTargetSprite = nullptr;
+		int borderthickness = 0;
 		
 		enum DrawType
 		{
@@ -81,7 +85,9 @@ private:
 
 
 	};
-	std::multimap<float,RenderInfo, std::greater<float>> RenderList;
+	std::vector<RenderInfo> RenderList;
+	std::chrono::steady_clock::time_point LastFrameTime;
+	double FpsDisplayElapsed = 0.0;
 	void FinalizeRender();
 
 public:
@@ -101,6 +107,8 @@ public:
 	};
 
 	sf::RenderWindow* Device;
+	double DeltaSeconds = 1.0 / 60.0;
+	std::uint64_t ElapsedMilliseconds = 0;
 	IniConfiguration* Config;
 	enum GameStage
 	{

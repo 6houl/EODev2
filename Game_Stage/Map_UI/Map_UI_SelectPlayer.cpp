@@ -41,11 +41,11 @@ void Map_UI_SelectPlayer::Update()
 		SrcRect.right = SrcRect.left + width;
 		int tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff;
 		int tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff;
-		sf::Vector3f* Pos = new sf::Vector3f(tilexp + 47, tileyp - 65, 1.0f);
+		sf::Vector3f Pos(tilexp + 47, tileyp - 65, 1.0f);
 
-		if ((this->m_game->MouseX > Pos->x&& this->m_game->MouseX < Pos->x + width) && (this->m_game->MouseY > Pos->y && this->m_game->MouseY < Pos->y + height))
+		if ((this->m_game->MouseX > Pos.x&& this->m_game->MouseX < Pos.x + width) && (this->m_game->MouseY > Pos.y && this->m_game->MouseY < Pos.y + height))
 		{
-			int mouselocy = this->m_game->MouseY - Pos->y;
+			int mouselocy = this->m_game->MouseY - Pos.y;
 			this->CurrentIndex = SelectIndex::None;
 			for (int i = 0; i < menudataypos.size(); i++)
 			{
@@ -80,7 +80,6 @@ void Map_UI_SelectPlayer::Update()
 			SelectMenuActive = false;
 			playerid = -1;
 		}
-		delete Pos;
 	}
 	if (this->m_game->MouseRightPressed)
 	{
@@ -122,8 +121,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 		int tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff;
 		int tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff;
 
-		sf::Vector3f* Pos = new sf::Vector3f(tilexp + 47, tileyp - 65, 1.0f);
-		sf::Vector3f* Center = new sf::Vector3f(1, 1, 0);
+		sf::Vector3f Pos(tilexp + 47, tileyp - 65, 1.0f);
 		sf::Color col = sf::Color::Color(186, 122, 89, 133);
 
 		SrcRect.top = 0;
@@ -131,7 +129,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 		SrcRect.left = 192;
 		SrcRect.right = SrcRect.left + width;
 		//this->m_game->Map_UserInterface->Sprite->Draw(this->m_game->Map_UserInterface->map_ChatBubbleHandler->ChatBoxBG, &SrcRect, NULL, Pos, col);
-		this->m_game->Draw(this->m_game->Map_UserInterface->map_ChatBubbleHandler->ChatBoxBG, Pos->x, Pos->y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+		this->m_game->Draw(this->m_game->Map_UserInterface->map_ChatBubbleHandler->ChatBoxBG, Pos.x, Pos.y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 		col = sf::Color::Color(255 , 255, 255, 255);
 		SrcRect.top = 0;
@@ -139,7 +137,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 		SrcRect.left = 0;
 		SrcRect.right = SrcRect.left + width;
 		//this->m_game->Map_UserInterface->Sprite->Draw(this->m_game->ResourceManager->CreateTexture(2, 41, true)._Texture.get(), &SrcRect, NULL, Pos, col);
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 41, true), Pos->x, Pos->y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 41, true), Pos.x, Pos.y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 		col = sf::Color::Color(255, 255, 255, 255);
 
@@ -151,7 +149,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left;
-				Pos->y += 10;
+				Pos.y += 10;
 				break;
 			}
 			case(1):
@@ -160,7 +158,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(2):
@@ -169,7 +167,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(3):
@@ -178,7 +176,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(4):
@@ -187,7 +185,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(5):
@@ -196,7 +194,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(6):
@@ -205,7 +203,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 17;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(7):
@@ -214,7 +212,7 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 			case(8):
@@ -223,15 +221,12 @@ void Map_UI_SelectPlayer::Render(float depth)
 				SrcRect.bottom = SrcRect.top + 14;
 				SrcRect.left = 96;
 				SrcRect.right = SrcRect.left + width;
-				Pos->y += SrcRect.top;
+				Pos.y += SrcRect.top;
 				break;
 			}
 		}
 		//this->m_game->Map_UserInterface->Sprite->Draw(this->m_game->ResourceManager->CreateTexture(2, 41, true)._Texture.get(), &SrcRect, NULL, Pos, col);
-		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 41, true), Pos->x, Pos->y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
-
-		delete Pos;
-		delete Center;
+		this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 41, true), Pos.x, Pos.y, col, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 	}
 
 

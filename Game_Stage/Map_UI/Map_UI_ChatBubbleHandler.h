@@ -8,7 +8,7 @@ class Map_UI_ChatBubbleHandler
 		int Height;
 		int _PlayerID;
 		std::string _Message;
-		time_t _StartTime;
+		std::uint64_t _StartTime = 0;
 		sf::Color BG_color;
 		sf::Color TextCol_color;
 	};

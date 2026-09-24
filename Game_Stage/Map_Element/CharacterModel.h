@@ -124,14 +124,14 @@ private:
 
 public:
 	void InitializeModel(Game* m_game);
-	Game* m_game;
-	int ID;
-	int Game_ID;
-	int admin;
+	Game* m_game = nullptr;
+	int ID = 0;
+	int Game_ID = 0;
+	int admin = 0;
 	int yoffset = 0;
 	int xoffset = 0;
 	std::string name;
-	unsigned char  frame_ID;
+	unsigned char  frame_ID = 0;
 	enum PlayerStance
 	{
 		Standing = 1,
@@ -142,19 +142,19 @@ public:
 		GroundSitting = 6,
 		BowAttacking = 7
 	};
-	PlayerStance Stance;
-	unsigned char  level;
-	unsigned char  Gender;
-	unsigned char  HairCol;
-	unsigned char  HairStyle;
-	unsigned char  SkinCol;
-	unsigned char  direction;
+	PlayerStance Stance = PlayerStance::Standing;
+	unsigned char  level = 0;
+	unsigned char  Gender = 0;
+	unsigned char  HairCol = 0;
+	unsigned char  HairStyle = 0;
+	unsigned char  SkinCol = 0;
+	unsigned char  direction = 0;
 	
-	unsigned char  ArmorID;
-	unsigned char  WeaponID;
-	unsigned char  ShoeID;
-	unsigned char  HatID;
-	unsigned char  ShieldID;
+	unsigned char  ArmorID = 255;
+	unsigned char  WeaponID = 255;
+	unsigned char  ShoeID = 255;
+	unsigned char  HatID = 255;
+	unsigned char  ShieldID = 255;
 	void UpdateAppearence() { this->PrerenderPaperdoll(); }
 	RECT SrcRect;
 	void SetCharacter(unsigned char  _Gender,unsigned char  _HairStyle,unsigned char  _HairCol,unsigned char  _SkinCol,unsigned char  _direction, int _armorid = -1, int _weaponid = -1, int _shoeid = -1, int _hatid = -1, int _shieldid = -1);
