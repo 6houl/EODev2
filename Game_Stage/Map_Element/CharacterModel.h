@@ -128,8 +128,8 @@ public:
 	int ID = 0;
 	int Game_ID = 0;
 	int admin = 0;
-	int yoffset = 0;
-	int xoffset = 0;
+	float yoffset = 0.0f;
+	float xoffset = 0.0f;
 	std::string name;
 	unsigned char  frame_ID = 0;
 	enum PlayerStance
@@ -159,7 +159,7 @@ public:
 	RECT SrcRect = { 0, 0, 0, 0 };
 	void SetCharacter(unsigned char  _Gender,unsigned char  _HairStyle,unsigned char  _HairCol,unsigned char  _SkinCol,unsigned char  _direction, int _armorid = -1, int _weaponid = -1, int _shoeid = -1, int _hatid = -1, int _shieldid = -1);
 	void AlignCharacter(PlayerStance m_stance, int FrameID, int m_Direction);
-	void Render(int x, int y, float depth, sf::Color _Color = sf::Color::White);
+	void Render(float x, float y, float depth, sf::Color _Color = sf::Color::White);
 	//void Render(int FrameID, int x, int y, float depth, sf::Color _Color = sf::Color::White);
 	void Release();
 };

@@ -303,7 +303,7 @@ std::pair<int, int> RetrieveOffset(int layerindex, CharacterModel::PlayerStance 
 	return std::pair<int, int>(x, y);
 }
 
-void CharacterModel::Render(int x, int y, float depth, sf::Color m_Color)
+void CharacterModel::Render(float x, float y, float depth, sf::Color m_Color)
 {
 	int p_FrameID = this->ConvertStanceToFrameID(this->Stance, this->frame_ID);
 

@@ -7,6 +7,11 @@ using namespace std;
 bool World::Connected = false;
 bool World::Connecting = false;
 
+namespace
+{
+	const auto ProtocolClockStarted = std::chrono::steady_clock::now();
+}
+
 
 std::string World::MBMessage = "";
 std::string World::MBTitle = "";
@@ -27,9 +32,8 @@ std::mutex World::OnlinePlayersMutex;
 
 unsigned int World::ProtocolTickCount()
 {
-	static const auto started = std::chrono::steady_clock::now();
 	const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::steady_clock::now() - started);
+		std::chrono::steady_clock::now() - ProtocolClockStarted);
 	return static_cast<unsigned int>(elapsed.count() / 10);
 }
 

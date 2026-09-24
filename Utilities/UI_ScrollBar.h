@@ -69,19 +69,20 @@ public:
 	{
 		if (p_container == NULL)
 		{
-			this->Lineindex = this->SubText.size() - (this->Numberoflines - 1);
+			const int maximumIndex = (std::max)(0, static_cast<int>(this->SubText.size()) - this->Numberoflines);
+			this->Lineindex = maximumIndex;
 			if (this->Lineindex < 0)
 			{
 				this->Lineindex = 0;
 			}
 
-			if (this->SubText.size() - (this->Numberoflines - 1) == 0)
+			if (maximumIndex == 0)
 			{
 				this->BarPercent = 0;
 			}
 			else
 			{
-				this->BarPercent = (float)(this->Lineindex) / (float)(this->SubText.size() - (this->Numberoflines - 1));
+				this->BarPercent = this->Lineindex / static_cast<float>(maximumIndex);
 			}
 			this->Barpos = (float)(this->BarPercent) * (float)(this->BarHeight - 32);
 		}
@@ -92,19 +93,20 @@ public:
 			{
 				counter += p_container->at(i).MessageLength;
 			}
-			this->Lineindex = counter - (this->Numberoflines - 1);
+			const int maximumIndex = (std::max)(0, counter - this->Numberoflines);
+			this->Lineindex = maximumIndex;
 
 			if (this->Lineindex < 0)
 			{
 				this->Lineindex = 0;
 			}
-			if ((float)(counter - (this->Numberoflines - 1)) == 0)
+			if (maximumIndex == 0)
 			{
 				this->BarPercent = 0;
 			}
 			else
 			{
-				this->BarPercent = (float)(this->Lineindex) / (float)(counter - (this->Numberoflines - 1));
+				this->BarPercent = this->Lineindex / static_cast<float>(maximumIndex);
 			}
 
 			this->Barpos = ((float)(this->BarPercent) * (float)(this->BarHeight - 32));

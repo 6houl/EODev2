@@ -254,8 +254,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.left = 0;
 	IconSrcRect.top = 0;
 	IconSrcRect.bottom = 14;
-	IconSrcRect.right = 439;
-	sf::Vector3f IconPos(105,8, 0.1f);
+	IconSrcRect.right = 440;
+	sf::Vector3f IconPos(100, 0, 0.1f);
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 	//this->Sprite->Draw(HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
@@ -267,7 +267,7 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 
 	const float hpPercent = (std::max)(0.0f, (std::min)(1.0f, hp / maxhp));
-	IconSrcRect.right = 25 + hpPercent*85;
+	IconSrcRect.right = 25 + std::round(hpPercent * 79.0f);
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 	float tp = (float)mainPlayer->tp;
@@ -276,8 +276,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 	const float tpPercent = (std::max)(0.0f, (std::min)(1.0f, tp / maxtp));
-	IconSrcRect.right = IconSrcRect.left  + 25 + tpPercent * 85;
-	IconPos.x = IconSrcRect.left + 105;
+	IconSrcRect.right = IconSrcRect.left + 25 + std::round(tpPercent * 79.0f);
+	IconPos.x = 210;
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 	
 
@@ -286,19 +286,19 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.left = 110*2;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
-	IconSrcRect.right = IconSrcRect.left + 25 + (sp / maxsp) * 85;
-	IconPos.x = IconSrcRect.left + 105;
+	IconSrcRect.right = IconSrcRect.left + 25 + std::round((sp / maxsp) * 79.0f);
+	IconPos.x = 320;
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 
 	float exp = (float)mainPlayer->exp - (std::round(std::pow(double(mainPlayer->level + 0), 3.0) * 133.1));
 	float exptnl = (std::max)(1.0f, static_cast<float>(std::round(std::pow((mainPlayer->level + 1), 3.0) * 133.1)- std::round(std::pow((mainPlayer->level), 3.0) * 133.1)));
-	IconSrcRect.left = 110 * 3;
+	IconSrcRect.left = 329;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 	const float expPercent = (std::max)(0.0f, (std::min)(1.0f, exp / exptnl));
-	IconSrcRect.right = IconSrcRect.left + 25 + expPercent * 85;
-	IconPos.x = IconSrcRect.left + 105;
+	IconSrcRect.right = IconSrcRect.left + 25 + std::round(expPercent * 79.0f);
+	IconPos.x = 430;
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 	//this->m_game->map->ThreadLock.unlock();
 }

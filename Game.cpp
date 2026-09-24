@@ -392,7 +392,7 @@ void Game::ResetDevice()
 {
 		//D3DXCreateSprite(Device,&sprite);
 }
-void Game::Draw(Resource_Manager::TextureData* dat, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
+void Game::Draw(Resource_Manager::TextureData* dat, float x, float y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
 {
 	RenderInfo newinfo = RenderInfo(dat, x, y, Color, imgx, imgy, imgw, imgh, scale);
 	newinfo.depth = _Depth;
@@ -400,7 +400,7 @@ void Game::Draw(Resource_Manager::TextureData* dat, int x, int y, sf::Color Colo
 	this->RenderList.push_back(std::move(newinfo));
 }
 
-void Game::Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
+void Game::Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, float x, float y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f scale, float _Depth)
 {
 	Resource_Manager::TextureData* _dat = this->ResourceManager->GetResource(ModuleID, GFXID, BlackIsTransparent);
 	RenderInfo newinfo = RenderInfo(_dat, x, y, Color, imgx, imgy, imgw, imgh, scale);
@@ -408,14 +408,14 @@ void Game::Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, int x, int y
 	newinfo.order = this->RenderList.size();
 	this->RenderList.push_back(std::move(newinfo));
 }
-void Game::Draw(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>*  Rendertex, int x, int y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f Scale, float Depth )
+void Game::Draw(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>*  Rendertex, float x, float y, sf::Color Color, int imgx, int imgy, int imgw, int  imgh, sf::Vector2f Scale, float Depth )
 {
 	RenderInfo newinfo = RenderInfo(_RenderSprite, Rendertex, x, y, Color, imgx, imgy, imgw, imgh, Scale);
 	newinfo.depth = Depth;
 	newinfo.order = this->RenderList.size();
 	this->RenderList.push_back(std::move(newinfo));
 }
-void Game::DrawText(std::string str, int x, int y, sf::Color Color, int height, bool centered, float _Depth, int outlinethickness, int bottomx, int bottomy)
+void Game::DrawText(std::string str, float x, float y, sf::Color Color, int height, bool centered, float _Depth, int outlinethickness, int bottomx, int bottomy)
 {
 	RenderInfo newinfo = RenderInfo(str, x, y, Color, bottomx, bottomy, NULL, height, sf::Vector2f(1,1),centered, outlinethickness);
 	newinfo.depth = _Depth;

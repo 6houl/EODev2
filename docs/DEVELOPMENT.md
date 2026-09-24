@@ -47,7 +47,7 @@ Run protocol and connection fixtures:
 run-tests.cmd
 ```
 
-The current Release baseline builds with 0 errors and 662 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
+The current Release baseline builds with 0 errors and 660 existing warnings. The fixture suite builds with 0 errors and 16 warnings inherited from the legacy packet implementation.
 
 ## Verified Progress
 
@@ -118,7 +118,10 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 ### Online player panel
 
 - Sends the empty Players/Request packet defined by EOProtocol and used by EOLib.
-- Parses ArenaServ's full online-player reply and displays the character name, title, guild tag, and resolved ECF class name in EODev's existing fixed panel.
+- Parses ArenaServ's Init reply 8 as the full online-player reply. Reply 9 is map mutation data and must never be decoded as a player list.
+- Displays the character icon, name, title, guild tag, resolved ECF class name, and total count in the fixed columns and seven-row layout used by EndlessClient's classic panel.
+- Maps ArenaServ's normal, party, GM, HGM, party-admin, and SLN bot icons to their actual chat-icon rows instead of deriving the row arithmetically.
+- Uses `-` for missing title, guild, or class values and keeps player names sorted.
 - Protects the online-player list shared by the network and render threads.
 - Refreshes the panel on elapsed wall time instead of process CPU time.
 
@@ -207,6 +210,9 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 - Queues overlapping remote-player and NPC walk destinations instead of resetting an active step when the next server packet arrives.
 - Carries unused frame time into the queued step so brief frame stalls do not create movement lag.
 - Keeps EODev's fixed camera and panel layout. Smooth actor offsets now move the world beneath the centered local player without adding EndlessClient zoom or floating UI behavior.
+- Keeps the 32-by-16 walk path on one continuous floating-point trajectory through the actor, camera, map layers, draw queue, cursor, player menu, and chat-bubble anchors. This avoids the alternating X/Y rounding that made the camera appear to shake.
+- Uses synchronized presentation instead of a separate 120 FPS limiter so completed frames are presented with the display refresh rather than tearing during camera motion.
+- Starts the protocol tick clock with the application instead of its first packet. The first walk now carries the elapsed 10 millisecond timestamp expected by EOLib and ArenaServ instead of zero, which ArenaServ silently rejects when timestamp enforcement is enabled.
 - Applies the tile-spec walkability rules supported by EOLib and blocks occupied actor positions and in-progress destinations before sending a local walk.
 - Treats Refresh/Reply coordinates as authoritative. A matching active or queued destination confirms movement without a snap; a conflicting coordinate cancels interpolation and logs a correction.
 - Parses ArenaServ's Walk/Reply sentinels and dropped-item entries instead of leaving unread reply data.
@@ -217,8 +223,9 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 - Removes the duplicate local-player render and replaces per-draw multimap allocation with a reserved, stable-sorted render queue.
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
+- Places the fixed HP, TP, SP, and TNL strip at the classic top coordinates: Y 0 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient.
 
-Live checks should cover continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The local player should remain centered, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
+Live checks should cover the first movement immediately after entering the map, continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The first walk should receive normal server processing without a corrective teleport, the local player should remain centered without layer or overlay shake, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 
 ## Current Boundary
 

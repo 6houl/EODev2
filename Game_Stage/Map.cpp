@@ -699,8 +699,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 		
 		for (next_depth(); y >= 0 && x < RenderWidth ; --y, ++x, next_depth())
 		{
-			int xoffs = layer_info[0].xoff - xoff;
-			int yoffs = layer_info[0].yoff - yoff;
+			float xoffs = layer_info[0].xoff - xoff;
+			float yoffs = layer_info[0].yoff - yoff;
 
 			float tilex = xoffs + (x * 32) - (y * 32);
 			float tiley = yoffs + (x * 16) + (y * 16);
@@ -770,11 +770,11 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 
 			for (next_depth(); y >= 0 && x < (RenderWidth); --y, ++x, next_depth())
 			{
-				int xoffs = layer_info[layer].xoff - xoff;
-				int yoffs = layer_info[layer].yoff - yoff;
+				float xoffs = layer_info[layer].xoff - xoff;
+				float yoffs = layer_info[layer].yoff - yoff;
 
-				int tilex = xoffs + (x * 32) - (y * 32);
-				int tiley = yoffs + (x * 16) + (y * 16);
+				float tilex = xoffs + (x * 32) - (y * 32);
+				float tiley = yoffs + (x * 16) + (y * 16);
 				short tile = 0;
 				if ((y * emfh.width + x) < emfh.width * emfh.height)
 				{
@@ -811,7 +811,7 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 							SrcRect.left = 0 + (framewidth * (this->MapAnimIndex % frameno));
 							SrcRect.right = framewidth + (framewidth * (this->MapAnimIndex % frameno));
 							SrcRect.bottom = SrcRect.top + tileResource->_height;
-							const int drawX = tilex + tileResource->_width - framewidth + 32;
+							const float drawX = tilex + tileResource->_width - framewidth + 32;
 							this->m_game->Draw(tileResource, drawX, tiley, sf::Color::White, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1,1), depth);
 						}
 						else
@@ -844,11 +844,11 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 
 		for (next_depth(); y >= 0 && x < (RenderWidth); --y, ++x, next_depth())
 		{
-			int xoffs = layer_info[8].xoff - xoff;
-			int yoffs = layer_info[8].yoff - yoff;
+			float xoffs = layer_info[8].xoff - xoff;
+			float yoffs = layer_info[8].yoff - yoff;
 
-			int tilex = xoffs + (x * 32) - (y * 32);
-			int tiley = yoffs + (x * 16) + (y * 16);
+			float tilex = xoffs + (x * 32) - (y * 32);
+			float tiley = yoffs + (x * 16) + (y * 16);
 			short tile = 0;
 			tile = 0;
 			if ((y * emfh.width + x) < emfh.width * emfh.height)
@@ -886,11 +886,11 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 
 			for (next_depth(); y >= 0 && x < (RenderWidth); --y, ++x, next_depth())
 			{
-				int xoffs = layer_info[7].xoff - xoff;
-				int yoffs = layer_info[7].yoff - yoff;
+				float xoffs = layer_info[7].xoff - xoff;
+				float yoffs = layer_info[7].yoff - yoff;
 
-				int tilex = xoffs + (x * 32) - (y * 32);
-				int tiley = yoffs + (x * 16) + (y * 16);
+				float tilex = xoffs + (x * 32) - (y * 32);
+				float tiley = yoffs + (x * 16) + (y * 16);
 				short tile = 0;
 				if ((y * emfh.width + x) < emfh.width * emfh.height)
 					tile = m_emf.gfx(x, y)[7];
@@ -917,10 +917,10 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 			depth -= (this->LUTMap[player->second->x][player->second->y] * ep);
 			if (rendering)
 			{
-				int xoffsp = layer_info[layer].xoff - xoff;
-				int yoffsp = layer_info[layer].yoff - yoff;
-				int tilexp = xoffsp + (player->second->x * 32) - (player->second->y * 32);
-				int tileyp = yoffsp + (player->second->x * 16) + (player->second->y * 16);
+				float xoffsp = layer_info[layer].xoff - xoff;
+				float yoffsp = layer_info[layer].yoff - yoff;
+				float tilexp = xoffsp + (player->second->x * 32) - (player->second->y * 32);
+				float tileyp = yoffsp + (player->second->x * 16) + (player->second->y * 16);
 				player->second->Map_PlayerRender(this->Sprite, tilexp + 24, tileyp - 40, depth, sf::Color::Color(255, 255, 255, 255));
 			}
 		}
@@ -934,10 +934,10 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 		if (rendering)
 		{
 			next_depth();
-			int xoffsp = layer_info[layer].xoff - xoff;
-			int yoffsp = layer_info[layer].yoff - yoff;
-			int tilexp = xoffsp + (NPC->second->x * 32) - (NPC->second->y * 32);
-			int tileyp = yoffsp + (NPC->second->x * 16) + (NPC->second->y * 16);
+			float xoffsp = layer_info[layer].xoff - xoff;
+			float yoffsp = layer_info[layer].yoff - yoff;
+			float tilexp = xoffsp + (NPC->second->x * 32) - (NPC->second->y * 32);
+			float tileyp = yoffsp + (NPC->second->x * 16) + (NPC->second->y * 16);
 			NPC->second->Render(this->Sprite, tilexp, tileyp, depth);
 			//NPC->second->Render(this->Sprite, tilexp, tileyp, depth);
 		}
@@ -950,8 +950,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 		depth = layer_info[layer].depth;
 		depth -= (this->LUTMap[m_item->second.x][m_item->second.y] * ep);
 
-		int xoffs = -xoff + 32;
-		int yoffs = -yoff + 16;
+		float xoffs = -xoff + 32;
+		float yoffs = -yoff + 16;
 
 		int graphic = World::EIF_File->Get(m_item->second.ItemID).graphic * 2;
 
@@ -985,8 +985,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 		int tile_h = this->m_game->ResourceManager->GetResource(23, (graphic)-1, true)->_height;// tile_gfx.Height;
 
 
-		int tilex = xoffs + (m_item->second.x * 32) - (m_item->second.y * 32) - (tile_w / 2);
-		int tiley = yoffs + (m_item->second.x * 16) + (m_item->second.y * 16) - (tile_h / 2);
+		float tilex = xoffs + (m_item->second.x * 32) - (m_item->second.y * 32) - (tile_w / 2);
+		float tiley = yoffs + (m_item->second.x * 16) + (m_item->second.y * 16) - (tile_h / 2);
 
 		this->m_game->Draw(this->m_game->ResourceManager->GetResource(23, (graphic)-1, true), tilex, tiley, sf::Color::White, 0, 0, -1, -1, sf::Vector2f(1, 1), depth);
 

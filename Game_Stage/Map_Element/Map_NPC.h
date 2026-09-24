@@ -17,8 +17,8 @@ public:
 	int destination_x = -1;
 	int destination_y = -1;
 	int moveFPS = 0;
-	int yoffset = 0;
-	int xoffset = 0;
+	float yoffset = 0.0f;
+	float xoffset = 0.0f;
 	int WalkCounter = 0;
 	double WalkElapsedSeconds = 0.0;
 	double AnimationElapsedSeconds = 0.0;
@@ -49,7 +49,7 @@ public:
 	bool IsWalkingTo(int dest_x, int dest_y) const;
 	void DealDamage(short HpLeft, int damage);
 	void Update(double deltaSeconds);
-	void Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_color = sf::Color::White );
+	void Render(sf::Sprite* _Sprite, float x, float y, float depth, sf::Color m_color = sf::Color::White );
 	~Map_NPC();
 };
 

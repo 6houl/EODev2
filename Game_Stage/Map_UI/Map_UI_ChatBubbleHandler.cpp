@@ -246,16 +246,9 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 		{
 			int sizeX = _Message.Width;
 			int sizeY = _Message.Height;
-			int rx = (this->m_game->map->m_Players[_Message._PlayerID]->x - this->m_game->map->xpos);
-			int ry = (this->m_game->map->m_Players[_Message._PlayerID]->y - this->m_game->map->ypos);
-			int x = (rx * 32) - (ry * 32) + 280 + 28 - (sizeX / 2);
-			int y = (ry * 16) + (rx * 16) + 170 - 72 - sizeY;
-
-			if (_Message._PlayerID != World::WorldCharacterID)
-			{
-				x = (rx * 32) - (ry * 32) + 280 + 28 - (sizeX / 2) + this->m_game->map->m_Players[_Message._PlayerID]->xoffset - this->m_game->map->m_Players[World::WorldCharacterID]->xoffset;
-				y = (ry * 16) + (rx * 16) + 170 - 72 - sizeY + this->m_game->map->m_Players[_Message._PlayerID]->yoffset - this->m_game->map->m_Players[World::WorldCharacterID]->yoffset;
-			}
+			Map_Player* player = this->m_game->map->m_Players[_Message._PlayerID];
+			float x = (player->x * 32) - (player->y * 32) - this->m_game->map->xoff + 28 - (sizeX / 2) + player->xoffset;
+			float y = (player->y * 16) + (player->x * 16) - this->m_game->map->yoff - 72 - sizeY + player->yoffset;
 			sf::Vector3f PosValue(x, y, 0.5f + (0.0001f * Index));
 			sf::Vector3f CenterValue(1, 1, 0);
 			sf::Vector3f* Pos = &PosValue;
@@ -328,7 +321,7 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 			SrcRect.left = Pos->x + 1;
 			SrcRect.right = SrcRect.left + sizeX + 7;
 
-			this->m_game->DrawText(_Message._Message, SrcRect.left, SrcRect.top, _Message.TextCol_color, 9, false, 0);
+			this->m_game->DrawText(_Message._Message, Pos->x + 1.0f, Pos->y + 2.0f, _Message.TextCol_color, 9, false, 0);
 
 		}
 	}
@@ -338,31 +331,9 @@ void Map_UI_ChatBubbleHandler::RenderChatBubble(BubbleContainer _Message, int In
 		{
 			int sizeX = _Message.Width;
 			int sizeY = _Message.Height;
-			int rx = (this->m_game->map->m_NPCs[_Message._PlayerID]->x - this->m_game->map->xpos);
-			int ry = (this->m_game->map->m_NPCs[_Message._PlayerID]->y - this->m_game->map->ypos);
-			int x = (rx * 32) - (ry * 32) + 280 + 32 - (sizeX / 2);
-			int y = (ry * 16) + (rx * 16) + 170 - 70 - sizeY;
-
-				if (this->m_game->map->m_NPCs[_Message._PlayerID]->direction == 1 || this->m_game->map->m_NPCs[_Message._PlayerID]->direction == 2)
-				{
-					x = (rx * 32) - (ry * 32) + 280 + 32 - (sizeX / 2) - this->m_game->map->m_NPCs[_Message._PlayerID]->xoffset;
-					y = (ry * 16) + (rx * 16) + 170 - 65 - sizeY + this->m_game->map->m_NPCs[_Message._PlayerID]->yoffset;
-				}
-				else
-				{
-					x = (rx * 32) - (ry * 32) + 280 + 32 - (sizeX / 2) + this->m_game->map->m_NPCs[_Message._PlayerID]->xoffset;
-					y = (ry * 16) + (rx * 16) + 170 - 65 - sizeY + this->m_game->map->m_NPCs[_Message._PlayerID]->yoffset;
-				}
-				if (this->m_game->map->m_Players[World::WorldCharacterID]->direction == 1 || this->m_game->map->m_Players[World::WorldCharacterID]->direction == 2)
-				{
-					x += this->m_game->map->m_Players[World::WorldCharacterID]->xoffset;
-					y -= this->m_game->map->m_Players[World::WorldCharacterID]->yoffset;
-				}
-				else
-				{
-					x -= this->m_game->map->m_Players[World::WorldCharacterID]->xoffset;
-					y -= this->m_game->map->m_Players[World::WorldCharacterID]->yoffset;
-				}
+			Map_NPC* npc = this->m_game->map->m_NPCs[_Message._PlayerID];
+			float x = (npc->x * 32) - (npc->y * 32) - this->m_game->map->xoff + 32 - (sizeX / 2) + npc->xoffset;
+			float y = (npc->y * 16) + (npc->x * 16) - this->m_game->map->yoff - 65 - sizeY + npc->yoffset;
 			
 			sf::Vector3f PosValue(x, y, 0.5f + (0.0001f * Index));
 			sf::Vector3f CenterValue(1, 1, 0);

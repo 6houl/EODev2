@@ -356,10 +356,9 @@ void Connection::execute()
 									V_Game->map->LoadMap(filecont.ID);
 								CompleteFileRequest();
 							}
-							else if (ID == 9)
+							else if (ID == 8)
 							{
-								//FriendsList
-								
+								// Full online player list
 								int numberofplayers = reader->GetShort();
 								reader->Getbyte();
 								std::vector<World::OnlinePlayerContainer> Sortedcontainer;
@@ -389,7 +388,7 @@ void Connection::execute()
 								World::SetOnlinePlayers(Sortedcontainer);
 								World::DebugPrint("Player list recieved!");
 							}
-							else if (ID != 11)
+							else if (ID != 9 && ID != 10 && ID != 11)
 							{
 								throw std::runtime_error("Unknown init response");
 							}

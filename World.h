@@ -43,8 +43,8 @@ public:
 	{
 		std::string _Name;
 		std::string _Title;
-		char _Icon;
-		char _ClassID;
+		unsigned char _Icon = 0;
+		unsigned char _ClassID = 0;
 		std::string _GuildTag;
 	};
 	static std::vector<OnlinePlayerContainer> OnlinePlayers;

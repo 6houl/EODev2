@@ -49,9 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	settings.minorVersion = 0;
 
 	sf::RenderWindow window(sf::VideoMode(ResX, ResY), "Endless Online Developmental", sf::Style::Default, settings);
-	//window.setVerticalSyncEnabled(true);
-
-	window.setFramerateLimit(120);
+	window.setVerticalSyncEnabled(true);
 	hWnd = window.getSystemHandle();
 
 	world = new World(&game);

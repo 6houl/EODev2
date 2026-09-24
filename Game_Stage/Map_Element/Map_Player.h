@@ -95,7 +95,7 @@ public:
 	void DealDamage(int Damage);
 	void PlayerKill();
 	bool isattacked = false;
-	void Map_PlayerRender(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color _Color = sf::Color::White );
+	void Map_PlayerRender(sf::Sprite* _Sprite, float x, float y, float depth, sf::Color _Color = sf::Color::White );
 	Map_Player();
 	~Map_Player();
 };

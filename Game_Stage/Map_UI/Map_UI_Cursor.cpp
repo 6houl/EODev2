@@ -58,8 +58,8 @@ void Map_UI_Cursor::Render(sf::Sprite* m_sprite, float depth)
 
 		for (std::map<int, Map_NPC*>::iterator NPC = this->p_Map->m_NPCs.begin(); NPC != this->p_Map->m_NPCs.end(); ++NPC)
 		{
-			int tilexp = ((NPC->second->x * 32) - (NPC->second->y * 32)) - this->p_Map->xoff;
-			int tileyp = ((NPC->second->x * 16) + (NPC->second->y * 16)) - this->p_Map->yoff;
+			float tilexp = ((NPC->second->x * 32) - (NPC->second->y * 32)) - this->p_Map->xoff + NPC->second->xoffset;
+			float tileyp = ((NPC->second->x * 16) + (NPC->second->y * 16)) - this->p_Map->yoff + NPC->second->yoffset;
 			if ((NPC->second->x == x && NPC->second->y == y))
 			{
 				if (p_Map->LUTMap[NPC->second->x][NPC->second->y] > MapElementDepth)
@@ -89,8 +89,8 @@ void Map_UI_Cursor::Render(sf::Sprite* m_sprite, float depth)
 		{
 			if (player->second)
 			{
-				int tilexp = ((player->second->x * 32) - (player->second->y * 32)) - this->p_Map->xoff;
-				int tileyp = ((player->second->x * 16) + (player->second->y * 16)) - this->p_Map->yoff;
+				float tilexp = ((player->second->x * 32) - (player->second->y * 32)) - this->p_Map->xoff + player->second->xoffset;
+				float tileyp = ((player->second->x * 16) + (player->second->y * 16)) - this->p_Map->yoff + player->second->yoffset;
 				if ((player->second->x == x && player->second->y == y))
 				{
 					if (p_Map->LUTMap[player->second->x][player->second->y] > MapElementDepth)
@@ -187,10 +187,8 @@ void Map_UI_Cursor::Render(sf::Sprite* m_sprite, float depth)
 			SrcRect.right = 64 + (64 * this->m_CursorType);
 			SrcRect.top = 0;
 			//D3DXMatrixTransformation2D(&mat, NULL, NULL, NULL, NULL, NULL, NULL);
-			int rx = (x - this->p_Map->xpos);
-			int ry = (y - this->p_Map->ypos);
-			int mx = (rx * 32) - (ry * 32) + 280;
-			int my = (ry * 16) + (rx * 16) + 170;
+			float mx = (x * 32) - (y * 32) - this->p_Map->xoff;
+			float my = (y * 16) + (x * 16) - this->p_Map->yoff;
 
 
 			this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 24, true), mx, my, sf::Color::White, SrcRect.left, SrcRect.top, SrcRect.right, SrcRect.bottom, sf::Vector2f(1, 1), depth);
@@ -266,7 +264,7 @@ void Map_UI_Cursor::Render(sf::Sprite* m_sprite, float depth)
 
 }
 
-std::pair<int, int> ScreenCordToMap(std::pair<int, int> m_loc)
+std::pair<int, int> ScreenCordToMap(std::pair<float, float> m_loc)
 {
 	/*int screenx = (m_loc.first - m_loc.second) * 32;
 	int screeny = (m_loc.first + m_loc.second) * 16;
@@ -298,8 +296,8 @@ std::pair<int, int> ScreenCordToMap(std::pair<int, int> m_loc)
 static const wchar_t* SpecNames[] = { L"None",	L"Wall",L"ChairDown",L"ChairLeft",L"ChairRight",L"ChairUp",L"ChairDownRight",L"ChairUpLeft",L"ChairAll",L"Unknown1", L"Unknown2", L"Chest",L"Unknown3",L"Unknown4",L"Unknown5",L"Unknown6",L"Unknown7",L"Unknown8",L"Unknown9",L"BankVault",L"NPCBoundary",L"MapEdge",L"FakeWall",L"Board1",L"Board2" ,L"Board3" ,L"Board4" ,L"Board5" ,L"Board6" ,L"Board7" ,L"Board8" ,L"Jukebox" ,L"Jump" ,L"Water",L"SpecUnknown7" ,L"Arena" ,L"AmbientSource" ,L"Spikes1",L"Spikes2",L"Spikes3" };
 void Map_UI_Cursor::Update()
 {
-	int MouseX = this->m_game->MouseX + this->p_Map->xoff;
-	int MouseY = this->m_game->MouseY + this->p_Map->yoff;
+	float MouseX = this->m_game->MouseX + this->p_Map->xoff;
+	float MouseY = this->m_game->MouseY + this->p_Map->yoff;
 
 	if (this->m_game->MousePressed)
 	{
@@ -356,7 +354,7 @@ void Map_UI_Cursor::Update()
 		hideme = true;
 		return;
 	}
-	std::pair<int, int> pa = ScreenCordToMap(std::pair<int, int>(MouseX, MouseY));
+	std::pair<int, int> pa = ScreenCordToMap(std::pair<float, float>(MouseX, MouseY));
 	x = pa.first;//+ this->p_Map->xpos;
 	y = pa.second; //+ this->p_Map->ypos;
 	if (x < 0 || x >= this->p_Map->m_emf.header.width) { x = -1; }

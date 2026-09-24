@@ -31,7 +31,8 @@ public:
 	int MapAnimIndex = 0;
 	double MapAnimationElapsedSeconds = 0.0;
 	const char* m_map_filename = nullptr;
-	int xsub = 0, ysub = 0, xoff = 0, yoff= 0;
+	int xsub = 0, ysub = 0;
+	float xoff = 0.0f, yoff = 0.0f;
 	int	xpos = 0, ypos = 0;
 	struct Map_Item
 	{

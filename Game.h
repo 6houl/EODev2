@@ -15,8 +15,8 @@ private:
 	{
 	public:
 		Resource_Manager::TextureData* _TextureData = nullptr;
-		int x; 
-		int y;
+		float x;
+		float y;
 		sf::Color Color;
 		int imgx = 0;
 		int imgy = 0;
@@ -39,7 +39,7 @@ private:
 		DrawType ResourceType;
 		std::string _Message;
 		
-		RenderInfo(Resource_Manager::TextureData* dat, int _x, int _y, sf::Color _Color , int _imgx , int _imgy , int _imgw , int  _imgh , sf::Vector2f _Scale)
+		RenderInfo(Resource_Manager::TextureData* dat, float _x, float _y, sf::Color _Color , int _imgx , int _imgy , int _imgw , int  _imgh , sf::Vector2f _Scale)
 		{
 			this->_TextureData = dat;
 			this->x = _x;
@@ -52,7 +52,7 @@ private:
 			this->Scale = _Scale;
 			this->ResourceType = DrawType::Texture;
 		}			
-		RenderInfo(std::string _message, int _x, int _y, sf::Color _Color , int _imgx , int _imgy , int _imgw , int  _imgh , sf::Vector2f _Scale, bool iscentered, int _borderthickness = 0)
+		RenderInfo(std::string _message, float _x, float _y, sf::Color _Color , int _imgx , int _imgy , int _imgw , int  _imgh , sf::Vector2f _Scale, bool iscentered, int _borderthickness = 0)
 		{
 			this->_Message = _message;
 			this->x = _x;
@@ -67,7 +67,7 @@ private:
 			this->borderthickness = _borderthickness;
 			this->ResourceType = DrawType::Text;
 		}	
-		RenderInfo(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>*  _RenderTextureTarget, int _x, int _y, sf::Color _Color, int _imgx, int _imgy, int _imgw, int  _imgh, sf::Vector2f _Scale)
+		RenderInfo(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>*  _RenderTextureTarget, float _x, float _y, sf::Color _Color, int _imgx, int _imgy, int _imgw, int  _imgh, sf::Vector2f _Scale)
 		{
 			this->RenderTargetSprite = _RenderSprite;
 			this->RenderTextureTarget = _RenderTextureTarget;
@@ -169,13 +169,13 @@ public:
 	void Initialize(sf::RenderWindow*Device, World* _world);
 	void Update();
 	void Render();
-	void Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, int x, int y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1,1), float Depth = 1);
-	void Draw(Resource_Manager::TextureData* dat, int x, int y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1, 1), float Depth = 1);
-	void Draw(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>* Rendertex, int x, int y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1, 1), float Depth = 1);
+	void Draw(DWORD ModuleID, int GFXID, bool BlackIsTransparent, float x, float y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1,1), float Depth = 1);
+	void Draw(Resource_Manager::TextureData* dat, float x, float y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1, 1), float Depth = 1);
+	void Draw(std::shared_ptr<sf::Sprite>* _RenderSprite, std::shared_ptr<sf::RenderTexture>* Rendertex, float x, float y, sf::Color Color = sf::Color::Color::White, int imgx = 0, int imgy = 0, int imgw = -1, int  imgh = -1, sf::Vector2f Scale = sf::Vector2f(1, 1), float Depth = 1);
 	void ClearDrawOrder() { this->RenderList.clear(); }
 	void Close();
 
-	void DrawText(std::string str, int x, int y, sf::Color Color, int height = 14, bool centered = false, float Depth = 1.0f, int outlinethickness = 0, int bottomx = -1, int bottomy = -1);
+	void DrawText(std::string str, float x, float y, sf::Color Color, int height = 14, bool centered = false, float Depth = 1.0f, int outlinethickness = 0, int bottomx = -1, int bottomy = -1);
 
 	void Unload();
 	~Game();

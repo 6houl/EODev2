@@ -118,8 +118,8 @@ void Map_NPC::MoveNPC(double deltaSeconds, int DestX, int DestY)
 
 	this->WalkElapsedSeconds += (std::max)(0.0, deltaSeconds);
 	const double progress = (std::min)(1.0, this->WalkElapsedSeconds / NPCWalkSeconds);
-	const int horizontal = static_cast<int>(std::lround(32.0 * progress));
-	const int vertical = static_cast<int>(std::lround(16.0 * progress));
+	const float horizontal = static_cast<float>(32.0 * progress);
+	const float vertical = horizontal * 0.5f;
 	this->FrameID = (std::min)(3, static_cast<int>(progress * 4.0));
 	switch (move_direction)
 	{
@@ -225,7 +225,7 @@ void Map_NPC::NPCKill()
 	this->DeathElapsedSeconds = 0.0;
 	this->Deathcounter += 1;
 }
-void Map_NPC::Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_color)
+void Map_NPC::Render(sf::Sprite* _Sprite, float x, float y, float depth, sf::Color m_color)
 {
 	const ENF_Data& npcData = World::ENF_File->Get(this->ID);
 	if (!npcData)

@@ -142,7 +142,7 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 	}
 	if (this->p_container == NULL)
 	{
-		this->Lineindex = (this->MaxIndex - (this->Numberoflines - 1)) * (float)(this->BarPercent);
+		this->Lineindex = (std::max)(0, this->MaxIndex - this->Numberoflines) * this->BarPercent;
 		if (this->Lineindex < 0)
 		{
 			this->Lineindex = 0;
@@ -155,7 +155,7 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 		{
 			counter += p_container->at(i).MessageLength;
 		}
-		this->Lineindex = ((float)counter - (this->Numberoflines - 1)) * (float)(this->BarPercent );
+		this->Lineindex = (std::max)(0, counter - this->Numberoflines) * this->BarPercent;
 		if (this->Lineindex < 0)
 		{
 			this->Lineindex = 0;
@@ -176,15 +176,11 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 	if (MouseWheelValue < 0)
 	{
 		this->Lineindex -= 1;
-		this->BarPercent = (float)(this->Lineindex) / (float)(this->MaxIndex);
-		this->Barpos = ((float)(this->BarPercent) * (float)(this->BarHeight - 32));
 		mousepressed = true;
 	}
 	else if (MouseWheelValue > 0)
 	{
 		this->Lineindex += 1;
-		this->BarPercent = (float)(this->Lineindex) / (float)(this->MaxIndex);
-		this->Barpos = ((float)(this->BarPercent) * (float)(this->BarHeight - 32));
 		mousepressed = true;
 	}
 
@@ -192,15 +188,16 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 	{
 		if (this->p_container == NULL)
 		{
-			if (this->Lineindex > this->MaxIndex - (this->Numberoflines - 1))
+			const int maximumIndex = (std::max)(0, this->MaxIndex - this->Numberoflines);
+			if (this->Lineindex > maximumIndex)
 			{
-				this->Lineindex = this->MaxIndex - (this->Numberoflines - 1);
+				this->Lineindex = maximumIndex;
 			}
 			if (this->Lineindex < 0)
 			{
 				this->Lineindex = 0;
 			}
-			this->BarPercent = (float)(this->Lineindex) / (float)(this->MaxIndex -(this->Numberoflines - 1));
+			this->BarPercent = maximumIndex > 0 ? this->Lineindex / static_cast<float>(maximumIndex) : 0.0f;
 			this->Barpos = (float)(this->BarPercent) * (float)(this->BarHeight - 32);
 		}
 		else
@@ -211,9 +208,10 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 			{
 				counter += p_container->at(i).MessageLength ;
 			}
-			if (this->Lineindex > counter - (this->Numberoflines - 1))
+			const int maximumIndex = (std::max)(0, counter - this->Numberoflines);
+			if (this->Lineindex > maximumIndex)
 			{
-				this->Lineindex = counter - (this->Numberoflines - 1);
+				this->Lineindex = maximumIndex;
 			}
 			if (this->Lineindex < 0)
 			{
@@ -221,7 +219,7 @@ void UI_Scrollbar::Update(int MouseX, int MouseY, int MouseWheelValue, bool Mous
 			}
 			
 
-			this->BarPercent = (float)(this->Lineindex) / (float)(counter - (this->Numberoflines - 1));
+			this->BarPercent = maximumIndex > 0 ? this->Lineindex / static_cast<float>(maximumIndex) : 0.0f;
 			this->Barpos = ((float)(this->BarPercent) * (float)(this->BarHeight - 32));
 		}
 	}

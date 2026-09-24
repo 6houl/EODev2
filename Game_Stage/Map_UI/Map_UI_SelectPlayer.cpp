@@ -39,8 +39,8 @@ void Map_UI_SelectPlayer::Update()
 		SrcRect.bottom = SrcRect.top + height;
 		SrcRect.left = 0;
 		SrcRect.right = SrcRect.left + width;
-		int tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff;
-		int tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff;
+		float tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff + this->m_game->map->m_Players[playerid]->xoffset;
+		float tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff + this->m_game->map->m_Players[playerid]->yoffset;
 		sf::Vector3f Pos(tilexp + 47, tileyp - 65, 1.0f);
 
 		if ((this->m_game->MouseX > Pos.x&& this->m_game->MouseX < Pos.x + width) && (this->m_game->MouseY > Pos.y && this->m_game->MouseY < Pos.y + height))
@@ -118,8 +118,8 @@ void Map_UI_SelectPlayer::Render(float depth)
 		RECT SrcRect;
 		int width = 96;
 		int height = 137;
-		int tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff;
-		int tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff;
+		float tilexp = ((this->m_game->map->m_Players[playerid]->x * 32) - (this->m_game->map->m_Players[playerid]->y * 32)) - this->m_game->map->xoff + this->m_game->map->m_Players[playerid]->xoffset;
+		float tileyp = ((this->m_game->map->m_Players[playerid]->x * 16) + (this->m_game->map->m_Players[playerid]->y * 16)) - this->m_game->map->yoff + this->m_game->map->m_Players[playerid]->yoffset;
 
 		sf::Vector3f Pos(tilexp + 47, tileyp - 65, 1.0f);
 		sf::Color col = sf::Color::Color(186, 122, 89, 133);

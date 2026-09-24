@@ -109,8 +109,8 @@ void Map_Player::MovePlayer(double deltaSeconds, int dest_x, int dest_y)
 
 	this->WalkElapsedSeconds += (std::max)(0.0, deltaSeconds);
 	const double progress = (std::min)(1.0, this->WalkElapsedSeconds / PlayerWalkSeconds);
-	const int horizontal = static_cast<int>(std::lround(32.0 * progress));
-	const int vertical = static_cast<int>(std::lround(16.0 * progress));
+	const float horizontal = static_cast<float>(32.0 * progress);
+	const float vertical = horizontal * 0.5f;
 	this->frame_ID = (std::min)(3, static_cast<int>(progress * 4.0));
 
 	switch (move_direction)
@@ -239,7 +239,7 @@ void Map_Player::Update(double deltaSeconds)
 	}
 }
 
-void Map_Player::Map_PlayerRender(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_Color)
+void Map_Player::Map_PlayerRender(sf::Sprite* _Sprite, float x, float y, float depth, sf::Color m_Color)
 {
 	this->Render(x, y, depth, m_Color);
 
