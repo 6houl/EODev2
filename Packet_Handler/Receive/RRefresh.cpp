@@ -17,15 +17,12 @@ CLIENT_F_FUNC(Refresh)
 					game->map->ThreadLock.unlock();
 					return false;
 				}
-				Map_Player* MainPlayer = mainPlayerEntry->second;
-				int exp = MainPlayer->exp;
 				game->map->ThreadLock.unlock();
 				std::vector<int> preserveIDList;
 				//				game->map->ClearMap();
 				for (int i = 0; i < numberofplayers; i++)
 				{
 					Map_Player* newplayer = new Map_Player();
-					newplayer->Initialize(game);
 					newplayer->name = reader.GetBreakString();
 					newplayer->ID = reader.GetShort();
 					preserveIDList.push_back(newplayer->ID);
@@ -85,41 +82,55 @@ CLIENT_F_FUNC(Refresh)
 						newplayer->SetStance(Map_Player::PlayerStance::Standing);
 					}
 					unsigned char is_hideinvisible = reader.GetChar();
+					newplayer->hidden = is_hideinvisible;
 					reader.Getbyte();
 
 					bool playerfound = false;
-					for (auto p : game->map->m_Players)
 					{
-						if (newplayer->ID == p.first)
+						std::lock_guard<std::mutex> lock(game->map->ThreadLock);
+						auto player = game->map->m_Players.find(newplayer->ID);
+						if (player != game->map->m_Players.end() && player->second != nullptr)
 						{
 							playerfound = true;
-							p.second->exp = exp;
-							p.second->guildtag = newplayer->guildtag;
-							p.second->mapid = newplayer->mapid;
-							p.second->x = newplayer->x;
-							p.second->y = newplayer->y;
-							p.second->direction = newplayer->direction;
-							p.second->level = newplayer->level;
-							p.second->Gender = newplayer->Gender;
-							p.second->HairStyle = newplayer->HairStyle;
-							p.second->HairCol = newplayer->HairCol;
-							p.second->SkinCol = newplayer->SkinCol;
-							p.second->maxhp = newplayer->maxhp;
-							p.second->hp = newplayer->hp;
-							p.second->maxtp = newplayer->maxtp;
-							p.second->tp = newplayer->tp;
-							p.second->ShoeID = newplayer->ShoeID;
-							p.second->ArmorID = newplayer->ArmorID;
-							p.second->HatID = newplayer->HatID;
-							p.second->ShieldID = newplayer->ShieldID;
-							p.second->WeaponID = newplayer->WeaponID;
-							p.second->SetStance(newplayer->Stance);
-							p.second->UpdateAppearence();
-							delete newplayer;
+							Map_Player* currentPlayer = player->second;
+							const bool confirmsCurrentWalk = newplayer->Stance == Map_Player::PlayerStance::Standing &&
+								currentPlayer->IsWalkingTo(newplayer->x, newplayer->y);
+							currentPlayer->guildtag = newplayer->guildtag;
+							currentPlayer->mapid = newplayer->mapid;
+							if (!confirmsCurrentWalk)
+							{
+								if (currentPlayer->destination_x >= 0 && currentPlayer->destination_y >= 0)
+									World::DebugPrint("Server corrected player walk position.");
+								currentPlayer->SetStance(newplayer->Stance);
+								currentPlayer->x = newplayer->x;
+								currentPlayer->y = newplayer->y;
+								currentPlayer->direction = newplayer->direction;
+							}
+							currentPlayer->level = newplayer->level;
+							currentPlayer->Gender = newplayer->Gender;
+							currentPlayer->HairStyle = newplayer->HairStyle;
+							currentPlayer->HairCol = newplayer->HairCol;
+							currentPlayer->SkinCol = newplayer->SkinCol;
+							currentPlayer->maxhp = newplayer->maxhp;
+							currentPlayer->hp = newplayer->hp;
+							currentPlayer->maxtp = newplayer->maxtp;
+							currentPlayer->tp = newplayer->tp;
+							currentPlayer->ShoeID = newplayer->ShoeID;
+							currentPlayer->ArmorID = newplayer->ArmorID;
+							currentPlayer->HatID = newplayer->HatID;
+							currentPlayer->ShieldID = newplayer->ShieldID;
+							currentPlayer->WeaponID = newplayer->WeaponID;
+							currentPlayer->hidden = newplayer->hidden;
+							currentPlayer->UpdateAppearence();
 						}
+					}
+					if (playerfound)
+					{
+						delete newplayer;
 					}
 					if (!playerfound)
 					{
+						newplayer->Initialize(game);
 						game->map->AddPlayer(newplayer);
 					}
 				}
@@ -145,13 +156,37 @@ CLIENT_F_FUNC(Refresh)
 					int index = reader.GetChar();
 					if (index == 254) { break; }
 					Map_NPC* new_npc = new Map_NPC();
-					new_npc->Initialize((LPVOID*)game);
 					new_npc->Index = index;
 					new_npc->ID = reader.GetShort();
 					new_npc->x = reader.GetChar();
 					new_npc->y = reader.GetChar();
 					new_npc->direction = reader.GetChar();
-					game->map->AddNPC(new_npc);
+					bool npcFound = false;
+					{
+						std::lock_guard<std::mutex> lock(game->map->ThreadLock);
+						auto npc = game->map->m_NPCs.find(index);
+						if (npc != game->map->m_NPCs.end() && npc->second != nullptr)
+						{
+							npcFound = true;
+							if (!npc->second->IsWalkingTo(new_npc->x, new_npc->y))
+							{
+								if (npc->second->destination_x >= 0 && npc->second->destination_y >= 0)
+									World::DebugPrint("Server corrected NPC walk position.");
+								npc->second->SetStance(Map_NPC::NPC_Stance::Standing);
+								npc->second->x = new_npc->x;
+								npc->second->y = new_npc->y;
+								npc->second->direction = new_npc->direction;
+							}
+							npc->second->ID = new_npc->ID;
+						}
+					}
+					if (npcFound)
+						delete new_npc;
+					else
+					{
+						new_npc->Initialize((LPVOID*)game);
+						game->map->AddNPC(new_npc);
+					}
 				}
 
 				while (true)

@@ -7,7 +7,8 @@
 
 namespace
 {
-	constexpr double PlayerWalkSeconds = 0.48;
+	constexpr double PlayerWalkSeconds = 0.45;
+	constexpr std::size_t MaximumQueuedWalks = 8;
 	constexpr double PlayerActionFrameSeconds = 0.12;
 	constexpr double PlayerActionSeconds = 0.60;
 	constexpr double DamageDisplaySeconds = 0.40;
@@ -40,8 +41,33 @@ void Map_Player::SetStance(PlayerStance m_Stance)
 		this->WalkElapsedSeconds = 0.0;
 		this->xoffset = 0;
 		this->yoffset = 0;
+		this->QueuedWalks.clear();
 	}
 }
+
+void Map_Player::QueueWalk(int dest_x, int dest_y)
+{
+	if (this->destination_x == dest_x && this->destination_y == dest_y)
+		return;
+	if (!this->QueuedWalks.empty() && this->QueuedWalks.back().first == dest_x && this->QueuedWalks.back().second == dest_y)
+		return;
+	if (this->QueuedWalks.size() >= MaximumQueuedWalks)
+		this->QueuedWalks.pop_front();
+	this->QueuedWalks.emplace_back(dest_x, dest_y);
+}
+
+bool Map_Player::IsWalkingTo(int dest_x, int dest_y) const
+{
+	if (this->destination_x == dest_x && this->destination_y == dest_y)
+		return true;
+	for (const auto& queuedWalk : this->QueuedWalks)
+	{
+		if (queuedWalk.first == dest_x && queuedWalk.second == dest_y)
+			return true;
+	}
+	return false;
+}
+
 int  Map_Player::FindWalkDirection(int dest_x, int dest_y)
 {
 	this->destination_x = dest_x;
@@ -97,6 +123,8 @@ void Map_Player::MovePlayer(double deltaSeconds, int dest_x, int dest_y)
 
 	if (progress >= 1.0)
 	{
+		const double remainingSeconds = (std::max)(0.0, this->WalkElapsedSeconds - PlayerWalkSeconds);
+		auto queuedWalks = std::move(this->QueuedWalks);
 		this->x = dest_x;
 		this->y = dest_y;
 		this->destination_x = -1;
@@ -106,6 +134,13 @@ void Map_Player::MovePlayer(double deltaSeconds, int dest_x, int dest_y)
 		this->WalkElapsedSeconds = 0.0;
 		this->frame_ID = 0;
 		this->SetStance(CharacterModel::PlayerStance::Standing);
+		if (!queuedWalks.empty())
+		{
+			const auto queuedWalk = queuedWalks.front();
+			queuedWalks.pop_front();
+			this->QueuedWalks = std::move(queuedWalks);
+			this->MovePlayer(remainingSeconds, queuedWalk.first, queuedWalk.second);
+		}
 	}
 }
 

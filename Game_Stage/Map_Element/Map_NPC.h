@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 
 class Map_NPC
 {
@@ -23,6 +24,7 @@ public:
 	double AnimationElapsedSeconds = 0.0;
 	double DamageElapsedSeconds = 0.0;
 	double DeathElapsedSeconds = 0.0;
+	std::deque<std::pair<int, int>> QueuedWalks;
 
 	bool isattacked = false;
 	int time = 0;
@@ -43,6 +45,8 @@ public:
 	void Initialize(LPVOID* m_game);
 	void SetStance(NPC_Stance m_Stance);
 	void MoveNPC(double deltaSeconds, int DestX,int DestY);
+	void QueueWalk(int dest_x, int dest_y);
+	bool IsWalkingTo(int dest_x, int dest_y) const;
 	void DealDamage(short HpLeft, int damage);
 	void Update(double deltaSeconds);
 	void Render(sf::Sprite* _Sprite, int x, int y, float depth, sf::Color m_color = sf::Color::White );

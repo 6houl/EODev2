@@ -264,6 +264,8 @@ void Map::AddNPC(Map_NPC * m_NPC)
 }
 void Map::WalkPlayer(int ID, int direction, int DestX, int DestY)
 {
+	if (ID < 0 || direction < 0 || direction > 3 || DestX < 0 || DestY < 0 || DestX >= this->m_emf.header.width || DestY >= this->m_emf.header.height)
+		return;
 	int m_PlayerID = ID;
 	int FromX = DestX;
 	int FromY = DestY;
@@ -289,18 +291,28 @@ void Map::WalkPlayer(int ID, int direction, int DestX, int DestY)
 			///Right
 			FromX--;
 		}
-		if (m_Players.count(m_PlayerID) > 0)
+		this->ThreadLock.lock();
+		auto player = this->m_Players.find(m_PlayerID);
+		if (player != this->m_Players.end() && player->second != nullptr)
 		{
-			this->ThreadLock.lock();
-			this->m_Players[m_PlayerID]->x = FromX;
-			this->m_Players[m_PlayerID]->y = FromY;
-			this->m_Players[m_PlayerID]->MovePlayer(0.0, DestX, DestY);
-			this->ThreadLock.unlock();
+			if (player->second->destination_x >= 0 && player->second->destination_y >= 0)
+			{
+				player->second->QueueWalk(DestX, DestY);
+			}
+			else
+			{
+				player->second->x = FromX;
+				player->second->y = FromY;
+				player->second->MovePlayer(0.0, DestX, DestY);
+			}
 		}
+		this->ThreadLock.unlock();
 	}
 }
 void Map::WalkNPC(int ID, int direction, int DestX, int DestY)
 {
+	if (ID < 0 || direction < 0 || direction > 3 || DestX < 0 || DestY < 0 || DestX >= this->m_emf.header.width || DestY >= this->m_emf.header.height)
+		return;
 	int m_NPCID = ID;
 	int FromX = DestX;
 	int FromY = DestY;
@@ -322,20 +334,22 @@ void Map::WalkNPC(int ID, int direction, int DestX, int DestY)
 		{
 			FromX--;
 		}
-		if (m_NPCs.count(m_NPCID) > 0 )
+		this->ThreadLock.lock();
+		auto npc = this->m_NPCs.find(m_NPCID);
+		if (npc != this->m_NPCs.end() && npc->second != nullptr)
 		{
-			this->ThreadLock.lock();
-			if (DestX > this->m_emf.header.width || DestY > this->m_emf.header.height)
+			if (npc->second->destination_x >= 0 && npc->second->destination_y >= 0)
 			{
-				//this->RemoveNPC(m_NPCID);
-				this->ThreadLock.unlock();
-				return;
+				npc->second->QueueWalk(DestX, DestY);
 			}
-			this->m_NPCs[m_NPCID]->x = FromX;
-			this->m_NPCs[m_NPCID]->y = FromY;
-			this->m_NPCs[m_NPCID]->MoveNPC(0.0, DestX, DestY);
-			this->ThreadLock.unlock();
+			else
+			{
+				npc->second->x = FromX;
+				npc->second->y = FromY;
+				npc->second->MoveNPC(0.0, DestX, DestY);
+			}
 		}
+		this->ThreadLock.unlock();
 	}
 }
 void Map::WalkGameCharacter(int ID, int direction, int _X, int _Y)

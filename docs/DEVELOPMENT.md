@@ -203,10 +203,12 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 ### Issues #100, #109-#110, #113-#115, #117-#123, and #156-#158: Rendering and movement stability
 
 - Uses monotonic elapsed time for frame pacing, player and NPC movement, map animation, combat frames, damage display, death effects, and UI refresh timers.
-- Interpolates player movement over 480 milliseconds and NPC movement over 400 milliseconds using EndlessClient's 32-by-16 isometric tile offsets and animation timing as the reference.
+- Interpolates player movement over 450 milliseconds and NPC movement over 400 milliseconds using EndlessClient's 32-by-16 isometric tile offsets and animation timing as the reference.
+- Queues overlapping remote-player and NPC walk destinations instead of resetting an active step when the next server packet arrives.
+- Carries unused frame time into the queued step so brief frame stalls do not create movement lag.
 - Keeps EODev's fixed camera and panel layout. Smooth actor offsets now move the world beneath the centered local player without adding EndlessClient zoom or floating UI behavior.
 - Applies the tile-spec walkability rules supported by EOLib and blocks occupied actor positions and in-progress destinations before sending a local walk.
-- Treats Refresh/Reply coordinates as authoritative and cancels unfinished interpolation when ArenaServ rejects or corrects a walk.
+- Treats Refresh/Reply coordinates as authoritative. A matching active or queued destination confirms movement without a snap; a conflicting coordinate cancels interpolation and logs a correction.
 - Parses ArenaServ's Walk/Reply sentinels and dropped-item entries instead of leaving unread reply data.
 - Handles both the five-byte immediate NPC removal packet and full NPC death packets without requiring an item drop, and no longer reports a successfully handled death packet as unhandled.
 - Initializes actor state, equipment, stance, direction, animation, and destination fields before the first render.
@@ -216,7 +218,7 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
 
-Live checks should cover continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. The local player should remain centered while the map moves smoothly, and all actors should finish on server-provided coordinates.
+Live checks should cover continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The local player should remain centered, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 
 ## Current Boundary
 

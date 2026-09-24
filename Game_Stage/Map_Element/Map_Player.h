@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include "..\..\Game_Stage\Map_Element\CharacterModel.h"
 class Map_Player : public CharacterModel
 {
@@ -35,6 +36,8 @@ public:
 	};
 	void SetStance(PlayerStance m_Stance);
 	void MovePlayer(double deltaSeconds, int dest_x, int dest_y);
+	void QueueWalk(int dest_x, int dest_y);
+	bool IsWalkingTo(int dest_x, int dest_y) const;
 
 	void Initialize(Game* M_Game);
 	int login_time = 0;
@@ -46,6 +49,7 @@ public:
 	double AnimationElapsedSeconds = 0.0;
 	double DamageElapsedSeconds = 0.0;
 	double DeathElapsedSeconds = 0.0;
+	std::deque<std::pair<int, int>> QueuedWalks;
 	//AdminLevel admin;
 	std::string guildname;
 	std::string guildtag;

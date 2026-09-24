@@ -8,7 +8,8 @@ CLIENT_F_FUNC(Walk)
 		{		
 			case PACKET_PLAYER: 
 				{
-					
+					if (reader.Remaining() < 5)
+						return false;
 					short PlayerID = reader.GetShort();
 					int Direction = reader.GetChar();
 					int FromX = reader.GetChar();

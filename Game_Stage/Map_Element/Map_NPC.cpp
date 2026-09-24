@@ -8,6 +8,7 @@
 namespace
 {
 	constexpr double NPCWalkSeconds = 0.40;
+	constexpr std::size_t MaximumQueuedWalks = 8;
 	constexpr double NPCActionFrameSeconds = 0.08;
 	constexpr double NPCActionSeconds = 0.24;
 	constexpr double DamageDisplaySeconds = 0.40;
@@ -50,8 +51,33 @@ void Map_NPC::SetStance(NPC_Stance m_Stance)
 		this->WalkElapsedSeconds = 0.0;
 		this->xoffset = 0;
 		this->yoffset = 0;
+		this->QueuedWalks.clear();
 	}
 }
+
+void Map_NPC::QueueWalk(int dest_x, int dest_y)
+{
+	if (this->destination_x == dest_x && this->destination_y == dest_y)
+		return;
+	if (!this->QueuedWalks.empty() && this->QueuedWalks.back().first == dest_x && this->QueuedWalks.back().second == dest_y)
+		return;
+	if (this->QueuedWalks.size() >= MaximumQueuedWalks)
+		this->QueuedWalks.pop_front();
+	this->QueuedWalks.emplace_back(dest_x, dest_y);
+}
+
+bool Map_NPC::IsWalkingTo(int dest_x, int dest_y) const
+{
+	if (this->destination_x == dest_x && this->destination_y == dest_y)
+		return true;
+	for (const auto& queuedWalk : this->QueuedWalks)
+	{
+		if (queuedWalk.first == dest_x && queuedWalk.second == dest_y)
+			return true;
+	}
+	return false;
+}
+
 int  Map_NPC::FindWalkDirection(int dest_x, int dest_y)
 {
 	this->destination_x = dest_x;
@@ -104,6 +130,8 @@ void Map_NPC::MoveNPC(double deltaSeconds, int DestX, int DestY)
 	}
 	if (progress >= 1.0)
 	{
+		const double remainingSeconds = (std::max)(0.0, this->WalkElapsedSeconds - NPCWalkSeconds);
+		auto queuedWalks = std::move(this->QueuedWalks);
 		this->x = DestX;
 		this->y = DestY;
 		this->destination_x = -1;
@@ -112,6 +140,13 @@ void Map_NPC::MoveNPC(double deltaSeconds, int DestX, int DestY)
 		this->yoffset = 0;
 		this->WalkElapsedSeconds = 0.0;
 		this->SetStance(Map_NPC::NPC_Stance::Standing);
+		if (!queuedWalks.empty())
+		{
+			const auto queuedWalk = queuedWalks.front();
+			queuedWalks.pop_front();
+			this->QueuedWalks = std::move(queuedWalks);
+			this->MoveNPC(remainingSeconds, queuedWalk.first, queuedWalk.second);
+		}
 	}
 }
 void Map_NPC::Update(double deltaSeconds)
