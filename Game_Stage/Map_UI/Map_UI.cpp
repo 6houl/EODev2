@@ -246,6 +246,7 @@ void Map_UI::Render()
 }
 void Map_UI::DrawHUDStats()
 {
+	constexpr float StatusBarDepth = 0.007f;
 	auto player = this->m_game->map->m_Players.find(World::WorldCharacterID);
 	if (player == this->m_game->map->m_Players.end() || player->second == nullptr)
 		return;
@@ -255,8 +256,8 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 0;
 	IconSrcRect.bottom = 14;
 	IconSrcRect.right = 440;
-	sf::Vector3f IconPos(100, 8, 0.1f);
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	sf::Vector3f IconPos(100, 0, 0.1f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 
 	//this->Sprite->Draw(HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
 	//this->m_game->map->ThreadLock.lock();
@@ -268,7 +269,7 @@ void Map_UI::DrawHUDStats()
 
 	const float hpPercent = (std::max)(0.0f, (std::min)(1.0f, hp / maxhp));
 	IconSrcRect.right = 25 + std::round(hpPercent * 79.0f);
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 
 	float tp = (float)mainPlayer->tp;
 	float maxtp = mainPlayer->maxtp > 0 ? (float)mainPlayer->maxtp : 1.0f;
@@ -278,7 +279,7 @@ void Map_UI::DrawHUDStats()
 	const float tpPercent = (std::max)(0.0f, (std::min)(1.0f, tp / maxtp));
 	IconSrcRect.right = IconSrcRect.left + 25 + std::round(tpPercent * 79.0f);
 	IconPos.x = 210;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 	
 
 	float sp = 100;
@@ -288,7 +289,7 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.bottom = IconSrcRect.top + 14;
 	IconSrcRect.right = IconSrcRect.left + 25 + std::round((sp / maxsp) * 79.0f);
 	IconPos.x = 320;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 
 
 	float exp = (float)mainPlayer->exp - (std::round(std::pow(double(mainPlayer->level + 0), 3.0) * 133.1));
@@ -299,7 +300,7 @@ void Map_UI::DrawHUDStats()
 	const float expPercent = (std::max)(0.0f, (std::min)(1.0f, exp / exptnl));
 	IconSrcRect.right = IconSrcRect.left + 25 + std::round(expPercent * 79.0f);
 	IconPos.x = 430;
-	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
+	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 	//this->m_game->map->ThreadLock.unlock();
 }
 

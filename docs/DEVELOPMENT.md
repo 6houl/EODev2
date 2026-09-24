@@ -223,7 +223,7 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 - Removes the duplicate local-player render and replaces per-draw multimap allocation with a reserved, stable-sorted render queue.
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
-- Places the fixed HP, TP, SP, and TNL strip directly below EODev's top frame at Y 8 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient.
+- Places the fixed HP, TP, SP, and TNL strip over EODev's top frame at Y 0 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient. The status strip uses a foreground depth below the frame's depth value because EODev renders smaller depths later.
 
 Live checks should cover the first movement immediately after entering the map, continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The first walk should receive normal server processing without a corrective teleport, the local player should remain centered without layer or overlay shake, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 
