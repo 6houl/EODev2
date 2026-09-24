@@ -15,8 +15,8 @@ public:
  */
 	struct Character_Item
 	{
-		short id;
-		int amount;
+		short id = 0;
+		int amount = 0;
 
 		Character_Item() = default;
 		Character_Item(short id, int amount) : id(id), amount(amount) { }
@@ -27,8 +27,8 @@ public:
 	 */
 	struct Character_Spell
 	{
-		short id;
-		unsigned char level;
+		short id = 0;
+		unsigned char level = 0;
 
 		Character_Spell() = default;
 		Character_Spell(short id, unsigned char level) : id(id), level(level) { }
@@ -55,8 +55,8 @@ public:
 	std::string home;
 	std::string fiance;
 	std::string partner;
-	unsigned char clas;
-	short mapid;
+	unsigned char clas = 0;
+	short mapid = 0;
 	int fpscounter = 0;
 	int moveFPS = 0;
 	int WalkCounter = 0;

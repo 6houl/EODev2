@@ -156,7 +156,7 @@ public:
 	unsigned char  HatID = 255;
 	unsigned char  ShieldID = 255;
 	void UpdateAppearence() { this->PrerenderPaperdoll(); }
-	RECT SrcRect;
+	RECT SrcRect = { 0, 0, 0, 0 };
 	void SetCharacter(unsigned char  _Gender,unsigned char  _HairStyle,unsigned char  _HairCol,unsigned char  _SkinCol,unsigned char  _direction, int _armorid = -1, int _weaponid = -1, int _shoeid = -1, int _hatid = -1, int _shieldid = -1);
 	void AlignCharacter(PlayerStance m_stance, int FrameID, int m_Direction);
 	void Render(int x, int y, float depth, sf::Color _Color = sf::Color::White);
