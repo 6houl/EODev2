@@ -7,6 +7,8 @@
 
 This file is the durable development reference for EODev. Update it whenever protocol behavior, build requirements, verified fixes, or the working order changes.
 
+The complete UI backlog, status, dependencies, and handoff requirements are tracked in `docs/UI_COMPLETION.md`.
+
 EODev keeps its existing artwork, fixed panel layout, and interaction style. EndlessClient is a behavior and protocol reference. Its floating panels, zoom, scaling, and screen layout are not EODev targets.
 
 ## Source Priority
@@ -224,6 +226,13 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
 - Places the fixed HP, TP, SP, and TNL strip over EODev's top frame at Y 0 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient. The status strip uses a foreground depth below the frame's depth value because EODev renders smaller depths later.
+- Preserves the 640x480 logical canvas at whole-number window scales with centered letterboxing, nearest-neighbor textures, and view-correct mouse input.
+- Renders the local `HH:MM:SS` clock at the classic fixed-client position and uses the EndlessClient three-second status-message lifetime.
+- Adds content to the existing credits screen and gives empty login fields immediate local feedback without sending a request.
+- Enables the classic minimap button and renders the fixed 28x14 map grid, interactive tiles, warps, players, and NPC markers inside the gameplay viewport.
+- Tracks current SP from the Welcome maximum, spends one SP per attack, blocks attacks at zero, and applies the EOLib standing/sitting recovery behavior.
+- Applies fullscreen, resizable-window, and stay-on-top configuration at startup while retaining the 640x480 logical canvas.
+- Guards empty character and guild names in the stats panel and reports remaining TNL rather than the full level interval.
 
 Live checks should cover the first movement immediately after entering the map, continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The first walk should receive normal server processing without a corrective teleport, the local player should remain centered without layer or overlay shake, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 

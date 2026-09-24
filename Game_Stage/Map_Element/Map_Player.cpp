@@ -168,6 +168,22 @@ void Map_Player::PlayerKill()
 }
 void Map_Player::Update(double deltaSeconds)
 {
+	if (this->ID == World::WorldCharacterID && this->sp < this->maxsp)
+	{
+		this->SPRecoveryElapsedSeconds += (std::max)(0.0, deltaSeconds);
+		const double recoverySeconds = (std::max)(0.1, 2.0 - (std::max)(0.8, this->level * 0.08));
+		while (this->SPRecoveryElapsedSeconds >= recoverySeconds && this->sp < this->maxsp)
+		{
+			const short recoveryAmount = this->Stance == PlayerStance::GroundSitting || this->Stance == PlayerStance::ChairSitting ? 4 : 2;
+			this->sp = (std::min)(this->maxsp, static_cast<short>(this->sp + recoveryAmount));
+			this->SPRecoveryElapsedSeconds -= recoverySeconds;
+		}
+	}
+	else
+	{
+		this->SPRecoveryElapsedSeconds = 0.0;
+	}
+
 	if (this->destination_x >= 0 || this->destination_y >= 0)
 	{
 		MovePlayer(deltaSeconds, destination_x, destination_y);

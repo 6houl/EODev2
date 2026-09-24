@@ -141,6 +141,7 @@ CLIENT_F_FUNC(Welcome)
 							MainPlayer->tp = reader.GetShort();
 							MainPlayer->maxtp = reader.GetShort();
 							MainPlayer->maxsp = reader.GetShort();
+							MainPlayer->sp = MainPlayer->maxsp;
 							MainPlayer->statpoints = reader.GetShort();
 							MainPlayer->skillpoints = reader.GetShort();
 							MainPlayer->karma = reader.GetShort();

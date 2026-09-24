@@ -16,6 +16,31 @@
 static int ResX, ResY; 
 Game game;
 World* world;
+
+namespace
+{
+	constexpr float LogicalWidth = 640.0f;
+	constexpr float LogicalHeight = 480.0f;
+
+	void UpdateLogicalView(sf::RenderWindow& window, unsigned int width, unsigned int height)
+	{
+		if (width == 0 || height == 0)
+			return;
+
+		const float availableScale = (std::min)(width / LogicalWidth, height / LogicalHeight);
+		const float scale = availableScale >= 1.0f ? std::floor(availableScale) : availableScale;
+		const float viewportWidth = LogicalWidth * scale / width;
+		const float viewportHeight = LogicalHeight * scale / height;
+
+		sf::View view(sf::FloatRect(0.0f, 0.0f, LogicalWidth, LogicalHeight));
+		view.setViewport(sf::FloatRect(
+			(1.0f - viewportWidth) * 0.5f,
+			(1.0f - viewportHeight) * 0.5f,
+			viewportWidth,
+			viewportHeight));
+		window.setView(view);
+	}
+}
 // function prototypes
 
 // the WindowProc function prototype
@@ -37,8 +62,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 #endif
 
 	std::srand(time(0));
-	ResX = 640;
-	ResY = 480;
+	game.Config = new IniConfiguration();
+	game.Config->Init();
+	const sf::VideoMode windowMode = IniConfiguration::FullScreen ? sf::VideoMode::getDesktopMode() : sf::VideoMode(640, 480);
+	ResX = windowMode.width;
+	ResY = windowMode.height;
+	const sf::Uint32 windowStyle = IniConfiguration::FullScreen
+		? sf::Style::Fullscreen
+		: sf::Style::Titlebar | sf::Style::Close | (IniConfiguration::Sizeable ? sf::Style::Resize : sf::Style::None);
 	// the handle for the window, filled by a function
 	HWND hWnd;
 	sf::ContextSettings settings;
@@ -48,13 +79,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	settings.majorVersion = 3;
 	settings.minorVersion = 0;
 
-	sf::RenderWindow window(sf::VideoMode(ResX, ResY), "Endless Online Developmental", sf::Style::Default, settings);
+	sf::RenderWindow window(windowMode, "Endless Online Developmental", windowStyle, settings);
 	window.setVerticalSyncEnabled(true);
+	UpdateLogicalView(window, window.getSize().x, window.getSize().y);
 	hWnd = window.getSystemHandle();
+	if (IniConfiguration::StayOnTop && !IniConfiguration::FullScreen)
+		SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
 	world = new World(&game);
-	game.Config = new IniConfiguration();
-	game.Config->Init();
 
 	game.Initialize(&window, world);
 	// this struct holds Windows event messages
@@ -118,10 +150,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			}
 			case(sf::Event::Resized):
 			{
-				// update the view to the new size of the window
-				sf::FloatRect visibleArea(0.0f, 0.0f, 640.0f, 480.0f);
-				window.setView(sf::View(visibleArea));
-				
+				UpdateLogicalView(window, event.size.width, event.size.height);
 				break;
 			}
 			case(sf::Event::Closed):
@@ -188,8 +217,16 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			break;
 		sf::Vector2i mousepos = sf::Mouse::getPosition(window);
 		sf::Vector2f newmouspos = window.mapPixelToCoords(mousepos);
-		game.MouseX = std::clamp((int)newmouspos.x, 0, 640);
-		game.MouseY = std::clamp((int)newmouspos.y, 0, 480);
+		if (newmouspos.x < 0.0f || newmouspos.x >= LogicalWidth || newmouspos.y < 0.0f || newmouspos.y >= LogicalHeight)
+		{
+			game.MouseX = -1;
+			game.MouseY = -1;
+		}
+		else
+		{
+			game.MouseX = static_cast<int>(newmouspos.x);
+			game.MouseY = static_cast<int>(newmouspos.y);
+		}
 		game.Update();
 		game.Render();
 		if (game.MousePressed)

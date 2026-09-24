@@ -66,7 +66,7 @@ void Menu::Initialize(World* _world, sf::RenderWindow*m_Device, Game* m_game)
 	Txbox_Texture->_width = Box.GetWidth();
 	txboxtex->loadFromMemory(buffer, dwBufferSize);
 	Txbox_Texture->_Texture = std::shared_ptr<sf::Texture>(txboxtex);
-	Txbox_Texture->_Texture->setSmooth(true);
+	Txbox_Texture->_Texture->setSmooth(false);
 	sf::Sprite* spr = new sf::Sprite();
 	spr->setTexture(*Txbox_Texture->_Texture);
 	Txbox_Texture->_Sprite = std::shared_ptr<sf::Sprite>(spr);
@@ -949,6 +949,13 @@ void Menu::Render()
 				}
 			case(this->m_game->PViewCredits):
 				{
+					this->m_game->DrawText("EODev2", 320, 105, sf::Color(240, 240, 199), 18, true, 0.02f, 1);
+					this->m_game->DrawText("Endless Online client restoration", 320, 140, sf::Color(240, 240, 199), 11, true, 0.02f, 1);
+					this->m_game->DrawText("Original Endless Online artwork and design", 320, 190, sf::Color::White, 9, true, 0.02f, 1);
+					this->m_game->DrawText("EOProtocol, EOLib, and EndlessClient references", 320, 212, sf::Color::White, 9, true, 0.02f, 1);
+					this->m_game->DrawText("ArenaServ and Etheos compatibility", 320, 234, sf::Color::White, 9, true, 0.02f, 1);
+					this->m_game->DrawText("Gantic, 6houl, and project contributors", 320, 256, sf::Color::White, 9, true, 0.02f, 1);
+					this->m_game->DrawText("github.com/6houl/EODev2", 320, 300, sf::Color(220, 220, 180), 9, true, 0.02f, 1);
 					this->BT_CreateAccount->Draw();
 					this->BT_PlayGame->Draw();
 					this->BT_ViewCredits->Draw();
@@ -1073,7 +1080,14 @@ void Menu::Release()
 void Menu::Login()
 {
 	if (this->TB_AccNme->text == "" || this->TB_PassWrd->text == "")
-       { }
+	{
+		World::ThrowMessage("Login", "Enter your account name and password.");
+		if (this->TB_AccNme->text.empty())
+			this->world->SetFocusedTextbox(this->TB_AccNme);
+		else
+			this->world->SetFocusedTextbox(this->TB_PassWrd);
+		return;
+	}
        else
 		{
 			if (!world->connection->TryBeginLogin())

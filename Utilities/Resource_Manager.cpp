@@ -97,14 +97,7 @@ Resource_Manager::TextureData* Resource_Manager::GetResource(DWORD ModuleID, int
 				buffer = (LPBYTE)malloc(dwBufferSize);
 				bitmapEx.Save(buffer);
 				bool loadsuccesss = text->loadFromMemory(buffer, dwBufferSize);
-				text->generateMipmap();
-				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				//text->setSmooth(true);
-				//if (ModuleID == 3)
-				{
-					//text->setSmooth(false);
-				}
+				text->setSmooth(false);
 				free(buffer);
 
 				if (loadsuccesss)
@@ -159,13 +152,7 @@ Resource_Manager::TextureData* Resource_Manager::GetResource(DWORD ModuleID, int
 				resimage.loadFromMemory(buffer, dwBufferSize);
 				resimage.createMaskFromColor(sf::Color::Black, 0);
 				bool loadsuccesss = text->loadFromImage(resimage);
-				text->generateMipmap();
-
-				//text->setSmooth(true);
-				//if (ModuleID == 3)
-				{
-				//	text->setSmooth(false);
-				}
+				text->setSmooth(false);
 				free(buffer);
 				if (loadsuccesss)
 				{

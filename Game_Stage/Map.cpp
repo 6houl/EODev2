@@ -449,8 +449,9 @@ void Map::OnKeyPress(WPARAM args)
 	{
 		case(VK_CONTROL):
 		{
-			if (this->m_Players[m_playerID]->Stance == CharacterModel::PlayerStance::Standing)
+			if (this->m_Players[m_playerID]->Stance == CharacterModel::PlayerStance::Standing && this->m_Players[m_playerID]->sp > 0)
 			{
+				this->m_Players[m_playerID]->sp--;
 				this->m_Players[m_playerID]->SetStance(CharacterModel::PlayerStance::BluntAttacking);
 				SAttack::SendAttack(this->m_game->world->connection->ClientStream, this->m_Players[m_playerID]->direction, (LPVOID)this->m_game);
 

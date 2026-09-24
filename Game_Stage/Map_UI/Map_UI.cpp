@@ -208,7 +208,7 @@ void Map_UI::Render()
 	if (this->HelpMessageTitle != "")
 	{
 		const std::uint64_t curtime = GetTickCount64();
-		if (curtime - this->HelpMessageTimer < 2000)
+		if (curtime - this->HelpMessageTimer < 3000)
 		{
 			//sf::Color col = D3DCOLOR_XRGB(0, 0, 0);
 			RECT BoxRect = { 0,0 ,0,0 };
@@ -230,17 +230,15 @@ void Map_UI::Render()
 	
 	//sf::Color col = D3DCOLOR_XRGB(0, 0, 0);
 	RECT BoxRect = { 0,0 ,0,0 };
-	BoxRect.left = 572;
+	BoxRect.left = 558;
 	BoxRect.top = 454;
 	BoxRect.bottom = BoxRect.top + 30;
 	BoxRect.right = BoxRect.left + 400;
 
 	std::ostringstream oss;
-	oss << std::put_time(&tm, "%H-%M-%S");
+	oss << std::put_time(&tm, "%H:%M:%S");
 	auto str = oss.str();
-
-	//this->m_game->MessageFont->DrawTextA(this->Sprite, str.c_str(), -1, &BoxRect, NULL, col);
-	//this->Sprite->End();
+	this->m_game->DrawText(str, BoxRect.left, BoxRect.top, sf::Color::Black, 7, false, 0.007f);
 
 	this->m_game->map->ThreadLock.unlock();
 }
@@ -282,12 +280,13 @@ void Map_UI::DrawHUDStats()
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 	
 
-	float sp = 100;
-	float maxsp = 100;
+	float sp = (float)mainPlayer->sp;
+	float maxsp = mainPlayer->maxsp > 0 ? (float)mainPlayer->maxsp : 1.0f;
 	IconSrcRect.left = 110*2;
 	IconSrcRect.top = 14;
 	IconSrcRect.bottom = IconSrcRect.top + 14;
-	IconSrcRect.right = IconSrcRect.left + 25 + std::round((sp / maxsp) * 79.0f);
+	const float spPercent = (std::max)(0.0f, (std::min)(1.0f, sp / maxsp));
+	IconSrcRect.right = IconSrcRect.left + 25 + std::round(spPercent * 79.0f);
 	IconPos.x = 320;
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), StatusBarDepth);
 

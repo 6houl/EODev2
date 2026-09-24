@@ -49,6 +49,7 @@ public:
 	double AnimationElapsedSeconds = 0.0;
 	double DamageElapsedSeconds = 0.0;
 	double DeathElapsedSeconds = 0.0;
+	double SPRecoveryElapsedSeconds = 0.0;
 	std::deque<std::pair<int, int>> QueuedWalks;
 	//AdminLevel admin;
 	std::string guildname;
@@ -81,7 +82,7 @@ public:
 	int goldbank = 0;
 	int usage = 0;
 	int muted_until = 0;
-	short maxsp = 0;
+	short sp = 0, maxsp = 0;
 	short maxhp = 1, maxtp = 1;
 	short accuracy = 0, evade = 0, armor = 0;
 	short mindam = 0, maxdam = 0;
