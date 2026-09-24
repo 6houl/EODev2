@@ -12,6 +12,7 @@
 namespace
 {
 	int failures = 0;
+	void Expect(bool condition, const char* name);
 
 	std::string Bytes(std::initializer_list<unsigned int> values)
 	{
@@ -91,6 +92,15 @@ namespace
 	{
 		ExpectPacket("player list request", ClientPackets::PlayerListRequest(),
 			Bytes({3, 254, 1, 22}));
+	}
+
+	void TestInitReplyEncoding()
+	{
+		PacketReader rawReader(Bytes({255, 255, 9}));
+		Expect(rawReader.Getbyte() == 9, "init reply raw byte");
+
+		PacketReader decodedReader(Bytes({255, 255, 9}));
+		Expect(decodedReader.GetChar() == 8, "init reply encoded char");
 	}
 
 	void TestWhisperSetting()
@@ -261,6 +271,7 @@ int main()
 	TestCharacterDelete();
 	TestConnectionAccept();
 	TestPlayerListRequest();
+	TestInitReplyEncoding();
 	TestWhisperSetting();
 	TestWelcome();
 	TestFileRequests();

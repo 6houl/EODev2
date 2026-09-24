@@ -118,7 +118,7 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 ### Online player panel
 
 - Sends the empty Players/Request packet defined by EOProtocol and used by EOLib.
-- Parses ArenaServ's Init reply 8 as the full online-player reply. Reply 9 is map mutation data and must never be decoded as a player list.
+- Parses EOProtocol's raw Init reply byte 9 as the full online-player reply. ArenaServ represents it internally as enum value 8 before `AddChar` encodes it for the wire. Raw reply byte 10 is map mutation data and must never be decoded as a player list.
 - Displays the character icon, name, title, guild tag, resolved ECF class name, and total count in the fixed columns and seven-row layout used by EndlessClient's classic panel.
 - Maps ArenaServ's normal, party, GM, HGM, party-admin, and SLN bot icons to their actual chat-icon rows instead of deriving the row arithmetically.
 - Uses `-` for missing title, guild, or class values and keeps player names sorted.
@@ -223,7 +223,7 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 - Removes the duplicate local-player render and replaces per-draw multimap allocation with a reserved, stable-sorted render queue.
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
-- Places the fixed HP, TP, SP, and TNL strip at the classic top coordinates: Y 0 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient.
+- Places the fixed HP, TP, SP, and TNL strip directly below EODev's top frame at Y 8 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient.
 
 Live checks should cover the first movement immediately after entering the map, continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The first walk should receive normal server processing without a corrective teleport, the local player should remain centered without layer or overlay shake, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 

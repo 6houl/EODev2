@@ -255,7 +255,7 @@ void Map_UI::DrawHUDStats()
 	IconSrcRect.top = 0;
 	IconSrcRect.bottom = 14;
 	IconSrcRect.right = 440;
-	sf::Vector3f IconPos(100, 0, 0.1f);
+	sf::Vector3f IconPos(100, 8, 0.1f);
 	this->m_game->Draw(this->m_game->ResourceManager->GetResource(2, 58, true), IconPos.x, IconPos.y, sf::Color(255, 255, 255, 255), IconSrcRect.left, IconSrcRect.top, IconSrcRect.right, IconSrcRect.bottom, sf::Vector2f(1, 1), 0.02f);
 
 	//this->Sprite->Draw(HudStatsTexture.get(), &IconSrcRect, IconCentre, IconPos, sf::Color::Color(255, 255, 255, 255));
