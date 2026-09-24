@@ -5,6 +5,7 @@ class Map_UI_Skills
 private:
 	Map_UI* m_MapUI;
 	Game* m_game;
+	int FirstVisibleRow = 0;
 public:
 	Button* UI_Element_SkillsButton;
 

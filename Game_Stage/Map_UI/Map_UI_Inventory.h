@@ -149,7 +149,7 @@ public:
 			if (inventory[i].id == ID)
 			{
 				inventory[i].amount = amount;
-				if (inventory[i].amount <= 0)
+				if (inventory[i].amount <= 0 && ID != 1)
 				{
 					inventory.erase(inventory.begin() + i);
 					for (int ii = 0; ii < 56; ii++)
@@ -166,6 +166,8 @@ public:
 				return;
 			}
 		}
+		if (amount > 0 || ID == 1)
+			AddInventoryItem(InventoryItem(static_cast<short>(ID), amount));
 	}
 	void RemoveItem(int ID, int amount)
 	{
@@ -231,7 +233,7 @@ public:
 	}
 	bool SetAmount(int ItemID, int Amount)
 	{
-		for each (InventoryItem item in inventory)
+		for (InventoryItem& item : inventory)
 		{
 			if (item.id == ItemID)
 			{

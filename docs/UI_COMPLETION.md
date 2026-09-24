@@ -37,7 +37,7 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 | --- | --- | --- | --- |
 | #27 | Minimap | Implemented | Classic fixed-canvas tile, warp, player, and NPC overlay is centered on the player; live map coverage check remains |
 | #28 | Party | Shell | Panel background only; add member rows, HP, leader state, and actions from EOLib party state |
-| #29 | Active skills | Shell | Panel background only; bind learned spells, slots, drag/drop, cooldown and targeting state |
+| #29 | Active skills | Partial | Welcome now retains learned spells and the panel renders scrollable spell icons, levels, skill points, and hover names; slot persistence, casting, cooldown, targeting, and training depend on #62/#63 |
 | #30 | Character stats/training | Partial | Values render; add server-authoritative stat and skill training controls |
 | #31 | Chat modes | Partial | Basic public/global/whisper/guild views exist; complete supported modes and behavior |
 | #32 | Whisper tabs | Partial | Replace placeholder player label with session target data |
@@ -92,7 +92,12 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 
 | Issues | Area | Status | Remaining work |
 | --- | --- | --- | --- |
-| #88-#93 | Inventory | Partial | Stored quantities, recalculation, grid bounds, valid cells, authoritative amounts, and weight state |
+| #88 | Inventory stored quantities | Implemented | `SetAmount` updates the stored item; live mutation check remains |
+| #89 | Inventory recalculation | Implemented | Rebuilds grid placement from an unchanged item snapshot without doubling quantities; live check remains |
+| #90 | Inventory grid bounds | Implemented | Shared width/height placement checks cover all eight EIF shapes without out-of-range access; drag checks use the same bounds |
+| #91 | Inventory valid cells | Implemented | New item state is accepted only after a complete shape fits and otherwise reports that no room is available |
+| #92 | Authoritative amounts | Implemented | Drop and junk replies apply ArenaServ/EOProtocol remaining amounts, including zero gold |
+| #93 | Inventory weight | Implemented | Welcome and item replies update the player stats used directly by inventory and stats panels |
 | #94-#99 | Paperdoll | Partial | Safe strings, home/class data, stats, remote equipment, paired slots, and full graphic IDs |
 | #101-#102 | Chest | Partial | Session isolation, close/update/range/error behavior |
 | #103-#105 | Shop/craft | Partial | Welcome text, variable recipes, and all failure states |
@@ -135,10 +140,11 @@ For each completed row, record:
 
 ## Current Batch Verification
 
-- Release rebuild: passed with 0 errors and 661 warnings on 2026-09-24.
+- Release rebuild: passed with 0 errors and 660 warnings on 2026-09-24.
 - Packet and connection fixtures: all passed with 0 errors and 16 inherited warnings.
 - Scaling references: SFML logical views plus EODev's fixed 640x480 artwork and input coordinates.
 - Minimap references: `MiniMapRenderer.cs`, EODev `Full_EMF`, `ENF`, and live map actor collections. The overlay keeps the classic 28x14 grid and uses resource 2/45.
 - SP references: EOProtocol Welcome `MaxSp`, EOLib `CharacterStats`, `CharacterActions`, and `PeriodicStatUpdaterComponent`. ArenaServ does not send current SP in Welcome, so it starts full and is maintained locally as in EndlessClient.
 - Window configuration references: EODev `config/setup.ini` keys and the fixed logical view. Fullscreen uses the desktop mode only as a presentation surface.
-- Required live checks: resize across 1x/2x and unusual aspect ratios; click every screen edge; open the minimap on small/large maps and around map edges; verify all marker colors; attack to zero SP while standing and sitting; start in windowed, fixed-size, fullscreen, and stay-on-top modes.
+- Inventory references: EOProtocol/EOLib `ItemDropHandler` and `ItemJunkHandler`, ArenaServ `Item_Drop` and `Item_Junk`, EIF item shapes, and the Welcome inventory/spell payload.
+- Required live checks: resize across 1x/2x and unusual aspect ratios; click every screen edge; open the minimap on small/large maps and around map edges; verify all marker colors; attack to zero SP while standing and sitting; start in windowed, fixed-size, fullscreen, and stay-on-top modes; load all eight inventory shapes, rearrange edge cells, pick up into a full grid, drop/junk partial stacks and gold, and inspect/scroll a character with more than 16 spells.

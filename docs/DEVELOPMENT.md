@@ -233,6 +233,8 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 - Tracks current SP from the Welcome maximum, spends one SP per attack, blocks attacks at zero, and applies the EOLib standing/sitting recovery behavior.
 - Applies fullscreen, resizable-window, and stay-on-top configuration at startup while retaining the 640x480 logical canvas.
 - Guards empty character and guild names in the stats panel and reports remaining TNL rather than the full level interval.
+- Rebuilds inventory placement without changing quantities, validates all EIF item shapes against the 14x4 grid, applies authoritative drop/junk remaining amounts, and uses the player as the single weight source.
+- Retains the learned spell list from Welcome and shows scrollable spell icons, levels, skill points, and hover names in the active skills panel. Casting, targeting, training, and slot persistence remain tied to protocol issues #62 and #63.
 
 Live checks should cover the first movement immediately after entering the map, continuous movement in every direction, fast direction changes, crowded tiles, server-rejected walks, remote players, NPC movement, combat animations, and camera tracking under a busy map. Test two clients walking continuously at the same time and introduce latency or a short frame stall. The first walk should receive normal server processing without a corrective teleport, the local player should remain centered without layer or overlay shake, remote actors should not restart a step when another packet arrives, and all actors should finish on server-provided coordinates.
 

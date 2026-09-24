@@ -88,302 +88,111 @@ Map_UI_Inventory::Map_UI_Inventory(Map_UI* m_UIElement, Game* p_Game)
 }
 void Map_UI_Inventory::RecalculateInventory()
 {
-	for (int i = 0; i < 56; i++)
-	{
-		InventoryGrid[i].ID = -1;
-		InventoryGrid[i].MouseOver = false;
-		InventoryGrid[i].MousePressed = false;
-	}
-	for (int i = 0; i < this->inventory.size(); i++)
-	{
-		this->AddInventoryItem(this->inventory[i]);
-	}
-	
+	const std::vector<InventoryItem> items = this->inventory;
+	this->ClearInventory();
+	for (const InventoryItem& item : items)
+		this->AddInventoryItem(item);
 }
 void Map_UI_Inventory::AddInventoryItem(InventoryItem m_item)
 {
-	bool ItemPlaced = false;
-	bool YCollision = false;
-	bool Exists = false;
-	int Counter = 0;
-	for each (InventoryItem Cell in this->inventory)
+	for (InventoryItem& item : this->inventory)
 	{
-		EIF_Data m_EIFItem = World::EIF_File->Get(m_item.id);
-		if (Cell.id == m_item.id)
+		if (item.id == m_item.id)
 		{
-			Exists = true;
-			break;
-		}
-		Counter++;
-	}
-	if (Exists)
-	{
-		this->inventory[Counter].amount += m_item.amount;
-	}
-	else
-	{
-		EIF_Data m_EIFItem = World::EIF_File->Get(m_item.id);
-		this->inventory.push_back(m_item);
-		if (m_EIFItem.size <= 3)
-		{
-			int Count = 0;
-			for each (InventoryGridCell Cell in this->InventoryGrid)
-			{
-				if (Cell.ID == -1)
-				{
-					if (m_EIFItem.size == EIF::Size::Size1x1)
-					{
-						InventoryGrid[Count].ID = m_EIFItem.id;
-						break;
-					}
-					else
-					{
-						int y = 0;
-						while (y < m_EIFItem.size + 1)
-						{
-							if (InventoryGrid[Count + (y * 14)].ID == -1)
-							{
-								if (y == (int)(m_EIFItem.size))
-								{
-									InventoryGrid[Count].ID = m_EIFItem.id;
-									for (int ii = 0; ii < (int)(m_EIFItem.size) + 1; ii++)
-									{
-										InventoryGrid[Count + (ii * 14)].ID = m_item.id;
-									}
-									break;
-								}
-								else
-								{
-									y++;
-								}
-							}
-							else
-							{
-								break;
-							}
-						}
-						break;
-					}
-				}
-				Count++;
-			}
-		}
-		else
-		{
-			int Count = 0;
-			EIF_Data m_EIFItem = World::EIF_File->Get(m_item.id);
-			for each (InventoryGridCell Cell in this->InventoryGrid)
-			{
-				if (ItemPlaced)
-				{
-					break;
-				}
-				if (Cell.ID == -1 && Cell.X != 13 && Cell.X != 26 && Cell.X != 39)
-				{
-					int x = 0;
-					while (x < 2)
-					{
-						if (!ItemPlaced || YCollision)
-						{
-							if (InventoryGrid[Count + x].ID == -1)
-							{
-								if ((int)(m_EIFItem.size - 4) == 0)
-								{
-									if (x == 1)
-									{
-										InventoryGrid[Count + x - 1].ID = m_EIFItem.id;
-										InventoryGrid[Count + x].ID = m_EIFItem.id;
-										ItemPlaced = true;
-									}
-									x++;
-								}
-								else
-								{
-									int y = 0;
-									while (y < (int)(m_EIFItem.size) - 3)
-									{
-										if (!ItemPlaced)
-										{
-											if (Count + x + (y * 14) < 56)
-											{
-												if (InventoryGrid[Count + x + (y * 14)].ID == -1)
-												{
-													if (y == (int)(m_EIFItem.size) - 4 && x == 1)
-													{
-														int XX = 0;
-														while (XX < 2)
-														{
-															InventoryGrid[Count + XX].ID = m_item.id;
-															for (int iii = 0; iii < (int)(m_EIFItem.size - 3); iii++)
-															{
-																InventoryGrid[Count + XX + (iii * 14)].ID = m_item.id;
-															}
-															if (XX == 1)
-															{
-																ItemPlaced = true;
-															}
-															XX++;
-														}
-														break;
-													}
-												}
-												else
-												{
-													YCollision = true;
-													break;
-												}
-											}
-											else
-											{
-												ItemPlaced = true;
-												break;
-											}
-											y++;
-										}
-										else
-										{
-											break;
-										}
-									}
-									x++;
-								}
-							}
-							else
-							{
-								break;
-							}
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
-				Count++;
-			}
-			
+			item.amount += m_item.amount;
+			return;
 		}
 	}
 
+	const EIF_Data itemData = World::EIF_File->Get(m_item.id);
+	const int size = static_cast<int>(itemData.size);
+	const int itemWidth = size >= static_cast<int>(EIF::Size::Size2x1) ? 2 : 1;
+	const int itemHeight = itemWidth == 1 ? size + 1 : size - static_cast<int>(EIF::Size::Size2x1) + 1;
+
+	for (int start = 0; start < 56; ++start)
+	{
+		const int startX = start % 14;
+		const int startY = start / 14;
+		if (startX + itemWidth > 14 || startY + itemHeight > 4)
+			continue;
+
+		bool fits = true;
+		for (int y = 0; y < itemHeight && fits; ++y)
+		{
+			for (int x = 0; x < itemWidth; ++x)
+			{
+				if (this->InventoryGrid[start + x + y * 14].ID != -1)
+				{
+					fits = false;
+					break;
+				}
+			}
+		}
+		if (!fits)
+			continue;
+
+		for (int y = 0; y < itemHeight; ++y)
+			for (int x = 0; x < itemWidth; ++x)
+				this->InventoryGrid[start + x + y * 14].ID = m_item.id;
+		this->inventory.push_back(m_item);
+		return;
+	}
+
+	this->m_MapUI->DrawHelpMessage("Inventory", "There is no room for that item.");
 }
 void Map_UI_Inventory::MoveItem(int _item)
 {
-	set<int> ItemIDS;
-	set<int>::iterator it;
-	int Count = 0;
-	int MouseX = this->m_MapUI->MouseX;
-	int MouseY = this->m_MapUI->MouseY;
-	
-	int index = 0;
-	InventoryGridCell m_InventoryGrid[56];
-	for (int i = 0; i < 56; i++)
+	int target = -1;
+	for (int i = 0; i < 56; ++i)
 	{
-		m_InventoryGrid[i] = this->InventoryGrid[i];
-	}
-	for each (InventoryGridCell Cell in m_InventoryGrid)
-	{
-		if ((Cell.ID  == -1 || Cell.ID == _item) && Cell.MouseOver)
+		if (this->InventoryGrid[i].MouseOver)
 		{
-			EIF_Data m_item = World::EIF_File->Get(_item);
-			if ((int)m_item.size <= (3))
-			{
-				int y = 0;
-				while (y < (int)m_item.size + 1)
-				{
-					if (Count + (y * 14) < 56 && (m_InventoryGrid[Count + y * 14].ID == -1 || (m_InventoryGrid[Count + y * 14].ID == m_item.id)))
-					{
-						
-						m_InventoryGrid[Count + (y * 14)].MouseOver = true;
-					}
-					else
-					{
-						return;
-					}
-					y++;
-				}
-			}
-			else
-			{
-				int x = 0;
-				while (x < 2)
-				{
-					int y = 0;
-					while (y < ((int)m_item.size) - 3)
-					{
-						if (Count + x + (y * 14) < 56 && Cell.X != 13 && Cell.X != 26 && Cell.X != 39 && (m_InventoryGrid[Count + x + (y * 14)].ID == -1 || m_InventoryGrid[Count + x + (y * 14)].ID == m_item.id))
-						{
-							m_InventoryGrid[Count + x + (y * 14)].MouseOver = true;
-						}
-						else
-						{
-							return;
-						}
-						y++;
-					}
-					x++;
-				}
-			}
-			
-			if (!this->m_MapUI->MouseHeld)
-			{
-				for (int i = 0; i < 56; i++)
-				{
-					if (InventoryGrid[i].ID == m_item.id)
-					{
-						InventoryGrid[i].ID = -1;
-						InventoryGrid[i].MouseOver = false;
-						InventoryGrid[i].MousePressed = false;
-						m_InventoryGrid[i].ID = -1;
-						m_InventoryGrid[i].MouseOver = false;
-						m_InventoryGrid[i].MousePressed = false;
-					}
-				}
-				if ((int)m_item.size <= (3))
-				{
-					int y = 0;
-					while (y < (int)m_item.size + 1)
-					{
-						if (Count + (y * 14) < 56 && (m_InventoryGrid[Count + y * 14].ID == -1 || m_InventoryGrid[Count + y * 14].ID == m_item.id))
-						{
-							m_InventoryGrid[Count + (y * 14)].ID = m_item.id;
-						}
-						else
-						{
-							return;
-						}
-						y++;
-					}
-				}
-				else
-				{
-					int x = 0;
-					while (x < 2)
-					{
-						int y = 0;
-						while (y < ((int)m_item.size) - 3)
-						{
-							if (Count + x + (y * 14) < 56 && Cell.X != 13 && Cell.X != 26 && Cell.X != 39 && (m_InventoryGrid[Count + x + (y * 14)].ID == -1 || m_InventoryGrid[Count + x + (y * 14)].ID == m_item.id))
-							{
-								m_InventoryGrid[Count + x + (y * 14)].ID = m_item.id;
-							}
-							else
-							{
-								return;
-							}
-							y++;
-						}
-						x++;
-					}
-				}
-			}
-			for (int i = 0; i < 56; i++)
-			{
-				InventoryGrid[i] = m_InventoryGrid[i];
-			}
-			return;
+			target = i;
+			break;
 		}
-		Count++;
 	}
+	if (target < 0)
+	{
+		if (!this->m_MapUI->MouseHeld)
+			this->childMPindex = -1;
+		return;
+	}
+
+	const EIF_Data itemData = World::EIF_File->Get(_item);
+	const int size = static_cast<int>(itemData.size);
+	const int itemWidth = size >= static_cast<int>(EIF::Size::Size2x1) ? 2 : 1;
+	const int itemHeight = itemWidth == 1 ? size + 1 : size - static_cast<int>(EIF::Size::Size2x1) + 1;
+	const int targetX = target % 14;
+	const int targetY = target / 14;
+	bool fits = targetX + itemWidth <= 14 && targetY + itemHeight <= 4;
+	for (int y = 0; y < itemHeight && fits; ++y)
+	{
+		for (int x = 0; x < itemWidth; ++x)
+		{
+			const int cellID = this->InventoryGrid[target + x + y * 14].ID;
+			if (cellID != -1 && cellID != _item)
+			{
+				fits = false;
+				break;
+			}
+		}
+	}
+
+	if (this->m_MapUI->MouseHeld)
+		return;
+	if (fits)
+	{
+		for (InventoryGridCell& cell : this->InventoryGrid)
+		{
+			if (cell.ID == _item)
+				cell.ID = -1;
+			cell.MousePressed = false;
+		}
+		for (int y = 0; y < itemHeight; ++y)
+			for (int x = 0; x < itemWidth; ++x)
+				this->InventoryGrid[target + x + y * 14].ID = _item;
+	}
+	this->childMPindex = -1;
 }
 std::uint64_t clicktimerstart = 0, clicktimerend = 0;
 void Map_UI_Inventory::Update()
@@ -630,7 +439,10 @@ void Map_UI_Inventory::Render(float depth)
 		rct.right = x + 190;
 		rct.top = y;
 		rct.bottom = y + 50;
-		std::string m_message = "Weight " + to_string(this->Weight) + "/" + to_string(this->MaxWeight);
+		auto mainPlayer = this->m_game->map->m_Players.find(World::WorldCharacterID);
+		const int weight = mainPlayer != this->m_game->map->m_Players.end() && mainPlayer->second != nullptr ? mainPlayer->second->weight : 0;
+		const int maxWeight = mainPlayer != this->m_game->map->m_Players.end() && mainPlayer->second != nullptr ? mainPlayer->second->maxweight : 0;
+		std::string m_message = "Weight " + to_string(weight) + "/" + to_string(maxWeight);
 		this->m_game->DrawTextW(m_message, rct.left, rct.top, sf::Color(255, 255, 255, 200), 12, true, depth,1);
 	
 		this->UI_Element_InventoryPPdoll->Draw();

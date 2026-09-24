@@ -32,19 +32,18 @@ CLIENT_F_FUNC(Item)
 				Map::Map_Item m_item;
 				m_item.ItemID = reader.GetShort();
 				m_item.amount = reader.GetThree();
-				int CharacterHasItem = reader.GetInt();
+				int remainingAmount = reader.GetInt();
 				int ItemIndex = reader.GetShort();
 				m_item.x = reader.GetChar();
 				m_item.y = reader.GetChar();
 				int weight = reader.GetChar();
 				int maxweight = reader.GetChar();
 
-				//if (CharacterHasItem == 0)
 				{
 					Map_UI_Inventory::InventoryItem invitem;
 					invitem.amount = m_item.amount;
 					invitem.id = m_item.ItemID;
-					game->Map_UserInterface->map_inventory->RemoveItem(invitem);
+					game->Map_UserInterface->map_inventory->SetItem(invitem.id, remainingAmount);
 					mainPlayer->weight = weight;
 					mainPlayer->maxweight = maxweight;
 
@@ -61,16 +60,15 @@ CLIENT_F_FUNC(Item)
 				Map::Map_Item m_item;
 				m_item.ItemID = reader.GetShort();
 				m_item.amount = reader.GetThree();
-				int CharacterHasItem = reader.GetInt();
+				int remainingAmount = reader.GetInt();
 				int weight = reader.GetChar();
 				int maxweight = reader.GetChar();
 
-				//if (CharacterHasItem == 0)
 				{
 					Map_UI_Inventory::InventoryItem invitem;
 					invitem.amount = m_item.amount;
 					invitem.id = m_item.ItemID;
-					game->Map_UserInterface->map_inventory->RemoveItem(invitem);
+					game->Map_UserInterface->map_inventory->SetItem(invitem.id, remainingAmount);
 					mainPlayer->weight = weight;
 					mainPlayer->maxweight = maxweight;
 				}

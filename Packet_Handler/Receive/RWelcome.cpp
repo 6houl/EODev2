@@ -205,7 +205,11 @@ CLIENT_F_FUNC(Welcome)
 						}
 						case (2):
 						{
-						
+							auto mainPlayerEntry = game->map->m_Players.find(World::WorldCharacterID);
+							if (mainPlayerEntry == game->map->m_Players.end() || mainPlayerEntry->second == nullptr)
+								return false;
+							Map_Player* MainPlayer = mainPlayerEntry->second;
+
 							reader.Getbyte(); //Unknown
 							std::string BuildString;
 							for (int i = 0; i < 9; i++)
@@ -215,6 +219,8 @@ CLIENT_F_FUNC(Welcome)
 							game->Map_UserInterface->map_news->UI_TextScrollbar->SetInputString(BuildString);
 							int weight = reader.GetChar();
 							int maxweight = reader.GetChar();
+							MainPlayer->weight = weight;
+							MainPlayer->maxweight = maxweight;
 							game->Map_UserInterface->map_inventory->ClearInventory();
 							Map_UI_Inventory::InventoryItem newitem;
 							newitem.id = 1;
@@ -232,11 +238,13 @@ CLIENT_F_FUNC(Welcome)
 							}
 		
 							std::string character_spells = reader.GetBreakString();
+							MainPlayer->spells.clear();
 							for (int i = 0; i < character_spells.length() / 4; i++)
 							{
 								int pos = i * 4;
 								short SpellID = PacketProcessor::Number(character_spells[pos], character_spells[pos + 1]);
 								short level = PacketProcessor::Number(character_spells[pos + 2], character_spells[pos + 3]);
+								MainPlayer->spells.emplace_back(SpellID, static_cast<unsigned char>(level));
 							}
 							int numberofplayers = reader.GetChar();
 							reader.Getbyte();
