@@ -200,7 +200,7 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 - Handles zero-length pub names without indexing an empty string.
 - Guards HUD and stat rendering when the main player is absent and avoids division by zero for empty HP, TP, or experience ranges.
 
-### Issues #100, #117-#123, and #156-#158: Rendering and movement stability
+### Issues #100, #109-#110, #113-#115, #117-#123, and #156-#158: Rendering and movement stability
 
 - Uses monotonic elapsed time for frame pacing, player and NPC movement, map animation, combat frames, damage display, death effects, and UI refresh timers.
 - Interpolates player movement over 480 milliseconds and NPC movement over 400 milliseconds using EndlessClient's 32-by-16 isometric tile offsets and animation timing as the reference.
@@ -208,7 +208,10 @@ The current Release baseline builds with 0 errors and 662 existing warnings. The
 - Applies the tile-spec walkability rules supported by EOLib and blocks occupied actor positions and in-progress destinations before sending a local walk.
 - Treats Refresh/Reply coordinates as authoritative and cancels unfinished interpolation when ArenaServ rejects or corrects a walk.
 - Parses ArenaServ's Walk/Reply sentinels and dropped-item entries instead of leaving unread reply data.
+- Handles both the five-byte immediate NPC removal packet and full NPC death packets without requiring an item drop, and no longer reports a successfully handled death packet as unhandled.
 - Initializes actor state, equipment, stance, direction, animation, and destination fields before the first render.
+- Releases removed and replaced player/NPC objects, cancels stale deferred removals when an entity is re-added, and frees remaining actors when the map is destroyed.
+- Rejects invalid actor and item coordinates before indexing the map render lookup table.
 - Removes the duplicate local-player render and replaces per-draw multimap allocation with a reserved, stable-sorted render queue.
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.

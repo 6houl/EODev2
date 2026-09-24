@@ -81,11 +81,23 @@ CLIENT_F_FUNC(NPC)
 			}
 			case PACKET_SPEC:
 			{
+				if (reader.Remaining() < 5)
+					return false;
 				int KillerID = reader.GetShort();
 				int KillerDirection = reader.GetChar();
 				int NPCIndex = reader.GetShort();
+				{
+					std::lock_guard<std::mutex> lock(game->map->ThreadLock);
+					auto killer = game->map->m_Players.find(KillerID);
+					if (killer != game->map->m_Players.end() && killer->second != nullptr)
+						killer->second->direction = KillerDirection;
+				}
 
-				if (reader.Remaining() > 0)
+				if (reader.Remaining() == 0)
+				{
+					game->map->RemoveNPC(NPCIndex);
+				}
+				else if (reader.Remaining() >= 13)
 				{	
 					int NPCDropUID = reader.GetShort();
 					int NPCDropItemID = reader.GetShort();
@@ -97,20 +109,19 @@ CLIENT_F_FUNC(NPC)
 					{
 						game->map->AddItem(NPCDropUID, NPCDropItemID, x, y, ItemAmount);
 					}
-					auto npc = game->map->m_NPCs.find(NPCIndex);
-					if (npc != game->map->m_NPCs.end() && npc->second)
-						npc->second->DealDamage(0, damage);
+					{
+						std::lock_guard<std::mutex> lock(game->map->ThreadLock);
+						auto npc = game->map->m_NPCs.find(NPCIndex);
+						if (npc != game->map->m_NPCs.end() && npc->second)
+							npc->second->DealDamage(0, damage);
+					}
 					game->map->KillNPC(NPCIndex);
-				}
-				if (KillerID == 0)
-				{
-					game->map->RemoveNPC(NPCIndex);
 				}
 				else
 				{
-					//game->map->m_NPCs.at(NPCIndex)->DealDamage(0, game->map->m_NPCs.at(NPCIndex)->MaxHP - game->map->m_NPCs.at(NPCIndex)->HP);
-					//game->map->KillNPC(NPCIndex);
+					return false;
 				}
+				break;
 			}
 			default:
 				return false;

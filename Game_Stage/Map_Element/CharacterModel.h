@@ -2,8 +2,8 @@
 class CharacterModel
 {
 private:
-	sf::RenderTexture* tex;
-	sf::Sprite* spr;
+	sf::RenderTexture* tex = nullptr;
+	sf::Sprite* spr = nullptr;
 	template <class T, std::size_t N>
 	constexpr std::size_t size(const T(&array)[N]) noexcept
 	{

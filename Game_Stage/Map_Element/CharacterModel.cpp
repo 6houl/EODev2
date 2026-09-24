@@ -698,13 +698,8 @@ void CharacterModel::PrerenderPaperdoll()
 
 void CharacterModel::Release()
 {
-	for (int i = 0; i < 11; i++)
-	{
-		for (int ii = 0; ii < 2; ii++)
-		{
-			//this->FrameEntries[i][ii].TextureFinalFontHair.;
-		}
-	}
-	delete this->tex;
-	delete this->spr;
+	this->PaperdollTextureTargets.reset();
+	this->PaperdollSpriteTargets.reset();
+	this->tex = nullptr;
+	this->spr = nullptr;
 }

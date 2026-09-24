@@ -9,6 +9,7 @@
 #include "..\Packet_Handler\Send\SDoor.h"
 #include "..\Packet_Handler\Send\SWelcome.h"
 #include "Map.h"
+#include <algorithm>
 
 sf::RenderWindow* map_d3d_Device;
 bool rendering = true;
@@ -149,6 +150,7 @@ void Map::ClearMap()
 int map_UpdateFPS = 0;
 void Map::Update()
 {
+	this->FinalizeMapState();
 	this->MapAnimationElapsedSeconds += this->m_game->DeltaSeconds;
 	while (this->MapAnimationElapsedSeconds >= 0.25)
 	{
@@ -214,6 +216,15 @@ void Map::ChangeAvatar(int ID, short ShoeID, short HatID, short WeaponID, short 
 void Map::AddPlayer(Map_Player* m_Player)
 {
 	this->ThreadLock.lock();
+	this->ClearPlayerIDList.erase(
+		std::remove(this->ClearPlayerIDList.begin(), this->ClearPlayerIDList.end(), m_Player->ID),
+		this->ClearPlayerIDList.end());
+	auto existing = this->m_Players.find(m_Player->ID);
+	if (existing != this->m_Players.end() && existing->second != m_Player)
+	{
+		existing->second->Release();
+		delete existing->second;
+	}
 	if (m_Player->ID != World::WorldCharacterID)
 	{
 		m_Player->UpdateAppearence();
@@ -240,6 +251,14 @@ void Map::RemoveNPC(int ID)
 void Map::AddNPC(Map_NPC * m_NPC)
 {
 	this->ThreadLock.lock();
+	this->ClearNPCIDList.erase(
+		std::remove(this->ClearNPCIDList.begin(), this->ClearNPCIDList.end(), m_NPC->Index),
+		this->ClearNPCIDList.end());
+	auto existing = this->m_NPCs.find(m_NPC->Index);
+	if (existing != this->m_NPCs.end() && existing->second != m_NPC)
+	{
+		delete existing->second;
+	}
 	this->m_NPCs[m_NPC->Index] = m_NPC;
 	this->ThreadLock.unlock();
 }
@@ -622,14 +641,16 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 		return;
 	}
 	int PlayerIndex = World::WorldCharacterID;
-	
-	if (m_Players.count(PlayerIndex) > 0)
+	auto mainPlayer = this->m_Players.find(PlayerIndex);
+	if (mainPlayer == this->m_Players.end() || mainPlayer->second == nullptr)
 	{
-		this->xpos = this->m_Players[PlayerIndex]->x;
-		this->ypos = this->m_Players[PlayerIndex]->y;
-		this->xoff = this->m_Players[PlayerIndex]->xoffset + (this->xpos * 32) - (this->ypos * 32) - 280;
-		this->yoff = this->m_Players[PlayerIndex]->yoffset + (this->xpos * 16) + (this->ypos * 16) - 170;
+		this->ThreadLock.unlock();
+		return;
 	}
+	this->xpos = mainPlayer->second->x;
+	this->ypos = mainPlayer->second->y;
+	this->xoff = mainPlayer->second->xoffset + (this->xpos * 32) - (this->ypos * 32) - 280;
+	this->yoff = mainPlayer->second->yoffset + (this->xpos * 16) + (this->ypos * 16) - 170;
 	
 	auto&& emf = m_emf;
 	auto&& emfh = m_emf.header;
@@ -639,16 +660,13 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 
 	int RenderWidth = emfh.width;
 	int RenderHeight = emfh.height -1;
-	int PlayerMinX = this->m_Players[World::WorldCharacterID]->x;
-	if (PlayerMinX < 0) { PlayerMinX = 0; }
-	int PlayerMinY = this->m_Players[World::WorldCharacterID]->y;
-	if (PlayerMinY < 0) { PlayerMinY = 0; }
-	int PlayerMaxX = this->m_Players[World::WorldCharacterID]->x;
-	if (PlayerMaxX > RenderWidth) { PlayerMaxX = RenderWidth; }
-	int PlayerMaxY = this->m_Players[World::WorldCharacterID]->y;
-	if (PlayerMaxY > RenderHeight) { PlayerMaxY = RenderHeight; }
-	int  startsuboffset = this->LUTMap[PlayerMinX][PlayerMinY];
-	int  endsuboffset = this->LUTMap[PlayerMaxX][PlayerMaxY];
+	if (RenderWidth <= 0 || RenderHeight < 0 || this->LUTMap.size() < static_cast<std::size_t>(RenderWidth))
+	{
+		this->ThreadLock.unlock();
+		return;
+	}
+	int PlayerMaxX = (std::max)(0, (std::min)(RenderWidth - 1, mainPlayer->second->x));
+	int PlayerMaxY = (std::max)(0, (std::min)(RenderHeight, mainPlayer->second->y));
 
 	for (int i = 0; i < RenderWidth + RenderHeight; ++i)
 	{
@@ -879,6 +897,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 	{
 		if (player->second)
 		{
+			if (player->second->x < 0 || player->second->x >= RenderWidth || player->second->y < 0 || player->second->y > RenderHeight)
+				continue;
 			depth = layer_info[layer].depth;
 			depth -= (this->LUTMap[player->second->x][player->second->y] * ep);
 			if (rendering)
@@ -893,6 +913,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 	}
 	for (std::map<int, Map_NPC*>::iterator NPC = this->m_NPCs.begin(); NPC != m_NPCs.end(); ++NPC)
 	{
+		if (NPC->second == nullptr || NPC->second->x < 0 || NPC->second->x >= RenderWidth || NPC->second->y < 0 || NPC->second->y > RenderHeight)
+			continue;
 		depth = layer_info[layer].depth;
 		depth -= (this->LUTMap[NPC->second->x][NPC->second->y] * ep);
 		if (rendering)
@@ -909,6 +931,8 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 
 	for (std::map<int, Map_Item>::iterator m_item = this->m_Items.begin(); m_item != m_Items.end(); ++m_item)
 	{
+		if (m_item->second.x < 0 || m_item->second.x >= RenderWidth || m_item->second.y < 0 || m_item->second.y > RenderHeight)
+			continue;
 		depth = layer_info[layer].depth;
 		depth -= (this->LUTMap[m_item->second.x][m_item->second.y] * ep);
 
@@ -960,6 +984,21 @@ constexpr float epi = 0.00001f; // gap between each interleaved layer
 }
 Map::~Map()
 {
+	std::lock_guard<std::mutex> lock(this->ThreadLock);
+	for (auto& player : this->m_Players)
+	{
+		if (player.second != nullptr)
+		{
+			player.second->Release();
+			delete player.second;
+		}
+	}
+	for (auto& npc : this->m_NPCs)
+	{
+		delete npc.second;
+	}
+	this->m_Players.clear();
+	this->m_NPCs.clear();
 }
 
 void Map::FinalizeMapState()
@@ -970,8 +1009,10 @@ void Map::FinalizeMapState()
 		std::map<int, Map_Player*>::iterator _Player = m_Players.find(i);
 		if (_Player != m_Players.end())
 		{
-			_Player->second->Release();
-			m_Players.erase(i);
+			Map_Player* removedPlayer = _Player->second;
+			m_Players.erase(_Player);
+			removedPlayer->Release();
+			delete removedPlayer;
 		}
 	}
 
@@ -980,7 +1021,9 @@ void Map::FinalizeMapState()
 		std::map<int, Map_NPC*>::iterator _NPC = m_NPCs.find(i);
 		if (_NPC != m_NPCs.end())
 		{
-			m_NPCs.erase(i);
+			Map_NPC* removedNPC = _NPC->second;
+			m_NPCs.erase(_NPC);
+			delete removedNPC;
 		}
 	}
 
