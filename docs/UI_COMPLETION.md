@@ -25,9 +25,9 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 
 | Area | Status | Implementation | Remaining verification |
 | --- | --- | --- | --- |
-| Fixed logical canvas | Implemented | 640x480 view uses aspect-correct integer scaling and centered letterboxing | Resize to 1x, 2x, ultrawide, and tall window sizes |
+| Fixed logical canvas | Implemented | 640x480 view stretches across the complete client area to preserve EODev's established resizable-window behavior | Resize to 1x, 2x, ultrawide, and tall window sizes |
 | Pixel-art filtering | Implemented | Resource and generated menu textures use nearest-neighbor filtering without mipmaps | Compare login buttons, textboxes, HUD, and map tiles at 1x and 2x |
-| Resized mouse input | Implemented | Mouse coordinates pass through the letterboxed SFML view and reject the outside bars | Check every screen edge and HUD button at 2x |
+| Resized mouse input | Implemented | Mouse coordinates pass through the stretched SFML view | Check every screen edge and HUD button at 2x |
 | Draw-order conventions | Partial | Status bars use an explicit foreground depth | Replace remaining unexplained depth literals with named UI layers |
 | Visual regression coverage | Missing | Tracked by issue #150 | Add screenshot and interaction checks for supported window sizes |
 
@@ -142,9 +142,9 @@ For each completed row, record:
 
 - Release rebuild: passed with 0 errors and 660 warnings on 2026-09-24.
 - Packet and connection fixtures: all passed with 0 errors and 16 inherited warnings.
-- Scaling references: SFML logical views plus EODev's fixed 640x480 artwork and input coordinates.
+- Scaling references: SFML logical views plus EODev's fixed 640x480 artwork and established full-window stretch behavior.
 - Minimap references: `MiniMapRenderer.cs`, EODev `Full_EMF`, `ENF`, and live map actor collections. The overlay keeps the classic 28x14 grid and uses resource 2/45.
 - SP references: EOProtocol Welcome `MaxSp`, EOLib `CharacterStats`, `CharacterActions`, and `PeriodicStatUpdaterComponent`. ArenaServ does not send current SP in Welcome, so it starts full and is maintained locally as in EndlessClient.
 - Window configuration references: EODev `config/setup.ini` keys and the fixed logical view. Fullscreen uses the desktop mode only as a presentation surface.
 - Inventory references: EOProtocol/EOLib `ItemDropHandler` and `ItemJunkHandler`, ArenaServ `Item_Drop` and `Item_Junk`, EIF item shapes, and the Welcome inventory/spell payload.
-- Required live checks: resize across 1x/2x and unusual aspect ratios; click every screen edge; open the minimap on small/large maps and around map edges; verify all marker colors; attack to zero SP while standing and sitting; start in windowed, fixed-size, fullscreen, and stay-on-top modes; load all eight inventory shapes, rearrange edge cells, pick up into a full grid, drop/junk partial stacks and gold, and inspect/scroll a character with more than 16 spells.
+- Required live checks: resize across 1x/2x and unusual aspect ratios and confirm the canvas fills the window; click every screen edge; open the minimap on small/large maps and around map edges; verify all marker colors; attack to zero SP while standing and sitting; start in windowed, fixed-size, fullscreen, and stay-on-top modes; load all eight inventory shapes, rearrange edge cells, pick up into a full grid, drop/junk partial stacks and gold, and inspect/scroll a character with more than 16 spells.

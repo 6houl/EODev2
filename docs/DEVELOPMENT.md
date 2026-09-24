@@ -226,7 +226,7 @@ The current Release baseline builds with 0 errors and 660 existing warnings. The
 - Removes recurring heap allocation from core map, HUD, inventory, paperdoll, chat-bubble, character-select, and scrollbar render paths.
 - Applies NPC death fading to the rendered sprite and guards HP, TP, and experience bars against zero ranges.
 - Places the fixed HP, TP, SP, and TNL strip over EODev's top frame at Y 0 and X 100, 210, 320, and 430, with the 79-pixel fill range used by EndlessClient. The status strip uses a foreground depth below the frame's depth value because EODev renders smaller depths later.
-- Preserves the 640x480 logical canvas at whole-number window scales with centered letterboxing, nearest-neighbor textures, and view-correct mouse input.
+- Preserves the 640x480 logical canvas while stretching it across the complete resizable window, with nearest-neighbor textures and view-correct mouse input.
 - Renders the local `HH:MM:SS` clock at the classic fixed-client position and uses the EndlessClient three-second status-message lifetime.
 - Adds content to the existing credits screen and gives empty login fields immediate local feedback without sending a request.
 - Enables the classic minimap button and renders the fixed 28x14 map grid, interactive tiles, warps, players, and NPC markers inside the gameplay viewport.

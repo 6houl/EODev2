@@ -27,17 +27,8 @@ namespace
 		if (width == 0 || height == 0)
 			return;
 
-		const float availableScale = (std::min)(width / LogicalWidth, height / LogicalHeight);
-		const float scale = availableScale >= 1.0f ? std::floor(availableScale) : availableScale;
-		const float viewportWidth = LogicalWidth * scale / width;
-		const float viewportHeight = LogicalHeight * scale / height;
-
 		sf::View view(sf::FloatRect(0.0f, 0.0f, LogicalWidth, LogicalHeight));
-		view.setViewport(sf::FloatRect(
-			(1.0f - viewportWidth) * 0.5f,
-			(1.0f - viewportHeight) * 0.5f,
-			viewportWidth,
-			viewportHeight));
+		view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 		window.setView(view);
 	}
 }
@@ -217,16 +208,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 			break;
 		sf::Vector2i mousepos = sf::Mouse::getPosition(window);
 		sf::Vector2f newmouspos = window.mapPixelToCoords(mousepos);
-		if (newmouspos.x < 0.0f || newmouspos.x >= LogicalWidth || newmouspos.y < 0.0f || newmouspos.y >= LogicalHeight)
-		{
-			game.MouseX = -1;
-			game.MouseY = -1;
-		}
-		else
-		{
-			game.MouseX = static_cast<int>(newmouspos.x);
-			game.MouseY = static_cast<int>(newmouspos.y);
-		}
+		game.MouseX = static_cast<int>(newmouspos.x);
+		game.MouseY = static_cast<int>(newmouspos.y);
 		game.Update();
 		game.Render();
 		if (game.MousePressed)
