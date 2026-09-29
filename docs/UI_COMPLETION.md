@@ -43,7 +43,7 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 | #32 | Whisper tabs | Partial | Replace placeholder player label with session target data |
 | #33 | Chat presentation | Partial | Implement lock state and active-tab visuals |
 | #34 | Player context menu | Partial | Complete actions and permission/range checks |
-| #35 | Session EXP | Missing | Add session baseline, gains, reset behavior, and display |
+| #35 | Session EXP | Implemented | Tracks session EXP gain from login; needs live verification |
 | #36 | Quest status/history | Missing | Requires quest state and protocol work before panel content |
 | #37 | Friends/ignore | Missing | Add list windows and file-backed state using EOLib behavior |
 | #38 | Status clock | Implemented | Renders local `HH:MM:SS` at the classic fixed-client position; live visual check remains |
