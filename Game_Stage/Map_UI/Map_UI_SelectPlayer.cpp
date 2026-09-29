@@ -61,6 +61,33 @@ void Map_UI_SelectPlayer::Update()
 								SPaperdoll::SendPaperdollRequest(this->m_game->world->connection->ClientStream, playerid, this->m_game);
 								break;
 							}
+						case(SelectIndex::Whisper):
+							{
+								auto player = this->m_game->map->m_Players.find(playerid);
+								if (player != this->m_game->map->m_Players.end() && player->second != nullptr)
+								{
+									std::string targetName = player->second->name;
+									if (!targetName.empty())
+										targetName[0] = std::toupper(static_cast<unsigned char>(targetName[0]));
+									
+									// Set whisper target in first available tab
+									if (this->m_MapUI->map_talk->WhisperTarget1.empty() || 
+										this->m_MapUI->map_talk->WhisperTarget1 == targetName)
+									{
+										this->m_MapUI->map_talk->WhisperTarget1 = targetName;
+										this->m_MapUI->map_talk->ChatIndex = 1; // Switch to whisper tab 1
+										this->m_MapUI->SetStage(Map_UI::UI_ElementStage::UI_Element_Talk);
+									}
+									else if (this->m_MapUI->map_talk->WhisperTarget2.empty() || 
+											 this->m_MapUI->map_talk->WhisperTarget2 == targetName)
+									{
+										this->m_MapUI->map_talk->WhisperTarget2 = targetName;
+										this->m_MapUI->map_talk->ChatIndex = 2; // Switch to whisper tab 2
+										this->m_MapUI->SetStage(Map_UI::UI_ElementStage::UI_Element_Talk);
+									}
+								}
+								break;
+							}
 							default: break;
 						}
 					}
