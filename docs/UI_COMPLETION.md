@@ -40,7 +40,7 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 | #29 | Active skills | Partial | Welcome now retains learned spells and the panel renders scrollable spell icons, levels, skill points, and hover names; slot persistence, casting, cooldown, targeting, and training depend on #62/#63 |
 | #30 | Character stats/training | Partial | Values render; add server-authoritative stat and skill training controls |
 | #31 | Chat modes | Partial | Basic public/global/whisper/guild views exist; complete supported modes and behavior |
-| #32 | Whisper tabs | Partial | Replace placeholder player label with session target data |
+| #32 | Whisper tabs | Partial | Target tracking added; needs PACKET_TELL handling and tab creation logic |
 | #33 | Chat presentation | Partial | Implement lock state and active-tab visuals |
 | #34 | Player context menu | Partial | Complete actions and permission/range checks |
 | #35 | Session EXP | Implemented | Tracks session EXP gain from login; needs live verification |
