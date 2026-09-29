@@ -137,7 +137,7 @@ void Map_UI_Talk::Render(float depth)
 			rct.right = x + 200;
 			rct.top = y;
 			rct.bottom = y + 50;
-			std::string m_message = "PlayerName";
+			std::string m_message = WhisperTarget1.empty() ? "Player" : WhisperTarget1;
 			if (ChatIndex == 1)
 			{
 				this->m_game->DrawTextW(m_message, rct.left, rct.top,sf::Color(255, 255, 255, 255), 10, false, depth, 1);
@@ -158,14 +158,14 @@ void Map_UI_Talk::Render(float depth)
 			rct.right = x + 200;
 			rct.top = y;
 			rct.bottom = y + 50;
-			std::string m_message = "PlayerName";
+			std::string m_message = WhisperTarget2.empty() ? "Player" : WhisperTarget2;
 			if (ChatIndex == 2)
 			{
 				this->m_game->DrawTextW(m_message, rct.left, rct.top, sf::Color(255, 255, 255, 255), 10, false, depth, 1);
 			}
 			else
 			{
-				this->m_game->DrawTextW(m_message, rct.left, rct.top, sf::Color(255, 255, 255, 255), 10, false, depth, 1);
+				this->m_game->DrawTextW(m_message, rct.left, rct.top, sf::Color(0, 0, 0, 255), 10, false, depth, 1);
 			}
 		}
 

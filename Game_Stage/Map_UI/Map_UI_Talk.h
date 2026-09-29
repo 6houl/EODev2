@@ -9,6 +9,9 @@ private:
 	Game* m_game;
 public:
 	int ChatIndex = 0;
+	std::string WhisperTarget1 = "";
+	std::string WhisperTarget2 = "";
+	
 	Button* UI_Element_TalkButton;
 	Button* UI_Element_LockText;
 
