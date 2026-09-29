@@ -217,6 +217,15 @@ void Map_UI_CharacterStats::Render(float depth)
 		rct.right = x + 200;
 		rct.top = y;
 		rct.bottom = y + 50;
+		int session_exp = (std::max)(0, mainPlayer->exp - mainPlayer->session_start_exp);
+		m_message = to_string(session_exp);
+		this->m_game->DrawTextW(m_message, rct.left, rct.top, fontcol, 13, false, depth);
+
+		y += 18;
+		rct.left = x;
+		rct.right = x + 200;
+		rct.top = y;
+		rct.bottom = y + 50;
 		int nextLevelExperience = static_cast<int>(std::round(std::pow(mainPlayer->level + 1, 3.0) * 133.1));
 		int tnl = (std::max)(0, nextLevelExperience - mainPlayer->exp);
 		m_message = to_string(tnl);

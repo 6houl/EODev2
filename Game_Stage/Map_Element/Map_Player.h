@@ -68,6 +68,7 @@ public:
 	//Direction direction;
 	unsigned char level = 0;
 	int exp = 0;
+	int session_start_exp = 0;
 	short hp = 0, tp = 0;
 	short str = 0, intl = 0, wis = 0, agi = 0, con = 0, cha = 0;
 	short adj_str = 0, adj_intl = 0, adj_wis = 0, adj_agi = 0, adj_con = 0, adj_cha = 0;

@@ -131,6 +131,7 @@ CLIENT_F_FUNC(Welcome)
 
 							MainPlayer->level = reader.GetChar();
 							MainPlayer->exp = reader.GetInt();
+							MainPlayer->session_start_exp = MainPlayer->exp;
 							MainPlayer->usage = reader.GetInt();
 
 							MainPlayer->guildname = GuildName;
