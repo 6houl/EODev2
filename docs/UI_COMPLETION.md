@@ -42,7 +42,7 @@ This file tracks the remaining UI work and the evidence needed to finish it. Upd
 | #31 | Chat modes | Partial | Basic public/global/whisper/guild views exist; complete supported modes and behavior |
 | #32 | Whisper tabs | Partial | Target tracking added; needs PACKET_TELL handling and tab creation logic |
 | #33 | Chat presentation | Partial | Implement lock state and active-tab visuals |
-| #34 | Player context menu | Partial | Complete actions and permission/range checks |
+| #34 | Player context menu | Partial | Paperdoll and Whisper actions work; needs Trade, Friend, Ignore, Book, Join/Invite |
 | #35 | Session EXP | Implemented | Tracks session EXP gain from login; needs live verification |
 | #36 | Quest status/history | Missing | Requires quest state and protocol work before panel content |
 | #37 | Friends/ignore | Missing | Add list windows and file-backed state using EOLib behavior |
